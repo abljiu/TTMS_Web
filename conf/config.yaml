@@ -1,0 +1,27 @@
+service:
+  AppMode: debug
+  HttpPort: 9090
+
+mysql:
+  DB: mysql
+  DBHost: 127.0.0.1
+  DbPort: root
+  DbPassword: '123456'
+  DbName: TTMS_Db
+
+redis:
+  RedisDb: redis
+  RedisAddr: 127.0.0.1:6379
+  RedisPw: '123456'
+  RedisDbName: 2
+
+email:
+  ValidEmail: 'http://localhost:8080/#vaild/email/'
+  SmtpHost: smtp.qq.com
+  SmtpEmail: ''
+  SmtpPass: ''
+
+path:
+  Host: 'http://127.0.0.1'
+  ProductPath: '/static/imgs/product/'
+  AvatarPath: '/static/imgs/avatar/'
