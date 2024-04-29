@@ -1,7 +1,12 @@
 package main
 
-import "fmt"
+import (
+	"TTMS_Web/conf"
+	"TTMS_Web/routes"
+)
 
 func main() {
-	fmt.Println("sdasdasdasd")
+	conf.Init()
+	r := routes.NewRouter()
+	r.Run(conf.Config_.Service.HttpPort)
 }

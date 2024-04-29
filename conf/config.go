@@ -1,20 +1,25 @@
 package conf
 
 import (
+	"TTMS_Web/dao"
 	"gopkg.in/yaml.v3"
 	"log"
 	"os"
+	"strings"
 )
+
+var Config_ Config
 
 type Config struct {
 	Service struct {
 		AppMode  string `yaml:"AppMode"`
-		HttpPort int    `yaml:"HttpPort"`
+		HttpPort string `yaml:"HttpPort"`
 	} `yaml:"service"`
 	Mysql struct {
 		DB         string `yaml:"DB"`
-		DBHost     string `yaml:"DBHost"`
+		DbHost     string `yaml:"DbHost"`
 		DbPort     string `yaml:"DbPort"`
+		DbUser     string `yaml:"DbUser"`
 		DbPassword string `yaml:"DbPassword"`
 		DbName     string `yaml:"DbName"`
 	} `yaml:"mysql"`
@@ -22,7 +27,7 @@ type Config struct {
 		RedisDb     string `yaml:"RedisDb"`
 		RedisAddr   string `yaml:"RedisAddr"`
 		RedisPw     string `yaml:"RedisPw"`
-		RedisDbName int    `yaml:"RedisDbName"`
+		RedisDbName string `yaml:"RedisDbName"`
 	} `yaml:"redis"`
 	Email struct {
 		ValidEmail string `yaml:"ValidEmail"`
@@ -38,16 +43,17 @@ type Config struct {
 }
 
 func Init() {
-	var config Config
-
-	yamlFile, err := os.ReadFile("config.yaml")
+	yamlFile, err := os.ReadFile("./conf/config.yaml")
 	if err != nil {
 		log.Fatalf("Failed to read YAML file: %v", err)
 	}
 
-	err = yaml.Unmarshal(yamlFile, &config)
+	err = yaml.Unmarshal(yamlFile, &Config_)
 	if err != nil {
 		log.Fatalf("Failed to parse YAML: %v", err)
 	}
 
+	pathRead := strings.Join([]string{Config_.Mysql.DbUser, ":", Config_.Mysql.DbPassword, "@tcp(", Config_.Mysql.DbHost, ":", Config_.Mysql.DbPort, ")/", Config_.Mysql.DbName, "?charset=utf8mb4&parseTime=true"}, "")
+	pathWrite := strings.Join([]string{Config_.Mysql.DbUser, ":", Config_.Mysql.DbPassword, "@tcp(", Config_.Mysql.DbHost, ":", Config_.Mysql.DbPort, ")/", Config_.Mysql.DbName, "?charset=utf8mb4&parseTime=true"}, "")
+	dao.Database(pathRead, pathWrite)
 }
