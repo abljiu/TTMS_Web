@@ -9,6 +9,8 @@ var MsgFlags = map[int]string{
 	ErrorExistUserNotFound: "用户不存在",
 	ErrorNotCompare:        "密码错误",
 	ErrorAuthToken:         "token错误",
+	ErrorAuthTokenTimeout:  "token过期",
+	ErrorUploadFail:        "图片上传失败",
 }
 
 // GetMsg 获取状态码对应的信息

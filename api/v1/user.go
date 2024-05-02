@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"TTMS_Web/pkg/util"
 	"TTMS_Web/service"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -14,7 +15,6 @@ func UserRegister(c *gin.Context) {
 	} else {
 		c.JSON(http.StatusBadRequest, err)
 	}
-
 }
 
 func UserLogin(c *gin.Context) {
@@ -25,5 +25,26 @@ func UserLogin(c *gin.Context) {
 	} else {
 		c.JSON(http.StatusBadRequest, err)
 	}
+}
 
+func UserUpdate(c *gin.Context) {
+	var userUpdate service.UserService
+	claims, _ := util.ParseToken(c.GetHeader("Authorization"))
+	if err := c.ShouldBind(&userUpdate); err == nil {
+		res := userUpdate.Update(c.Request.Context(), claims.ID)
+		c.JSON(http.StatusOK, res)
+	} else {
+		c.JSON(http.StatusBadRequest, err)
+	}
+}
+func UploadAvatar(c *gin.Context) {
+	file, _, _ := c.Request.FormFile("file")
+	var uploadAvatar service.UserService
+	claims, _ := util.ParseToken(c.GetHeader("Authorization"))
+	if err := c.ShouldBind(&uploadAvatar); err == nil {
+		res := uploadAvatar.Post(c.Request.Context(), claims.ID, file)
+		c.JSON(http.StatusOK, res)
+	} else {
+		c.JSON(http.StatusBadRequest, err)
+	}
 }

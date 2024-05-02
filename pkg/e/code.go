@@ -5,9 +5,12 @@ const (
 	Error         = 500
 	InvalidParams = 400
 
+	// user模块
 	ErrorExistUser         = 30001
 	ErrorFailEncryption    = 30002
 	ErrorExistUserNotFound = 30003
 	ErrorNotCompare        = 30004
 	ErrorAuthToken         = 30005
+	ErrorAuthTokenTimeout  = 30006
+	ErrorUploadFail        = 30007
 )

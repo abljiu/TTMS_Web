@@ -7,6 +7,7 @@ import (
 	"TTMS_Web/pkg/util"
 	"TTMS_Web/serializer"
 	"context"
+	"mime/multipart"
 )
 
 type UserService struct {
@@ -101,5 +102,70 @@ func (service *UserService) Login(ctx context.Context) serializer.Response {
 		Status: code,
 		Msg:    e.GetMsg(code),
 		Data:   serializer.TokenData{User: serializer.BuildUser(user), Token: token},
+	}
+}
+
+// Update 用户修改信息
+func (service *UserService) Update(ctx context.Context, uid uint) serializer.Response {
+	var user *model.User
+	var err error
+	code := e.Success
+	userDao := dao.NewUserDao(ctx)
+	user, err = userDao.GetUserByID(uid)
+	//修改用户昵称
+	if service.NickName != "" {
+		user.NickName = service.NickName
+	}
+	err = userDao.UpdateUserByID(uid, user)
+	if err != nil {
+		code = e.Error
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+	return serializer.Response{
+		Status: code,
+		Msg:    e.GetMsg(code),
+		Data:   serializer.BuildUser(user),
+	}
+}
+
+// Post  上传头像
+func (service *UserService) Post(ctx context.Context, uid uint, file multipart.File) serializer.Response {
+	code := e.Success
+	var user *model.User
+	var err error
+	userDao := dao.NewUserDao(ctx)
+	user, err = userDao.GetUserByID(uid)
+	if err != nil {
+		code = e.Error
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+	//保存图片到本地
+	path, err := UploadAvatarToLocalStatic(file, uid, user.UserName)
+	if err != nil {
+		code = e.ErrorUploadFail
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+	user.Avatar = path
+	err = userDao.UpdateUserByID(uid, user)
+	if err != nil {
+		code = e.Error
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+	return serializer.Response{
+		Status: code,
+		Msg:    e.GetMsg(code),
+		Data:   serializer.BuildUser(user),
 	}
 }
