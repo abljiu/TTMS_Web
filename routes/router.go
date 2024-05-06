@@ -28,7 +28,11 @@ func NewRouter() *gin.Engine {
 			//用户操作
 			authed.PUT("user", api.UserUpdate)
 			authed.POST("avatar", api.UploadAvatar)
+			authed.POST("user/sending-email", api.SendEmail)
+			authed.POST("user/valid-email", api.ValidEmail)
 
+			//显示金额
+			authed.POST("money", api.ShowMoney)
 		}
 	}
 	return r

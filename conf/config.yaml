@@ -19,8 +19,8 @@ redis:
 email:
   ValidEmail: 'http://localhost:8080/#vaild/email/'
   SmtpHost: smtp.qq.com
-  SmtpEmail: ''
-  SmtpPass: ''
+  SmtpEmail: '1160433376@qq.com'
+  SmtpPass: 'qwbyyqacqjqijbbh'
 
 path:
   Host: 'http://127.0.0.1'
