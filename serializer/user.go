@@ -13,6 +13,7 @@ type User struct {
 	Status   string `json:"status"`
 	Avatar   string `json:"avatar"`
 	CreateAt int64  `json:"create_at"`
+	Money    uint   `json:"money"`
 }
 
 func BuildUser(user *model.User) *User {
@@ -24,5 +25,6 @@ func BuildUser(user *model.User) *User {
 		Status:   user.Status,
 		Avatar:   conf.Config_.Path.Host + conf.Config_.Service.HttpPort + conf.Config_.Path.AvatarPath + user.Avatar,
 		CreateAt: user.CreatedAt.Unix(),
+		Money:    user.Money,
 	}
 }

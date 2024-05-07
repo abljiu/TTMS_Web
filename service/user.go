@@ -30,7 +30,6 @@ type ValidEmailService struct {
 }
 
 type ShowMoneyService struct {
-	Key string `json:"key"`
 }
 
 // Register 注册逻辑
@@ -60,7 +59,7 @@ func (service *UserService) Register(ctx context.Context) serializer.Response {
 		NickName: service.NickName,
 		Status:   model.Active,
 		Avatar:   "avatar.JPG",
-		Money:    "0",
+		Money:    0,
 	}
 
 	//密码加密
@@ -300,5 +299,21 @@ func (service *ValidEmailService) Valid(ctx context.Context, token string) seria
 	}
 }
 
-asdasdasdasdasdasdasdasdasda
-//
+// Show 展示用户金额
+func (service *ShowMoneyService) Show(ctx context.Context, uid uint) serializer.Response {
+	code := e.Success
+	userDao := dao.NewUserDao(ctx)
+	user, err := userDao.GetUserByID(uid)
+	if err != nil {
+		code = e.Error
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+	return serializer.Response{
+		Status: code,
+		Data:   serializer.BuildUser(user),
+		Msg:    e.GetMsg(code),
+	}
+}
