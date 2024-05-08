@@ -21,6 +21,9 @@ func NewRouter() *gin.Engine {
 		v1.POST("user/register", api.UserRegister)
 		v1.POST("user/login", api.UserLogin)
 
+		//轮播图
+		v1.GET("carousels", api.ListCarousel)
+
 		//
 		authed := v1.Group("/") //需要登录保护
 		authed.Use(middleware.JWT())
