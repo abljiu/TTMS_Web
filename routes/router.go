@@ -24,8 +24,8 @@ func NewRouter() *gin.Engine {
 		//轮播图
 		v1.GET("carousels", api.ListCarousel)
 
-		//
-		authed := v1.Group("/") //需要登录保护
+		//需要登录保护
+		authed := v1.Group("/")
 		authed.Use(middleware.JWT())
 		{
 			//用户操作
@@ -36,6 +36,9 @@ func NewRouter() *gin.Engine {
 
 			//显示金额
 			authed.POST("money", api.ShowMoney)
+
+			//商品操作
+			authed.POST("product", api.CreateProduct)
 		}
 	}
 	return r

@@ -3,7 +3,6 @@ package service
 import (
 	"TTMS_Web/dao"
 	"TTMS_Web/pkg/e"
-	"TTMS_Web/pkg/util"
 	"TTMS_Web/serializer"
 	"context"
 )
@@ -17,7 +16,6 @@ func (service *CarouselService) List(ctx context.Context) serializer.Response {
 	carousels, err := carouselDao.ListCarousel()
 	if err != nil {
 		code = e.Error
-		util.LogrusObj.Infoln("err", err)
 		return serializer.Response{
 			Status: code,
 			Msg:    e.GetMsg(code),
