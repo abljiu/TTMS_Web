@@ -48,7 +48,7 @@ func (service *ProductService) Create(ctx context.Context, uid uint, files []*mu
 		CategoryId:    service.CategoryId,
 		Title:         service.Title,
 		Info:          service.Info,
-		ImgPath:       service.ImgPath,
+		ImgPath:       path,
 		Price:         service.Price,
 		DiscountPrice: service.DiscountPrice,
 		OnSale:        true,
@@ -100,6 +100,5 @@ func (service *ProductService) Create(ctx context.Context, uid uint, files []*mu
 		Status: code,
 		Msg:    e.GetMsg(code),
 		Data:   serializer.BuildProduct(product),
-		asdasdasdasdasdasdasd
 	}
 }

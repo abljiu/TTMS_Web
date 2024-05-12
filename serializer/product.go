@@ -37,6 +37,6 @@ func BuildProduct(item *model.Product) Product {
 		Num:           item.Num,
 		BossID:        item.BossID,
 		BossName:      item.BossName,
-		BossAvatar:    conf.Config_.Path.Host + conf.Config_.Service.HttpPort + conf.Config_.Path.ProductPath + item.BossAvatar,
+		BossAvatar:    conf.Config_.Path.Host + conf.Config_.Service.HttpPort + conf.Config_.Path.AvatarPath + item.BossAvatar,
 	}
 }
