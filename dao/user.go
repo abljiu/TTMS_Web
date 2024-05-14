@@ -38,6 +38,7 @@ func (dao *UserDao) CreateUser(user *model.User) error {
 func (dao *UserDao) GetUserByID(id uint) (user *model.User, err error) {
 	err = dao.DB.Model(&model.User{}).Where("id=?", id).First(&user).Error
 	return
+
 }
 
 func (dao *UserDao) UpdateUserByID(uid uint, user *model.User) error {
