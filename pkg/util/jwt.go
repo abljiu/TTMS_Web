@@ -8,19 +8,17 @@ import (
 var jwtSecret = []byte("abljiu")
 
 type Claims struct {
-	ID        uint   `json:"id"`
-	UserName  string `json:"user_name"`
-	Authority int    ` json:"authority"`
+	UserID    uint `json:"user_id"`
+	Authority int  ` json:"authority"`
 	jwt.StandardClaims
 }
 
 // GenerateToken 签发token
-func GenerateToken(id uint, userName string, authority int) (string, error) {
+func GenerateToken(userID uint, authority int) (string, error) {
 	nowTime := time.Now()
 	expireTime := nowTime.Add(24 * time.Hour)
 	claims := Claims{
-		ID:        id,
-		UserName:  userName,
+		UserID:    userID,
 		Authority: authority,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expireTime.Unix(),

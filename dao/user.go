@@ -18,10 +18,10 @@ func NewUserDaoByDB(db *gorm.DB) *UserDao {
 	return &UserDao{db}
 }
 
-// ExitOrNorByUserName 根据UserName 查询用户名是否存在
-func (dao *UserDao) ExitOrNorByUserName(userName string) (user *model.User, exit bool, err error) {
+// ExitOrNorByUserID  根据UserID 查询用户名是否存在
+func (dao *UserDao) ExitOrNorByUserID(userID string) (user *model.User, exit bool, err error) {
 	var users []model.User
-	err = dao.DB.Model(&model.User{}).Where("user_name=?", userName).Find(&users).Error
+	err = dao.DB.Model(&model.User{}).Where("id=?", userID).Find(&users).Error
 	if len(users) == 0 {
 		return nil, false, err
 	}

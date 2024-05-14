@@ -9,13 +9,13 @@ import (
 )
 
 // UploadAvatarToLocalStatic 更新图像到本地
-func UploadAvatarToLocalStatic(file multipart.File, uid uint, userName string) (filePath string, er error) {
+func UploadAvatarToLocalStatic(file multipart.File, uid uint, userID string) (filePath string, er error) {
 	bid := strconv.Itoa(int(uid))
 	basePath := "." + conf.Config_.Path.AvatarPath + "user" + bid + "/"
 	if !DirExistOrNot(basePath) {
 		CreateDir(basePath)
 	}
-	avatarPath := basePath + userName + ".jpg"
+	avatarPath := basePath + userID + ".jpg"
 	content, err := io.ReadAll(file)
 	if err != nil {
 		return "", err
@@ -24,7 +24,7 @@ func UploadAvatarToLocalStatic(file multipart.File, uid uint, userName string) (
 	if err != nil {
 		return
 	}
-	return "user" + bid + "/" + userName + ".jpg", err
+	return "user" + bid + "/" + userID + ".jpg", err
 }
 
 // UploadProductToLocalStatic  更新图像到本地

@@ -54,7 +54,7 @@ func (service *ProductService) Create(ctx context.Context, uid uint, files []*mu
 		OnSale:        true,
 		Num:           service.Num,
 		BossID:        uid,
-		BossName:      boss.UserName,
+		BossName:      boss.NickName,
 		BossAvatar:    boss.Avatar,
 	}
 	productDao := dao.NewProductDao(ctx)

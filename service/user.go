@@ -10,13 +10,14 @@ import (
 	"context"
 	"gopkg.in/mail.v2"
 	"mime/multipart"
+	"strconv"
 	"strings"
 	"time"
 )
 
 type UserService struct {
 	NickName string `json:"nick_name" form:"nick_name"`
-	UserName string `json:"user_name" form:"user_name"`
+	UserID   string `json:"user_id" form:"user_id"`
 	Password string `json:"password" form:"password"`
 }
 
@@ -36,26 +37,24 @@ type ShowMoneyService struct {
 func (service *UserService) Register(ctx context.Context) serializer.Response {
 	var user model.User
 	code := e.Success
-
-	userDao := dao.NewUserDao(ctx)
-	_, exist, err := userDao.ExitOrNorByUserName(service.UserName)
-	if err != nil {
-		code = e.Error
-		return serializer.Response{
-			Status: code,
-			Msg:    e.GetMsg(code),
-		}
-	}
-	if exist {
-		code = e.ErrorExistUser
-		return serializer.Response{
-			Status: code,
-			Msg:    e.GetMsg(code),
-		}
-	}
+	//_, exist, err := userDao.ExitOrNorByUserID(service.UserID)
+	//if err != nil {
+	//	code = e.Error
+	//	return serializer.Response{
+	//		Status: code,
+	//		Msg:    e.GetMsg(code),
+	//	}
+	//}
+	//if !exist {
+	//	code = e.ErrorExistUser
+	//	return serializer.Response{
+	//		Status: code,
+	//		Msg:    e.GetMsg(code),
+	//	}
+	//}
 
 	user = model.User{
-		UserName: service.UserName,
+		ID:       user.ID,
 		NickName: service.NickName,
 		Status:   model.Active,
 		Avatar:   "avatar.JPG",
@@ -63,7 +62,8 @@ func (service *UserService) Register(ctx context.Context) serializer.Response {
 	}
 
 	//密码加密
-	if err = user.SetPassword(service.Password); err != nil {
+	userDao := dao.NewUserDao(ctx)
+	if err := user.SetPassword(service.Password); err != nil {
 		code = e.ErrorFailEncryption
 		return serializer.Response{
 			Status: code,
@@ -72,13 +72,14 @@ func (service *UserService) Register(ctx context.Context) serializer.Response {
 	}
 
 	//创建用户
-	err = userDao.CreateUser(&user)
+	err := userDao.CreateUser(&user)
 	if err != nil {
 		code = e.Error
 	}
 	return serializer.Response{
 		Status: code,
 		Msg:    e.GetMsg(code),
+		Data:   serializer.BuildUser(&user),
 	}
 }
 
@@ -88,7 +89,7 @@ func (service *UserService) Login(ctx context.Context) serializer.Response {
 	code := e.Success
 
 	userDao := dao.NewUserDao(ctx)
-	user, exist, err := userDao.ExitOrNorByUserName(service.UserName)
+	user, exist, err := userDao.ExitOrNorByUserID(service.UserID)
 	if !exist || err != nil {
 		code = e.ErrorExistUserNotFound
 		return serializer.Response{
@@ -106,7 +107,7 @@ func (service *UserService) Login(ctx context.Context) serializer.Response {
 	}
 
 	//http 无状态(认证，让对方带上token)
-	token, err := util.GenerateToken(user.ID, user.UserName, 0)
+	token, err := util.GenerateToken(user.ID, 0)
 	if err != nil {
 		code = e.ErrorAuthToken
 		return serializer.Response{
@@ -162,7 +163,8 @@ func (service *UserService) Post(ctx context.Context, uid uint, file multipart.F
 		}
 	}
 	//保存图片到本地
-	path, err := UploadAvatarToLocalStatic(file, uid, user.UserName)
+	IdStr := strconv.FormatUint(uint64(user.ID), 10)
+	path, err := UploadAvatarToLocalStatic(file, uid, IdStr)
 	if err != nil {
 		code = e.ErrorUploadFail
 		return serializer.Response{
