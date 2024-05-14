@@ -6,7 +6,7 @@ const (
 	InvalidParams = 400
 
 	// user模块
-	ErrorExistUser         = 30001
+	ErrorNoPassword        = 30001
 	ErrorFailEncryption    = 30002
 	ErrorExistUserNotFound = 30003
 	ErrorNotCompare        = 30004

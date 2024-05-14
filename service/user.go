@@ -37,21 +37,14 @@ type ShowMoneyService struct {
 func (service *UserService) Register(ctx context.Context) serializer.Response {
 	var user model.User
 	code := e.Success
-	//_, exist, err := userDao.ExitOrNorByUserID(service.UserID)
-	//if err != nil {
-	//	code = e.Error
-	//	return serializer.Response{
-	//		Status: code,
-	//		Msg:    e.GetMsg(code),
-	//	}
-	//}
-	//if !exist {
-	//	code = e.ErrorExistUser
-	//	return serializer.Response{
-	//		Status: code,
-	//		Msg:    e.GetMsg(code),
-	//	}
-	//}
+
+	if service.Password == "" {
+		code = e.ErrorNoPassword
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
 
 	user = model.User{
 		ID:       user.ID,
