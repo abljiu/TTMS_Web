@@ -40,6 +40,7 @@ func NewRouter() *gin.Engine {
 			//商品操作
 			authed.POST("product", api.CreateProduct)
 		}
+
 	}
 	return r
 }

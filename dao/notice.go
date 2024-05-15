@@ -18,7 +18,7 @@ func NewNoticeDaoByDB(db *gorm.DB) *NoticeDao {
 	return &NoticeDao{db}
 }
 
-func (dao *NoticeDao) GetNoticeByID(id uint) (notice *model.Notice, err error) {
+func (dao *NoticeDao) GetNoticeByType(id uint) (notice *model.Notice, err error) {
 	err = dao.DB.Model(&model.Notice{}).Where("id=?", id).First(&notice).Error
 	return
 }

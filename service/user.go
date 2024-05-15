@@ -8,6 +8,7 @@ import (
 	"TTMS_Web/pkg/util"
 	"TTMS_Web/serializer"
 	"context"
+	"fmt"
 	"gopkg.in/mail.v2"
 	"mime/multipart"
 	"strconv"
@@ -15,26 +16,16 @@ import (
 	"time"
 )
 
-type UserService struct {
-	NickName string `json:"nick_name" form:"nick_name"`
-	UserID   string `json:"user_id" form:"user_id"`
-	Password string `json:"password" form:"password"`
-}
-
-type SendEmailService struct {
-	Email         string `json:"email" form:"email"`
+type Service struct {
+	NickName      string `json:"nick_name" form:"nick_name"`
+	UserID        string `json:"user_id" form:"user_id"`
 	Password      string `json:"password" form:"password"`
+	Email         string `json:"email" form:"email"`
 	OperationType uint   `json:"operation_type" form:"operation_type"` //1 绑定邮箱 2 解绑邮箱 3 改密码
 }
 
-type ValidEmailService struct {
-}
-
-type ShowMoneyService struct {
-}
-
 // Register 注册逻辑
-func (service *UserService) Register(ctx context.Context) serializer.Response {
+func (service *Service) Register(ctx context.Context) serializer.Response {
 	var user model.User
 	code := e.Success
 
@@ -47,7 +38,6 @@ func (service *UserService) Register(ctx context.Context) serializer.Response {
 	}
 
 	user = model.User{
-		ID:       user.ID,
 		NickName: service.NickName,
 		Status:   model.Active,
 		Avatar:   "avatar.JPG",
@@ -69,6 +59,44 @@ func (service *UserService) Register(ctx context.Context) serializer.Response {
 	if err != nil {
 		code = e.Error
 	}
+
+	//绑定邮箱
+	var address string
+	var notice *model.Notice
+	token, err := util.GenerateEmailToken(user.ID, service.OperationType, service.Email, service.Password)
+	if err != nil {
+		code = e.ErrorAuthToken
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+	noticeDao := dao.NewNoticeDao(ctx)
+	notice, err = noticeDao.GetNoticeByType(service.OperationType)
+	if err != nil {
+		code = e.Error
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+	address = conf.Config_.Email.ValidEmail + token //发送方
+	mailStr := notice.Text
+	mailText := strings.Replace(mailStr, "Email", address, -1)
+	m := mail.NewMessage()
+	m.SetHeader("From", conf.Config_.Email.SmtpEmail)
+	m.SetHeader("To", service.Email)
+	m.SetHeader("Subject", "TTMS_Web")
+	m.SetBody("text/html", mailText)
+	d := mail.NewDialer(conf.Config_.Email.SmtpHost, 465, conf.Config_.Email.SmtpEmail, conf.Config_.Email.SmtpPass)
+	d.StartTLSPolicy = mail.MandatoryStartTLS
+	if err = d.DialAndSend(m); err != nil {
+		code = e.ErrorSendEmail
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
 	return serializer.Response{
 		Status: code,
 		Msg:    e.GetMsg(code),
@@ -77,7 +105,7 @@ func (service *UserService) Register(ctx context.Context) serializer.Response {
 }
 
 // Login  登陆逻辑
-func (service *UserService) Login(ctx context.Context) serializer.Response {
+func (service *Service) Login(ctx context.Context) serializer.Response {
 	var user *model.User
 	code := e.Success
 
@@ -116,7 +144,7 @@ func (service *UserService) Login(ctx context.Context) serializer.Response {
 }
 
 // Update 用户修改信息
-func (service *UserService) Update(ctx context.Context, uid uint) serializer.Response {
+func (service *Service) Update(ctx context.Context, uid uint) serializer.Response {
 	var user *model.User
 	var err error
 	code := e.Success
@@ -142,7 +170,7 @@ func (service *UserService) Update(ctx context.Context, uid uint) serializer.Res
 }
 
 // Post  上传头像
-func (service *UserService) Post(ctx context.Context, uid uint, file multipart.File) serializer.Response {
+func (service *Service) Post(ctx context.Context, uid uint, file multipart.File) serializer.Response {
 	code := e.Success
 	var user *model.User
 	var err error
@@ -182,7 +210,7 @@ func (service *UserService) Post(ctx context.Context, uid uint, file multipart.F
 }
 
 // Send 发送邮件
-func (service *SendEmailService) Send(ctx context.Context, uid uint) serializer.Response {
+func (service *Service) Send(ctx context.Context, uid uint) serializer.Response {
 	code := e.Success
 	var address string
 	var notice *model.Notice
@@ -195,7 +223,7 @@ func (service *SendEmailService) Send(ctx context.Context, uid uint) serializer.
 		}
 	}
 	noticeDao := dao.NewNoticeDao(ctx)
-	notice, err = noticeDao.GetNoticeByID(service.OperationType)
+	notice, err = noticeDao.GetNoticeByType(service.OperationType)
 	if err != nil {
 		code = e.Error
 		return serializer.Response{
@@ -223,11 +251,12 @@ func (service *SendEmailService) Send(ctx context.Context, uid uint) serializer.
 	return serializer.Response{
 		Status: code,
 		Msg:    e.GetMsg(code),
+		Data:   token,
 	}
 }
 
 // Valid 验证邮箱
-func (service *ValidEmailService) Valid(ctx context.Context, token string) serializer.Response {
+func (service *Service) Valid(ctx context.Context, token string) serializer.Response {
 	var userId uint
 	var email string
 	var password string
@@ -248,6 +277,7 @@ func (service *ValidEmailService) Valid(ctx context.Context, token string) seria
 			password = claims.Password
 			operationType = claims.OperationType
 		}
+		fmt.Println(claims)
 	}
 	if code != e.Success {
 		return serializer.Response{
@@ -295,7 +325,7 @@ func (service *ValidEmailService) Valid(ctx context.Context, token string) seria
 }
 
 // Show 展示用户金额
-func (service *ShowMoneyService) Show(ctx context.Context, uid uint) serializer.Response {
+func (service *Service) Show(ctx context.Context, uid uint) serializer.Response {
 	code := e.Success
 	userDao := dao.NewUserDao(ctx)
 	user, err := userDao.GetUserByID(uid)

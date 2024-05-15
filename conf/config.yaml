@@ -7,7 +7,7 @@ mysql:
   DbHost: 127.0.0.1
   DbPort: 3306
   DbUser: root
-  DbPassword: '040111'
+  DbPassword: '123456'
   DbName: TTMS_Web
 
 redis:
@@ -17,7 +17,7 @@ redis:
   RedisDbName: 2
 
 email:
-  ValidEmail: 'http://localhost:8080/#vaild/email/'
+  ValidEmail: 'http://localhost:8080/front/vaild/email/'
   SmtpHost: smtp.qq.com
   SmtpEmail: '1160433376@qq.com'
   SmtpPass: 'qwbyyqacqjqijbbh'
