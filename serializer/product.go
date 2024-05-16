@@ -22,7 +22,7 @@ type Product struct {
 	BossAvatar    string `json:"boss_avatar"`
 }
 
-func BuildProduct(item *model.Product) Product {
+func BuildProduct(item *model.Movie) Product {
 	return Product{
 		Id:            item.ID,
 		Name:          item.Name,
@@ -39,4 +39,12 @@ func BuildProduct(item *model.Product) Product {
 		BossName:      item.BossName,
 		BossAvatar:    conf.Config_.Path.Host + conf.Config_.Service.HttpPort + conf.Config_.Path.AvatarPath + item.BossAvatar,
 	}
+}
+
+func BuildProducts(items []model.Movie) (products []Product) {
+	for _, item := range items {
+		product := BuildProduct(&item)
+		products = append(products, product)
+	}
+	return products
 }

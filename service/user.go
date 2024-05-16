@@ -22,6 +22,7 @@ type Service struct {
 	Password      string `json:"password" form:"password"`
 	Email         string `json:"email" form:"email"`
 	OperationType uint   `json:"operation_type" form:"operation_type"` //1 绑定邮箱 2 解绑邮箱 3 改密码
+	Status        string `json:"status" form:"status"`
 }
 
 // Register 注册逻辑
@@ -39,7 +40,7 @@ func (service *Service) Register(ctx context.Context) serializer.Response {
 
 	user = model.User{
 		NickName: service.NickName,
-		Status:   model.Active,
+		Status:   model.Normal,
 		Avatar:   "avatar.JPG",
 		Money:    0,
 	}
@@ -126,9 +127,8 @@ func (service *Service) Login(ctx context.Context) serializer.Response {
 			Msg:    e.GetMsg(code),
 		}
 	}
-
 	//http 无状态(认证，让对方带上token)
-	token, err := util.GenerateToken(user.ID, 0)
+	token, err := util.GenerateToken(user.ID, user.Status)
 	if err != nil {
 		code = e.ErrorAuthToken
 		return serializer.Response{

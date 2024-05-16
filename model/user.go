@@ -17,8 +17,9 @@ type User struct {
 }
 
 const (
-	PasswordCost        = 12       //密码加密难度
-	Active       string = "active" //激活用户
+	PasswordCost         = 12              //密码加密难度
+	Normal        string = "normal"        //普通用户
+	Administrator string = "administrator" //管理员
 )
 
 func (user *User) SetPassword(password string) error {
@@ -33,4 +34,9 @@ func (user *User) SetPassword(password string) error {
 func (user *User) CheckPassword(password string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(user.PasswordDigest), []byte(password))
 	return err == nil
+}
+
+func (user *User) SetRoot() error {
+	user.PasswordDigest = Administrator
+	return nil
 }

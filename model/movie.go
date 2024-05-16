@@ -2,7 +2,7 @@ package model
 
 import "gorm.io/gorm"
 
-type Product struct {
+type Movie struct {
 	gorm.Model
 	Name          string
 	CategoryId    uint
