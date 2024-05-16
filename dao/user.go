@@ -44,3 +44,8 @@ func (dao *UserDao) UpdateUserByID(uid uint, user *model.User) error {
 	err := dao.DB.Model(&model.User{}).Where("id=?", uid).Updates(&user).Error
 	return err
 }
+
+func (dao *UserDao) GetNewID() (uid uint, err error) {
+	err = dao.DB.Model(&model.User{}).Order("id DESC").Limit(1).Pluck("id", &uid).Error
+	return uid, err
+}

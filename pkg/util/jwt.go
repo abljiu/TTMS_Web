@@ -45,6 +45,7 @@ func ParseToken(token string) (*Claims, error) {
 }
 
 type EmailClaims struct {
+	Nickname      string `json:"nickname"`
 	UserID        uint   `json:"user_id"`
 	Email         string `json:"email"`
 	Password      string `json:"password"`
@@ -53,10 +54,11 @@ type EmailClaims struct {
 }
 
 // GenerateEmailToken 签发Email token
-func GenerateEmailToken(userId, operationType uint, email, password string) (string, error) {
+func GenerateEmailToken(userId, operationType uint, nickname, email, password string) (string, error) {
 	nowTime := time.Now()
 	expireTime := nowTime.Add(24 * time.Hour)
 	claims := EmailClaims{
+		Nickname:      nickname,
 		UserID:        userId,
 		OperationType: operationType,
 		Email:         email,

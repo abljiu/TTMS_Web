@@ -8,7 +8,6 @@ import (
 	"TTMS_Web/pkg/util"
 	"TTMS_Web/serializer"
 	"context"
-	"fmt"
 	"gopkg.in/mail.v2"
 	"mime/multipart"
 	"strconv"
@@ -37,34 +36,10 @@ func (service *Service) Register(ctx context.Context) serializer.Response {
 			Msg:    e.GetMsg(code),
 		}
 	}
-
-	user = model.User{
-		NickName: service.NickName,
-		Status:   model.Normal,
-		Avatar:   "avatar.JPG",
-		Money:    0,
-	}
-
-	//密码加密
-	userDao := dao.NewUserDao(ctx)
-	if err := user.SetPassword(service.Password); err != nil {
-		code = e.ErrorFailEncryption
-		return serializer.Response{
-			Status: code,
-			Msg:    e.GetMsg(code),
-		}
-	}
-
-	//创建用户
-	err := userDao.CreateUser(&user)
-	if err != nil {
-		code = e.Error
-	}
-
 	//绑定邮箱
 	var address string
 	var notice *model.Notice
-	token, err := util.GenerateEmailToken(user.ID, service.OperationType, service.Email, service.Password)
+	token, err := util.GenerateEmailToken(0, 1, service.NickName, service.Email, service.Password)
 	if err != nil {
 		code = e.ErrorAuthToken
 		return serializer.Response{
@@ -73,7 +48,7 @@ func (service *Service) Register(ctx context.Context) serializer.Response {
 		}
 	}
 	noticeDao := dao.NewNoticeDao(ctx)
-	notice, err = noticeDao.GetNoticeByType(service.OperationType)
+	notice, err = noticeDao.GetNoticeByType(1)
 	if err != nil {
 		code = e.Error
 		return serializer.Response{
@@ -98,9 +73,10 @@ func (service *Service) Register(ctx context.Context) serializer.Response {
 			Msg:    e.GetMsg(code),
 		}
 	}
+
 	return serializer.Response{
 		Status: code,
-		Msg:    e.GetMsg(code),
+		Msg:    "请验证邮箱",
 		Data:   serializer.BuildUser(&user),
 	}
 }
@@ -214,7 +190,7 @@ func (service *Service) Send(ctx context.Context, uid uint) serializer.Response 
 	code := e.Success
 	var address string
 	var notice *model.Notice
-	token, err := util.GenerateEmailToken(uid, service.OperationType, service.Email, service.Password)
+	token, err := util.GenerateEmailToken(uid, service.OperationType, service.NickName, service.Email, service.Password)
 	if err != nil {
 		code = e.ErrorAuthToken
 		return serializer.Response{
@@ -261,6 +237,7 @@ func (service *Service) Valid(ctx context.Context, token string) serializer.Resp
 	var email string
 	var password string
 	var operationType uint
+	var nickName string
 	code := e.Success
 
 	if token == "" {
@@ -272,17 +249,60 @@ func (service *Service) Valid(ctx context.Context, token string) serializer.Resp
 		} else if time.Now().Unix() > claims.ExpiresAt {
 			code = e.ErrorAuthTokenTimeout
 		} else {
+			nickName = claims.Nickname
 			userId = claims.UserID
 			email = claims.Email
 			password = claims.Password
 			operationType = claims.OperationType
 		}
-		fmt.Println(claims)
 	}
 	if code != e.Success {
 		return serializer.Response{
 			Status: code,
 			Msg:    e.GetMsg(code),
+		}
+	}
+	user := &model.User{
+		NickName: nickName,
+		Status:   model.Normal,
+		Avatar:   "avatar.JPG",
+		Money:    0,
+	}
+
+	if operationType == 1 {
+		user.Email = email
+		//如果是首次绑定 说明是注册
+		if userId == 0 {
+			//密码加密
+			userDao := dao.NewUserDao(ctx)
+			if err := user.SetPassword(service.Password); err != nil {
+				code = e.ErrorFailEncryption
+				return serializer.Response{
+					Status: code,
+					Msg:    e.GetMsg(code),
+				}
+			}
+			//创建用户
+			err := userDao.CreateUser(user)
+			if err != nil {
+				code = e.Error
+			}
+			return serializer.Response{
+				Status: code,
+				Msg:    e.GetMsg(code),
+				Data:   serializer.BuildUser(user),
+			}
+		}
+	} else if operationType == 2 {
+		user.Email = ""
+	} else if operationType == 3 {
+		err := user.SetPassword(password)
+		if err != nil {
+			code = e.Error
+			return serializer.Response{
+				Status: code,
+				Msg:    e.GetMsg(code),
+			}
 		}
 	}
 
@@ -293,20 +313,6 @@ func (service *Service) Valid(ctx context.Context, token string) serializer.Resp
 		return serializer.Response{
 			Status: code,
 			Msg:    e.GetMsg(code),
-		}
-	}
-	if operationType == 1 {
-		user.Email = email
-	} else if operationType == 2 {
-		user.Email = ""
-	} else if operationType == 3 {
-		err = user.SetPassword(password)
-		if err != nil {
-			code = e.Error
-			return serializer.Response{
-				Status: code,
-				Msg:    e.GetMsg(code),
-			}
 		}
 	}
 	err = userDao.UpdateUserByID(userId, user)
