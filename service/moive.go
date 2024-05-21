@@ -7,6 +7,7 @@ import (
 	"TTMS_Web/pkg/util"
 	"TTMS_Web/serializer"
 	"context"
+	"fmt"
 	"mime/multipart"
 	"sync"
 )
@@ -107,7 +108,7 @@ func (service *MovieService) List(ctx context.Context) serializer.Response {
 			Msg:    e.GetMsg(code),
 		}
 	}
-
+	fmt.Println(service)
 	wg := new(sync.WaitGroup)
 	wg.Add(1)
 	go func() {
