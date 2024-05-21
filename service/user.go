@@ -275,7 +275,7 @@ func (service *Service) Valid(ctx context.Context, token string) serializer.Resp
 		if userId == 0 {
 			//密码加密
 			userDao := dao.NewUserDao(ctx)
-			if err := user.SetPassword(service.Password); err != nil {
+			if err := user.SetPassword(password); err != nil {
 				code = e.ErrorFailEncryption
 				return serializer.Response{
 					Status: code,

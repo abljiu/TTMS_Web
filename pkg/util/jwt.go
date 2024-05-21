@@ -16,7 +16,7 @@ type Claims struct {
 // GenerateToken 签发token
 func GenerateToken(userID uint, status string) (string, error) {
 	nowTime := time.Now()
-	expireTime := nowTime.Add(24 * time.Hour)
+	expireTime := nowTime.Add(24 * time.Minute)
 	claims := Claims{
 		UserID: userID,
 		Status: status,
@@ -56,7 +56,7 @@ type EmailClaims struct {
 // GenerateEmailToken 签发Email token
 func GenerateEmailToken(userId, operationType uint, nickname, email, password string) (string, error) {
 	nowTime := time.Now()
-	expireTime := nowTime.Add(24 * time.Hour)
+	expireTime := nowTime.Add(5 * time.Second)
 	claims := EmailClaims{
 		Nickname:      nickname,
 		UserID:        userId,
