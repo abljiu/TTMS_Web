@@ -23,8 +23,8 @@ func NewRouter() *gin.Engine {
 
 		//轮播图
 		v1.GET("carousels", api.ListCarousel)
-		//产品操作
-		v1.GET("products", api.ListProduct)
+		//查询电影
+		v1.GET("movies", api.ListMovie)
 
 		//需要登录保护
 		authed := v1.Group("/") //api/v1/
@@ -39,12 +39,15 @@ func NewRouter() *gin.Engine {
 			//显示金额
 			authed.POST("money", api.ShowMoney)
 
+			//搜索电影
+			authed.POST("movies", api.SearchMovie)
+
 			//管理员权限
 			admin := v1.Group("/admin") //api/v1/admin
 			admin.Use(middleware.Admin())
 			{
-				//添加产品
-				admin.POST("movie", api.CreateProduct)
+				//添加电影
+				admin.POST("movie", api.CreateMovie)
 			}
 		}
 	}

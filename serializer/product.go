@@ -41,9 +41,9 @@ func BuildProduct(item *model.Movie) Product {
 	}
 }
 
-func BuildProducts(items []model.Movie) (products []Product) {
+func BuildProducts(items []*model.Movie) (products []Product) {
 	for _, item := range items {
-		product := BuildProduct(&item)
+		product := BuildProduct(item)
 		products = append(products, product)
 	}
 	return products

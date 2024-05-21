@@ -58,11 +58,11 @@ func (service *MovieService) Create(ctx context.Context, uid uint, files []*mult
 		BossName:      boss.NickName,
 		BossAvatar:    boss.Avatar,
 	}
-	productDao := dao.NewProductDao(ctx)
-	err = productDao.CreateProduct(product)
+	productDao := dao.NewMovieDao(ctx)
+	err = productDao.CreateMovie(product)
 	if err != nil {
 		code = e.Error
-		util.LogrusObj.Infoln("CreateProduct", err)
+		util.LogrusObj.Infoln("CreateMovie", err)
 		return serializer.Response{
 			Status: code,
 			Msg:    e.GetMsg(code),
@@ -88,7 +88,7 @@ func (service *MovieService) Create(ctx context.Context, uid uint, files []*mult
 
 // List 获取电影列表
 func (service *MovieService) List(ctx context.Context) serializer.Response {
-	var products []model.Movie
+	var products []*model.Movie
 	var err error
 	code := e.Success
 	if service.PageSize == 0 {
@@ -98,11 +98,11 @@ func (service *MovieService) List(ctx context.Context) serializer.Response {
 	if service.CategoryId != 0 {
 		condition["category_id"] = service.CategoryId
 	}
-	productDao := dao.NewProductDao(ctx)
-	total, err := productDao.CountProductByCondition(condition)
+	productDao := dao.NewMovieDao(ctx)
+	total, err := productDao.CountMovieByCondition(condition)
 	if err != nil {
 		code = e.Error
-		util.LogrusObj.Infoln("CountProductByCondition", err)
+		util.LogrusObj.Infoln("CountMovieByCondition", err)
 		return serializer.Response{
 			Status: code,
 			Msg:    e.GetMsg(code),
@@ -112,11 +112,31 @@ func (service *MovieService) List(ctx context.Context) serializer.Response {
 	wg := new(sync.WaitGroup)
 	wg.Add(1)
 	go func() {
-		productDao = dao.NewProductDaoByDB(productDao.DB)
-		products, _ = productDao.ListProductByCondition(condition, service.BasePage)
+		productDao = dao.NewMovieDaoByDB(productDao.DB)
+		products, _ = productDao.ListMovieByCondition(condition, service.BasePage)
 		wg.Done()
 	}()
 	wg.Wait()
 
 	return serializer.BuildListResponse(serializer.BuildProducts(products), uint(total))
+}
+
+// Search 搜索电影
+func (service *MovieService) Search(ctx context.Context) serializer.Response {
+	code := e.Success
+	if service.PageSize == 0 {
+		service.PageSize = 15
+	}
+
+	productDao := dao.NewMovieDao(ctx)
+	products, err := productDao.SearchMovie(service.Info, service.BasePage)
+	if err != nil {
+		util.LogrusObj.Infoln("SearchProduct", err)
+		code = e.Error
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+	return serializer.BuildListResponse(serializer.BuildProducts(products), uint(len(products)))
 }

@@ -7,8 +7,8 @@ import (
 	"net/http"
 )
 
-// CreateProduct 创建商品
-func CreateProduct(c *gin.Context) {
+// CreateMovie 创建电影
+func CreateMovie(c *gin.Context) {
 	form, _ := c.MultipartForm()
 	files := form.File["file"]
 	claim, _ := util.ParseToken(c.GetHeader("Authorization"))
@@ -18,17 +18,30 @@ func CreateProduct(c *gin.Context) {
 		c.JSON(http.StatusOK, res)
 	} else {
 		c.JSON(http.StatusBadRequest, ErrorResponse(err))
-		util.LogrusObj.Infoln("CreateProduct", err)
+		util.LogrusObj.Infoln("CreateMovie", err)
 	}
 }
 
-func ListProduct(c *gin.Context) {
-	listProductService := service.MovieService{}
-	if err := c.ShouldBind(&listProductService); err == nil {
-		res := listProductService.List(c.Request.Context())
+// ListMovie 获取电影列表
+func ListMovie(c *gin.Context) {
+	listMovieService := service.MovieService{}
+	if err := c.ShouldBind(&listMovieService); err == nil {
+		res := listMovieService.List(c.Request.Context())
 		c.JSON(http.StatusOK, res)
 	} else {
 		c.JSON(http.StatusBadRequest, ErrorResponse(err))
-		util.LogrusObj.Infoln("CreateProduct", err)
+		util.LogrusObj.Infoln("ListMovie", err)
+	}
+}
+
+// SearchMovie 搜索电影
+func SearchMovie(c *gin.Context) {
+	SearchMovieService := service.MovieService{}
+	if err := c.ShouldBind(&SearchMovieService); err == nil {
+		res := SearchMovieService.Search(c.Request.Context())
+		c.JSON(http.StatusOK, res)
+	} else {
+		c.JSON(http.StatusBadRequest, ErrorResponse(err))
+		util.LogrusObj.Infoln("ListMovie", err)
 	}
 }
