@@ -10,11 +10,13 @@ import (
 // CreateMovie 创建电影
 func CreateMovie(c *gin.Context) {
 	form, _ := c.MultipartForm()
-	files := form.File["file"]
+	movieImg := form.File["movie_img"]
+	directorImg := form.File["director_img"]
+	actorImg := form.File["actor_img"]
 	claim, _ := util.ParseToken(c.GetHeader("Authorization"))
 	createProductService := service.MovieService{}
 	if err := c.ShouldBind(&createProductService); err == nil {
-		res := createProductService.Create(c.Request.Context(), claim.UserID, files)
+		res := createProductService.Create(c.Request.Context(), claim.UserID, movieImg, directorImg, actorImg)
 		c.JSON(http.StatusOK, res)
 	} else {
 		c.JSON(http.StatusBadRequest, ErrorResponse(err))

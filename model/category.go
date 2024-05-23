@@ -4,5 +4,5 @@ import "gorm.io/gorm"
 
 type Category struct {
 	gorm.Model
-	CategoryName string
+	CategoryName string `gorm:"unique;not null"`
 }

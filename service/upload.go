@@ -28,9 +28,9 @@ func UploadAvatarToLocalStatic(file multipart.File, uid uint, userID string) (fi
 	return "user" + bid + "/" + userID + ".jpg", err
 }
 
-// UploadProductIndexToLocalStatic   更新电影封面图片到本地
-func UploadProductIndexToLocalStatic(file multipart.File, productName string) (filePath string, er error) {
-	basePath := "." + conf.Config_.Path.ProductPath + productName + "/"
+// UploadMovieIndexToLocalStatic   更新电影封面图片到本地
+func UploadMovieIndexToLocalStatic(file multipart.File, productName string) (filePath string, er error) {
+	basePath := "." + conf.Config_.Path.MoviePath + productName + "/"
 	if !DirExistOrNot(basePath) {
 		CreateDir(basePath)
 	}
@@ -43,15 +43,67 @@ func UploadProductIndexToLocalStatic(file multipart.File, productName string) (f
 	if err != nil {
 		return
 	}
-	return productPath + "/" + productName + ".jpg", err
+	return productPath, err
 }
 
-// UploadProductToLocalStatic  更新电影图片到本地
-func UploadProductToLocalStatic(files []*multipart.FileHeader, productName string) (string, error) {
+// UploadDirectorToLocalStatic 更新导演图片到本地
+func UploadDirectorToLocalStatic(files []*multipart.FileHeader, directors []string) (string, error) {
+	var err error
+	var directorPath string
+	wg := new(sync.WaitGroup)
+	wg.Add(len(files))
+	basePath := "." + conf.Config_.Path.DirectorPath + "/"
+	if !DirExistOrNot(basePath) {
+		CreateDir(basePath)
+	}
+	for i := 0; i < len(files) && i < len(directors); i++ {
+		director := directors[i]
+		directorImg, _ := files[i].Open()
+		directorPath = basePath + director + ".jpg"
+		content, err := io.ReadAll(directorImg)
+		if err != nil {
+			return "", err
+		}
+		err = os.WriteFile(directorPath, content, 0666)
+		if err != nil {
+			return "", err
+		}
+	}
+	return directorPath, err
+}
+
+// UploadActorToLocalStatic 更新演员图片到本地
+func UploadActorToLocalStatic(files []*multipart.FileHeader, actors []string) (string, error) {
+	var err error
+	var actorPath string
+	wg := new(sync.WaitGroup)
+	wg.Add(len(files))
+	basePath := "." + conf.Config_.Path.DirectorPath + "/"
+	if !DirExistOrNot(basePath) {
+		CreateDir(basePath)
+	}
+	for i := 0; i < len(files) && i < len(actors); i++ {
+		actor := actors[i]
+		directorImg, _ := files[i].Open()
+		actorPath = basePath + actor + ".jpg"
+		content, err := io.ReadAll(directorImg)
+		if err != nil {
+			return "", err
+		}
+		err = os.WriteFile(actorPath, content, 0666)
+		if err != nil {
+			return "", err
+		}
+	}
+	return actorPath, err
+}
+
+// UploadMovieToLocalStatic  更新电影图片到本地
+func UploadMovieToLocalStatic(files []*multipart.FileHeader, productName string) (string, error) {
 	var err error
 	wg := new(sync.WaitGroup)
 	wg.Add(len(files))
-	basePath := "." + conf.Config_.Path.ProductPath + productName + "/"
+	basePath := "." + conf.Config_.Path.MoviePath + productName + "/"
 	var productPath string
 
 	for num, file := range files {
@@ -68,7 +120,7 @@ func UploadProductToLocalStatic(files []*multipart.FileHeader, productName strin
 			return "", err
 		}
 	}
-	return productPath + "/" + productName + ".jpg", err
+	return productPath, err
 
 }
 

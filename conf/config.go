@@ -36,9 +36,11 @@ type Config struct {
 		SmtpPass   string `yaml:"SmtpPass"`
 	} `yaml:"email"`
 	Path struct {
-		Host        string `yaml:"Host"`
-		ProductPath string `yaml:"ProductPath"`
-		AvatarPath  string `yaml:"AvatarPath"`
+		Host         string `yaml:"Host"`
+		MoviePath    string `yaml:"MoviePath"`
+		AvatarPath   string `yaml:"AvatarPath"`
+		DirectorPath string `yaml:"DirectorPath"`
+		ActorPath    string `yaml:"ActorPath"`
 	} `yaml:"path"`
 }
 

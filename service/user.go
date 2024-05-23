@@ -15,7 +15,7 @@ import (
 	"time"
 )
 
-type Service struct {
+type UserService struct {
 	NickName      string `json:"nick_name" form:"nick_name"`
 	UserID        string `json:"user_id" form:"user_id"`
 	Password      string `json:"password" form:"password"`
@@ -25,7 +25,7 @@ type Service struct {
 }
 
 // Register 注册逻辑
-func (service *Service) Register(ctx context.Context) serializer.Response {
+func (service *UserService) Register(ctx context.Context) serializer.Response {
 	var user model.User
 	code := e.Success
 
@@ -82,7 +82,7 @@ func (service *Service) Register(ctx context.Context) serializer.Response {
 }
 
 // Login  登陆逻辑
-func (service *Service) Login(ctx context.Context) serializer.Response {
+func (service *UserService) Login(ctx context.Context) serializer.Response {
 	var user *model.User
 	code := e.Success
 
@@ -120,7 +120,7 @@ func (service *Service) Login(ctx context.Context) serializer.Response {
 }
 
 // Update 用户修改信息
-func (service *Service) Update(ctx context.Context, uid uint) serializer.Response {
+func (service *UserService) Update(ctx context.Context, uid uint) serializer.Response {
 	var user *model.User
 	var err error
 	code := e.Success
@@ -146,7 +146,7 @@ func (service *Service) Update(ctx context.Context, uid uint) serializer.Respons
 }
 
 // Post  上传头像
-func (service *Service) Post(ctx context.Context, uid uint, file multipart.File) serializer.Response {
+func (service *UserService) Post(ctx context.Context, uid uint, file multipart.File) serializer.Response {
 	code := e.Success
 	var user *model.User
 	var err error
@@ -186,7 +186,7 @@ func (service *Service) Post(ctx context.Context, uid uint, file multipart.File)
 }
 
 // Send 发送邮件
-func (service *Service) Send(ctx context.Context, uid uint) serializer.Response {
+func (service *UserService) Send(ctx context.Context, uid uint) serializer.Response {
 	code := e.Success
 	var address string
 	var notice *model.Notice
@@ -232,7 +232,7 @@ func (service *Service) Send(ctx context.Context, uid uint) serializer.Response 
 }
 
 // Valid 验证邮箱
-func (service *Service) Valid(ctx context.Context, token string) serializer.Response {
+func (service *UserService) Valid(ctx context.Context, token string) serializer.Response {
 	var userId uint
 	var email string
 	var password string
@@ -331,7 +331,7 @@ func (service *Service) Valid(ctx context.Context, token string) serializer.Resp
 }
 
 // Show 展示用户金额
-func (service *Service) Show(ctx context.Context, uid uint) serializer.Response {
+func (service *UserService) Show(ctx context.Context, uid uint) serializer.Response {
 	code := e.Success
 	userDao := dao.NewUserDao(ctx)
 	user, err := userDao.GetUserByID(uid)

@@ -17,12 +17,14 @@ redis:
   RedisDbName: 2
 
 email:
-  ValidEmail: 'http://localhost:8080/front/vaild/email/'
+  ValidEmail: 'http://117.78.11.45:5173/user/register'
   SmtpHost: smtp.qq.com
   SmtpEmail: '1160433376@qq.com'
   SmtpPass: 'qwbyyqacqjqijbbh'
 
 path:
   Host: 'http://127.0.0.1'
-  ProductPath: '/static/imgs/movie/'
+  MoviePath: '/static/imgs/movie/'
   AvatarPath: '/static/imgs/avatar/'
+  DirectorPath: '/static/imgs/director'
+  ActorPath: '/static/imgs/actor'
