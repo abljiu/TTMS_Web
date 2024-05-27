@@ -7,7 +7,6 @@ import (
 
 type User struct {
 	ID       uint   `json:"id"`
-	UserName string `json:"user_name"`
 	Email    string `json:"email"`
 	NickName string `json:"nick_name"`
 	Status   string `json:"status"`
@@ -19,7 +18,6 @@ type User struct {
 func BuildUser(user *model.User) *User {
 	return &User{
 		ID:       user.ID,
-		UserName: user.UserName,
 		Email:    user.Email,
 		NickName: user.NickName,
 		Status:   user.Status,

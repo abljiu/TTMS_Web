@@ -1,8 +1,6 @@
 package model
 
-import "gorm.io/gorm"
-
 type Category struct {
-	gorm.Model
-	CategoryName string
+	ID           uint   `gorm:"primary_key;auto_increment" `
+	CategoryName string `gorm:"unique;not null"`
 }

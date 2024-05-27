@@ -8,20 +8,18 @@ import (
 var jwtSecret = []byte("abljiu")
 
 type Claims struct {
-	ID        uint   `json:"id"`
-	UserName  string `json:"user_name"`
-	Authority int    ` json:"authority"`
+	UserID uint   `json:"user_id"`
+	Status string ` json:"status"`
 	jwt.StandardClaims
 }
 
 // GenerateToken 签发token
-func GenerateToken(id uint, userName string, authority int) (string, error) {
+func GenerateToken(userID uint, status string) (string, error) {
 	nowTime := time.Now()
 	expireTime := nowTime.Add(24 * time.Hour)
 	claims := Claims{
-		ID:        id,
-		UserName:  userName,
-		Authority: authority,
+		UserID: userID,
+		Status: status,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expireTime.Unix(),
 			Issuer:    "TTMS_Web",
@@ -47,6 +45,7 @@ func ParseToken(token string) (*Claims, error) {
 }
 
 type EmailClaims struct {
+	Nickname      string `json:"nickname"`
 	UserID        uint   `json:"user_id"`
 	Email         string `json:"email"`
 	Password      string `json:"password"`
@@ -55,10 +54,11 @@ type EmailClaims struct {
 }
 
 // GenerateEmailToken 签发Email token
-func GenerateEmailToken(userId, operationType uint, email, password string) (string, error) {
+func GenerateEmailToken(userId, operationType uint, nickname, email, password string) (string, error) {
 	nowTime := time.Now()
-	expireTime := nowTime.Add(24 * time.Hour)
+	expireTime := nowTime.Add(5 * time.Minute)
 	claims := EmailClaims{
+		Nickname:      nickname,
 		UserID:        userId,
 		OperationType: operationType,
 		Email:         email,

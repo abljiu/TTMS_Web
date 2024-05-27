@@ -33,7 +33,7 @@ func UserUpdate(c *gin.Context) {
 	var userUpdate service.UserService
 	claims, _ := util.ParseToken(c.GetHeader("Authorization"))
 	if err := c.ShouldBind(&userUpdate); err == nil {
-		res := userUpdate.Update(c.Request.Context(), claims.ID)
+		res := userUpdate.Update(c.Request.Context(), claims.UserID)
 		c.JSON(http.StatusOK, res)
 	} else {
 		c.JSON(http.StatusBadRequest, ErrorResponse(err))
@@ -46,7 +46,7 @@ func UploadAvatar(c *gin.Context) {
 	var uploadAvatar service.UserService
 	claims, _ := util.ParseToken(c.GetHeader("Authorization"))
 	if err := c.ShouldBind(&uploadAvatar); err == nil {
-		res := uploadAvatar.Post(c.Request.Context(), claims.ID, file)
+		res := uploadAvatar.Post(c.Request.Context(), claims.UserID, file)
 		c.JSON(http.StatusOK, res)
 	} else {
 		c.JSON(http.StatusBadRequest, ErrorResponse(err))
@@ -55,10 +55,10 @@ func UploadAvatar(c *gin.Context) {
 }
 
 func SendEmail(c *gin.Context) {
-	var sendEmail service.SendEmailService
+	var sendEmail service.UserService
 	claims, _ := util.ParseToken(c.GetHeader("Authorization"))
 	if err := c.ShouldBind(&sendEmail); err == nil {
-		res := sendEmail.Send(c.Request.Context(), claims.ID)
+		res := sendEmail.Send(c.Request.Context(), claims.UserID)
 		c.JSON(http.StatusOK, res)
 	} else {
 		c.JSON(http.StatusBadRequest, ErrorResponse(err))
@@ -67,7 +67,7 @@ func SendEmail(c *gin.Context) {
 }
 
 func ValidEmail(c *gin.Context) {
-	var validEmail service.ValidEmailService
+	var validEmail service.UserService
 	if err := c.ShouldBind(&validEmail); err == nil {
 		res := validEmail.Valid(c.Request.Context(), c.GetHeader("Authorization"))
 		c.JSON(http.StatusOK, res)
@@ -78,10 +78,10 @@ func ValidEmail(c *gin.Context) {
 }
 
 func ShowMoney(c *gin.Context) {
-	var showMoney service.ShowMoneyService
+	var showMoney service.UserService
 	claims, _ := util.ParseToken(c.GetHeader("Authorization"))
 	if err := c.ShouldBind(&showMoney); err == nil {
-		res := showMoney.Show(c.Request.Context(), claims.ID)
+		res := showMoney.Show(c.Request.Context(), claims.UserID)
 		c.JSON(http.StatusOK, res)
 	} else {
 		c.JSON(http.StatusBadRequest, ErrorResponse(err))
