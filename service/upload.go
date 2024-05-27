@@ -43,7 +43,7 @@ func UploadMovieIndexToLocalStatic(file multipart.File, productName string) (fil
 	if err != nil {
 		return
 	}
-	return productPath, err
+	return productName + "/" + productName + "index.jpg", err
 }
 
 // UploadDirectorToLocalStatic 更新导演图片到本地
@@ -78,7 +78,7 @@ func UploadActorToLocalStatic(files []*multipart.FileHeader, actors []string) (s
 	var actorPath string
 	wg := new(sync.WaitGroup)
 	wg.Add(len(files))
-	basePath := "." + conf.Config_.Path.DirectorPath + "/"
+	basePath := "." + conf.Config_.Path.ActorPath + "/"
 	if !DirExistOrNot(basePath) {
 		CreateDir(basePath)
 	}

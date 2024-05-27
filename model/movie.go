@@ -1,12 +1,15 @@
 package model
 
-import "gorm.io/gorm"
+import (
+	"github.com/goccy/go-json"
+	"gorm.io/gorm"
+)
 
 type Movie struct {
 	gorm.Model
 	ChineseName  string
 	EnglishName  string
-	CategoryId   []uint `gorm:"type:json"`
+	CategoryId   json.RawMessage `gorm:"type:json"`
 	Area         string
 	Duration     string
 	ShowTime     string

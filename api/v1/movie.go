@@ -13,10 +13,9 @@ func CreateMovie(c *gin.Context) {
 	movieImg := form.File["movie_img"]
 	directorImg := form.File["director_img"]
 	actorImg := form.File["actor_img"]
-	claim, _ := util.ParseToken(c.GetHeader("Authorization"))
 	createProductService := service.MovieService{}
 	if err := c.ShouldBind(&createProductService); err == nil {
-		res := createProductService.Create(c.Request.Context(), claim.UserID, movieImg, directorImg, actorImg)
+		res := createProductService.Create(c.Request.Context(), movieImg, directorImg, actorImg)
 		c.JSON(http.StatusOK, res)
 	} else {
 		c.JSON(http.StatusBadRequest, ErrorResponse(err))

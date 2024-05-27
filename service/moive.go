@@ -8,7 +8,7 @@ import (
 	"TTMS_Web/pkg/util"
 	"TTMS_Web/serializer"
 	"context"
-	"fmt"
+	"encoding/json"
 	"mime/multipart"
 	"sync"
 )
@@ -30,7 +30,7 @@ type MovieService struct {
 }
 
 // Create 上传新电影
-func (service *MovieService) Create(ctx context.Context, uid uint, movieImg, directorImg, actorImg []*multipart.FileHeader) serializer.Response {
+func (service *MovieService) Create(ctx context.Context, movieImg, directorImg, actorImg []*multipart.FileHeader) serializer.Response {
 	var directors []model.Director
 	var actors []model.Actor
 	var err error
@@ -50,28 +50,29 @@ func (service *MovieService) Create(ctx context.Context, uid uint, movieImg, dir
 
 	//整理导演演员信息
 	for _, director := range service.Directors {
-		directors = append(directors, model.Director{Name: director, ImageURL: conf.Config_.Path.Host + conf.Config_.Path.DirectorPath})
-	}
-	for _, actor := range service.Actors {
-		actors = append(actors, model.Actor{Name: actor, ImageURL: conf.Config_.Path.Host + conf.Config_.Path.ActorPath})
+		directors = append(directors, model.Director{Name: director, ImageURL: conf.Config_.Path.Host + conf.Config_.Service.HttpPort + conf.Config_.Path.DirectorPath + director + ".jpg"})
 	}
 
+	for _, actor := range service.Actors {
+		actors = append(actors, model.Actor{Name: actor, ImageURL: conf.Config_.Path.Host + conf.Config_.Service.HttpPort + conf.Config_.Path.ActorPath + actor + ".jpg"})
+	}
+	categoryIdJson, err := json.Marshal(service.CategoryId)
 	movie := &model.Movie{
-		ChineseName: service.ChineseName,
-		EnglishName: service.EnglishName,
-		CategoryId:  service.CategoryId,
-		Area:        service.Area,
-		Duration:    service.Duration,
-		ImgPath:     path,
-		OnSale:      false,
-		Score:       service.Score,
-		Directors:   directors,
-		Actors:      actors,
+		ChineseName:  service.ChineseName,
+		EnglishName:  service.EnglishName,
+		CategoryId:   categoryIdJson,
+		Area:         service.Area,
+		Duration:     service.Duration,
+		ShowTime:     service.ShowTime,
+		Introduction: service.Introduction,
+		ImgPath:      path,
+		OnSale:       false,
+		Score:        service.Score,
+		Directors:    directors,
+		Actors:       actors,
 	}
 	MovieDao := dao.NewMovieDao(ctx)
 	err = MovieDao.CreateMovie(movie)
-	//bug 多列
-	fmt.Println(err)
 	if err != nil {
 		code = e.Error
 		util.LogrusObj.Infoln("CreateMovie", err)
@@ -132,7 +133,7 @@ func (service *MovieService) Create(ctx context.Context, uid uint, movieImg, dir
 
 // List 获取电影列表
 func (service *MovieService) List(ctx context.Context) serializer.Response {
-	var products []*model.Movie
+	var movies []*model.Movie
 	var err error
 	code := e.Success
 	if service.PageSize == 0 {
@@ -157,14 +158,16 @@ func (service *MovieService) List(ctx context.Context) serializer.Response {
 	wg.Add(1)
 	go func() {
 		productDao = dao.NewMovieDaoByDB(productDao.DB)
-		products, _ = productDao.ListMovieByCondition(condition, service.BasePage)
+		movies, _ = productDao.ListMovieByCondition(condition, service.BasePage)
 		wg.Done()
 	}()
 	wg.Wait()
 	categoryDao := dao.NewCategoryDao(ctx)
 	var categoryStrings []string
-	for _, product := range products {
-		categoryString, err := categoryDao.GetCategory(product.CategoryId)
+	for _, movie := range movies {
+		var CategoryId []uint
+		json.Unmarshal(movie.CategoryId, &CategoryId)
+		categoryString, err := categoryDao.GetCategory(CategoryId)
 		if err != nil {
 			code = e.Error
 			util.LogrusObj.Infoln("GetCategory", err)
@@ -176,7 +179,7 @@ func (service *MovieService) List(ctx context.Context) serializer.Response {
 		categoryStrings = append(categoryStrings, categoryString)
 	}
 
-	return serializer.BuildListResponse(serializer.BuildMovies(products, categoryStrings), uint(total))
+	return serializer.BuildListResponse(serializer.BuildMovies(movies, categoryStrings), uint(total))
 }
 
 // Search 搜索电影
@@ -200,7 +203,9 @@ func (service *MovieService) Search(ctx context.Context) serializer.Response {
 	categoryDao := dao.NewCategoryDao(ctx)
 	var categoryStrings []string
 	for _, movie := range movies {
-		categoryString, err := categoryDao.GetCategory(movie.CategoryId)
+		var CategoryId []uint
+		json.Unmarshal(movie.CategoryId, &CategoryId)
+		categoryString, err := categoryDao.GetCategory(CategoryId)
 		if err != nil {
 			code = e.Error
 			util.LogrusObj.Infoln("GetCategory", err)

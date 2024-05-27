@@ -26,5 +26,5 @@ path:
   Host: 'http://127.0.0.1'
   MoviePath: '/static/imgs/movie/'
   AvatarPath: '/static/imgs/avatar/'
-  DirectorPath: '/static/imgs/director'
-  ActorPath: '/static/imgs/actor'
+  DirectorPath: '/static/imgs/director/'
+  ActorPath: '/static/imgs/actor/'
