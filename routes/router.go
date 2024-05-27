@@ -40,6 +40,15 @@ func NewRouter() *gin.Engine {
 			//商品操作
 			authed.POST("product", api.CreateProduct)
 		}
+
 	}
+
+	//某剧院的影厅列表
+	r.GET("halls", api.HallsList)
+	//创建影厅
+	//删除影厅
+	//更新影厅信息
+	//影厅详细信息
+
 	return r
 }

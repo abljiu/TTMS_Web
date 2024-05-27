@@ -7,13 +7,13 @@ mysql:
   DbHost: 127.0.0.1
   DbPort: 3306
   DbUser: root
-  DbPassword: '040111'
-  DbName: TTMS_Web
+  DbPassword: 'hyx20040731'
+  DbName: ttms
 
 redis:
   RedisDb: redis
   RedisAddr: 127.0.0.1:6379
-  RedisPw: '123456'
+  RedisPw: 'hyx20040731'
   RedisDbName: 2
 
 email:
