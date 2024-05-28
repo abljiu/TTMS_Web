@@ -17,7 +17,7 @@ func SubmitOrder(c *gin.Context) {
 		util.LogrusObj.Infoln("UserRegister", err)
 	}
 }
-asdhjasldalskdhkjasdhkjahsd
+
 func CancelOrder(c *gin.Context) {
 	var userRegister service.UserService
 	if err := c.ShouldBind(&userRegister); err == nil {
