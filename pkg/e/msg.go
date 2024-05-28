@@ -16,7 +16,7 @@ var MsgFlags = map[int]string{
 	ErrorProductImgUpload:  "图片上传错误",
 	ErrorMovieIndex:        "请上传电影封面",
 	ErrorMovieId:           "电影id有误",
-	ErrorTheaterId:         "剧院id有误",
+	ErrorHallId:            "影厅id有误",
 	ErrorSessionId:         "场次id有误",
 	ErrorInitializeStock:   "初始化库存失败",
 }

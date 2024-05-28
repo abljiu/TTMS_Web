@@ -11,9 +11,9 @@ type Order struct {
 	MovieID   uint    `gorm:"not null"`
 	Movie     Movie   `gorm:"ForeignKey:MovieID"`
 	AddressID uint    `gorm:"not null"`
-	Address   Address `gorm:"ForeignKey:AddressID"`
+	Address   Theater `gorm:"ForeignKey:TheaterID"`
 	TheaterID uint    `gorm:"not null"`
-	Theater   Theater `gorm:"ForeignKey:TheaterID"`
+	Theater   Hall    `gorm:"ForeignKey:TheaterID"`
 	Seat      string  `gorm:"not null"`
 	Num       uint    `gorm:"not null"`
 	ShowTime  string  `gorm:"not null"`

@@ -21,8 +21,8 @@ const (
 	ErrorMovieIndex       = 40003
 	ErrorMovieId          = 40004
 
-	//theater模块
-	ErrorTheaterId = 50001
+	//hall模块
+	ErrorHallId = 50001
 
 	//session模块
 	ErrorSessionId       = 60001

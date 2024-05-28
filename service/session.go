@@ -14,7 +14,7 @@ type SessionServer struct {
 	SessionID uint      `form:"session_id" json:"session_id" `
 	MovieID   uint      `form:"movie_id" json:"movie_id"`
 	Price     float64   `form:"price" json:"price"`
-	AddressID uint      `form:"address_id" json:"address_id"`
+	HallID    uint      `form:"hall_id" json:"hall_id"`
 	TheaterID uint      `form:"theater_id" json:"theater_id"`
 	ShowTime  time.Time `form:"show_time" json:"show_time" time_format:"2006-01-02 15:04"`
 }
@@ -25,7 +25,7 @@ func (service *SessionServer) Add(ctx context.Context) serializer.Response {
 
 	sessionDao := dao.NewSessionDao(ctx)
 	movieDao := dao.NewMovieDao(ctx)
-	theaterDao := dao.NewTheaterDao(ctx)
+	theaterDao := dao.NewHallDao(ctx)
 	rdb := cache.GetRedisClient()
 
 	//根据id获取电影
@@ -37,10 +37,10 @@ func (service *SessionServer) Add(ctx context.Context) serializer.Response {
 			Msg:    e.GetMsg(code),
 		}
 	}
-	// 根据id获取剧院
-	theater, err := theaterDao.GetTheaterByTheaterID(service.TheaterID)
+	// 根据id获取影厅
+	hall, err := theaterDao.GetHallByHallID(service.HallID)
 	if err != nil {
-		code = e.ErrorTheaterId
+		code = e.ErrorHallId
 		return serializer.Response{
 			Status: code,
 			Msg:    e.GetMsg(code),
@@ -49,8 +49,8 @@ func (service *SessionServer) Add(ctx context.Context) serializer.Response {
 
 	session := &model.Session{
 		MovieID:   service.MovieID,
-		AddressID: service.AddressID,
 		TheaterID: service.TheaterID,
+		HallID:    service.HallID,
 		ShowTime:  service.ShowTime,
 		EndTime:   service.ShowTime.Add(movie.Duration),
 	}
@@ -64,7 +64,7 @@ func (service *SessionServer) Add(ctx context.Context) serializer.Response {
 		}
 	}
 	//添加库存
-	err = cache.InitializeStock(ctx, rdb, session.ID, theater.SeatNum)
+	err = cache.InitializeStock(ctx, rdb, session.ID, hall.SeatNum)
 	if err != nil {
 		code = e.ErrorInitializeStock
 		return serializer.Response{
@@ -99,8 +99,8 @@ func (service *SessionServer) Alter(ctx context.Context) serializer.Response {
 	if session.TheaterID != 0 {
 		session.TheaterID = service.TheaterID
 	}
-	if session.AddressID != 0 {
-		session.AddressID = service.AddressID
+	if session.TheaterID != 0 {
+		session.TheaterID = service.HallID
 	}
 	if !session.ShowTime.IsZero() {
 		session.ShowTime = service.ShowTime
