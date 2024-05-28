@@ -1,7 +1,6 @@
 package model
 
 import (
-	"github.com/goccy/go-json"
 	"gorm.io/gorm"
 	"time"
 )
@@ -10,7 +9,7 @@ type Movie struct {
 	gorm.Model
 	ChineseName  string
 	EnglishName  string
-	CategoryId   json.RawMessage `gorm:"type:json"`
+	CategoryId   string
 	Area         string
 	Duration     time.Duration
 	ShowTime     time.Time

@@ -8,8 +8,10 @@ import (
 	"TTMS_Web/pkg/util"
 	"TTMS_Web/serializer"
 	"context"
-	"encoding/json"
+	"fmt"
 	"mime/multipart"
+	"strconv"
+	"strings"
 	"sync"
 	"time"
 )
@@ -65,11 +67,17 @@ func (service *MovieService) Create(ctx context.Context, movieImg, directorImg, 
 	for _, actor := range service.Actors {
 		actors = append(actors, model.Actor{Name: actor, ImageURL: conf.Config_.Path.Host + conf.Config_.Service.HttpPort + conf.Config_.Path.ActorPath + actor + ".jpg"})
 	}
-	categoryIdJson, err := json.Marshal(service.CategoryId)
+	strSlice := make([]string, len(service.CategoryId))
+
+	// 将每个uint转换为字符串并存储在strSlice中
+	for i, num := range service.CategoryId {
+		strSlice[i] = fmt.Sprintf("%d", num)
+	}
+	categoryStr := strings.Join(strSlice, ",")
 	movie := &model.Movie{
 		ChineseName:  service.ChineseName,
 		EnglishName:  service.EnglishName,
-		CategoryId:   categoryIdJson,
+		CategoryId:   categoryStr,
 		Area:         service.Area,
 		Duration:     service.Duration,
 		ShowTime:     service.ShowTime,
@@ -175,8 +183,20 @@ func (service *MovieService) List(ctx context.Context) serializer.Response {
 	categoryDao := dao.NewCategoryDao(ctx)
 	var categoryStrings []string
 	for _, movie := range movies {
-		var CategoryId []uint
-		json.Unmarshal(movie.CategoryId, &CategoryId)
+		CategoryId := make([]uint, len(movie.CategoryId))
+		strSlice := strings.Split(movie.CategoryId, ",")
+		for i, str := range strSlice {
+			num, err := strconv.ParseUint(str, 10, 64)
+			if err != nil {
+				code = e.Error
+				util.LogrusObj.Infoln("ParseUint", err)
+				return serializer.Response{
+					Status: code,
+					Msg:    e.GetMsg(code),
+				}
+			}
+			CategoryId[i] = uint(num)
+		}
 		categoryString, err := categoryDao.GetCategory(CategoryId)
 		if err != nil {
 			code = e.Error
@@ -213,8 +233,20 @@ func (service *MovieService) ListSales(ctx context.Context) serializer.Response 
 	categoryDao := dao.NewCategoryDao(ctx)
 	var categoryStrings []string
 	for _, movie := range movies {
-		var CategoryId []uint
-		json.Unmarshal(movie.CategoryId, &CategoryId)
+		CategoryId := make([]uint, len(movie.CategoryId))
+		strSlice := strings.Split(movie.CategoryId, ",")
+		for i, str := range strSlice {
+			num, err := strconv.ParseUint(str, 10, 64)
+			if err != nil {
+				code = e.Error
+				util.LogrusObj.Infoln("ParseUint", err)
+				return serializer.Response{
+					Status: code,
+					Msg:    e.GetMsg(code),
+				}
+			}
+			CategoryId[i] = uint(num)
+		}
 		categoryString, err := categoryDao.GetCategory(CategoryId)
 		if err != nil {
 			code = e.Error
@@ -251,8 +283,20 @@ func (service *MovieService) Search(ctx context.Context) serializer.Response {
 	categoryDao := dao.NewCategoryDao(ctx)
 	var categoryStrings []string
 	for _, movie := range movies {
-		var CategoryId []uint
-		json.Unmarshal(movie.CategoryId, &CategoryId)
+		CategoryId := make([]uint, len(movie.CategoryId))
+		strSlice := strings.Split(movie.CategoryId, ",")
+		for i, str := range strSlice {
+			num, err := strconv.ParseUint(str, 10, 64)
+			if err != nil {
+				code = e.Error
+				util.LogrusObj.Infoln("ParseUint", err)
+				return serializer.Response{
+					Status: code,
+					Msg:    e.GetMsg(code),
+				}
+			}
+			CategoryId[i] = uint(num)
+		}
 		categoryString, err := categoryDao.GetCategory(CategoryId)
 		if err != nil {
 			code = e.Error
