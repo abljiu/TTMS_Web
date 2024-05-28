@@ -1,6 +1,9 @@
 package service
 
 import (
+	//"TTMS_Web/dao"
+	//"TTMS_Web/model"
+	//"TTMS_Web/pkg/e"
 	"TTMS_Web/serializer"
 	"context"
 )
@@ -16,6 +19,20 @@ type OrderService struct {
 	Money     float64 `json:"money" form:"money"`
 }
 
+// Submit 提交订单逻辑
 func (service *OrderService) Submit(ctx context.Context) serializer.Response {
+	//var order *model.Order
+	//code := e.Success
+	//
+	//orderDao := dao.NewOrderDao(ctx)
+	//
+	return serializer.Response{}
+}
+
+func (service *OrderService) Cancel(ctx context.Context) serializer.Response {
+	return serializer.Response{}
+}
+
+func (service *OrderService) Return(ctx context.Context) serializer.Response {
 	return serializer.Response{}
 }

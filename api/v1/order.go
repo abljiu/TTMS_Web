@@ -14,28 +14,28 @@ func SubmitOrder(c *gin.Context) {
 		c.JSON(http.StatusOK, res)
 	} else {
 		c.JSON(http.StatusBadRequest, ErrorResponse(err))
-		util.LogrusObj.Infoln("UserRegister", err)
+		util.LogrusObj.Infoln("SubmitOrder", err)
 	}
 }
 
 func CancelOrder(c *gin.Context) {
-	var userRegister service.UserService
-	if err := c.ShouldBind(&userRegister); err == nil {
-		res := userRegister.Register(c.Request.Context())
+	var cancelOrder service.OrderService
+	if err := c.ShouldBind(&cancelOrder); err == nil {
+		res := cancelOrder.Cancel(c.Request.Context())
 		c.JSON(http.StatusOK, res)
 	} else {
 		c.JSON(http.StatusBadRequest, ErrorResponse(err))
-		util.LogrusObj.Infoln("UserRegister", err)
+		util.LogrusObj.Infoln("CancelOrder", err)
 	}
 }
 
 func ReturnOrder(c *gin.Context) {
-	var userRegister service.UserService
-	if err := c.ShouldBind(&userRegister); err == nil {
-		res := userRegister.Register(c.Request.Context())
+	var returnOrder service.OrderService
+	if err := c.ShouldBind(&returnOrder); err == nil {
+		res := returnOrder.Return(c.Request.Context())
 		c.JSON(http.StatusOK, res)
 	} else {
 		c.JSON(http.StatusBadRequest, ErrorResponse(err))
-		util.LogrusObj.Infoln("UserRegister", err)
+		util.LogrusObj.Infoln("ReturnOrder", err)
 	}
 }
