@@ -122,7 +122,7 @@ func (service *MovieService) Create(ctx context.Context, movieImg, directorImg, 
 	}
 
 	//根据categoryId返回string
-	categoryDao := dao.NewOrderDao(ctx)
+	categoryDao := dao.NewCategoryDao(ctx)
 	categoryString, err := categoryDao.GetCategory(service.CategoryId)
 	if err != nil {
 		code = e.Error
@@ -172,7 +172,7 @@ func (service *MovieService) List(ctx context.Context) serializer.Response {
 	}()
 	wg.Wait()
 
-	categoryDao := dao.NewOrderDao(ctx)
+	categoryDao := dao.NewCategoryDao(ctx)
 	var categoryStrings []string
 	for _, movie := range movies {
 		var CategoryId []uint
@@ -210,7 +210,7 @@ func (service *MovieService) ListSales(ctx context.Context) serializer.Response 
 		}
 	}
 
-	categoryDao := dao.NewOrderDao(ctx)
+	categoryDao := dao.NewCategoryDao(ctx)
 	var categoryStrings []string
 	for _, movie := range movies {
 		var CategoryId []uint
@@ -248,7 +248,7 @@ func (service *MovieService) Search(ctx context.Context) serializer.Response {
 		}
 	}
 
-	categoryDao := dao.NewOrderDao(ctx)
+	categoryDao := dao.NewCategoryDao(ctx)
 	var categoryStrings []string
 	for _, movie := range movies {
 		var CategoryId []uint
