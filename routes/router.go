@@ -56,6 +56,10 @@ func NewRouter() *gin.Engine {
 				admin.POST("add-movie", api.CreateMovie)
 				//增加场次
 				admin.POST("add-session", api.AddSession)
+				//修改场次
+				admin.POST("alter-session", api.AlterSession)
+				//删除场次
+				admin.POST("delete-session", api.DeleteSession)
 				//添加剧院
 				//admin.POST("add-theater", api.AddTheater)
 			}

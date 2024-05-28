@@ -102,7 +102,7 @@ func (service *SessionServer) Alter(ctx context.Context) serializer.Response {
 	if session.AddressID != 0 {
 		session.AddressID = service.AddressID
 	}
-	if session.ShowTime.IsZero() {
+	if !session.ShowTime.IsZero() {
 		session.ShowTime = service.ShowTime
 	}
 	err = sessionDao.UpdateSessionByID(service.SessionID, session)
