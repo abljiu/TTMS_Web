@@ -17,6 +17,7 @@ type Movie struct {
 	ImgPath      string           `json:"img_path"`
 	OnSale       bool             `json:"on_sale"`
 	Score        float64          `json:"score"`
+	Sales        int64            `json:"sales"`
 	Directors    []model.Director `json:"directors"`
 	Actors       []model.Actor    `json:"actors"`
 }

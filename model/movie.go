@@ -17,6 +17,7 @@ type Movie struct {
 	ImgPath      string
 	OnSale       bool `gorm:"default:false"`
 	Score        float64
+	Sales        int64      `json:"sales"`
 	Directors    []Director `gorm:"many2many:movie_directors;"`
 	Actors       []Actor    `gorm:"many2many:movie_actors;"`
 }

@@ -25,6 +25,8 @@ func NewRouter() *gin.Engine {
 		v1.GET("carousels", api.ListCarousel)
 		//查询电影
 		v1.GET("movies", api.ListMovie)
+		//查询电影票房
+		v1.GET("sales", api.ListMovieSales)
 
 		//需要登录保护
 		authed := v1.Group("/") //api/v1/
@@ -35,12 +37,15 @@ func NewRouter() *gin.Engine {
 			authed.POST("avatar", api.UploadAvatar)
 			authed.POST("user/sending-email", api.SendEmail)
 			authed.POST("user/valid-email", api.ValidEmail)
+			authed.POST("submit-order", api.SubmitOrder)
+			authed.POST("cancel-order", api.CancelOrder)
+			authed.POST("return-order", api.ReturnOrder)
 
 			//显示金额
-			authed.POST("money", api.ShowMoney)
+			//authed.POST("money", api.ShowMoney)
 
 			//搜索电影
-			authed.POST("movies", api.SearchMovie)
+			//authed.POST("movies", api.SearchMovie)
 
 			//管理员权限
 			admin := v1.Group("/admin") //api/v1/admin

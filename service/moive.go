@@ -11,21 +11,22 @@ import (
 	"encoding/json"
 	"mime/multipart"
 	"sync"
+	"time"
 )
 
 type MovieService struct {
-	MovieId      uint     `json:"movie_id" form:"movie_id"`
-	ChineseName  string   `json:"chinese_name" form:"chinese_name"`
-	EnglishName  string   `json:"english_name" form:"english_name"`
-	CategoryId   []uint   `json:"category_id" form:"category_id"`
-	Area         string   `json:"area" form:"area"`
-	Duration     string   `json:"duration" form:"duration"`
-	ShowTime     string   `json:"show_time" form:"show_time" time_format:"2006-01-02"`
-	Introduction string   `json:"introduction" form:"introduction"`
-	OnSale       bool     `json:"on_sale" form:"on_sale"`
-	Score        float64  `json:"score" form:"score"`
-	Directors    []string `json:"directors" form:"directors"`
-	Actors       []string `json:"actors" form:"actors"`
+	MovieId      uint      `json:"movie_id" form:"movie_id"`
+	ChineseName  string    `json:"chinese_name" form:"chinese_name"`
+	EnglishName  string    `json:"english_name" form:"english_name"`
+	CategoryId   []uint    `json:"category_id" form:"category_id"`
+	Area         string    `json:"area" form:"area"`
+	Duration     string    `json:"duration" form:"duration"`
+	ShowTime     time.Time `json:"show_time" form:"show_time" time_format:"2006-01-02"`
+	Introduction string    `json:"introduction" form:"introduction"`
+	OnSale       bool      `json:"on_sale" form:"on_sale"`
+	Score        float64   `json:"score" form:"score"`
+	Directors    []string  `json:"directors" form:"directors"`
+	Actors       []string  `json:"actors" form:"actors"`
 	model.BasePage
 }
 
@@ -36,6 +37,14 @@ func (service *MovieService) Create(ctx context.Context, movieImg, directorImg, 
 	var err error
 	code := e.Success
 
+	if len(movieImg) == 0 {
+		code = e.ErrorMovieIndex
+		util.LogrusObj.Infoln("ErrorMovieIndex", err)
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
 	//以第一张作为封面图
 	tmp, _ := movieImg[0].Open()
 	path, err := UploadMovieIndexToLocalStatic(tmp, service.ChineseName)
@@ -63,7 +72,7 @@ func (service *MovieService) Create(ctx context.Context, movieImg, directorImg, 
 		CategoryId:   categoryIdJson,
 		Area:         service.Area,
 		Duration:     service.Duration,
-		ShowTime:     service.ShowTime,
+		ShowTime:     service.ShowTime.Format("2006-01-02"),
 		Introduction: service.Introduction,
 		ImgPath:      path,
 		OnSale:       false,
@@ -139,12 +148,12 @@ func (service *MovieService) List(ctx context.Context) serializer.Response {
 	if service.PageSize == 0 {
 		service.PageSize = 15
 	}
-	condition := make(map[string]interface{})
-	if service.CategoryId[0] != 0 {
-		condition["category_id"] = service.CategoryId[0]
+	categoryId := uint(0)
+	if len(service.CategoryId) != 0 {
+		categoryId = service.CategoryId[0]
 	}
 	productDao := dao.NewMovieDao(ctx)
-	total, err := productDao.CountMovieByCondition(condition)
+	total, err := productDao.CountMovieByCondition(categoryId)
 	if err != nil {
 		code = e.Error
 		util.LogrusObj.Infoln("CountMovieByCondition", err)
@@ -158,10 +167,11 @@ func (service *MovieService) List(ctx context.Context) serializer.Response {
 	wg.Add(1)
 	go func() {
 		productDao = dao.NewMovieDaoByDB(productDao.DB)
-		movies, _ = productDao.ListMovieByCondition(condition, service.BasePage)
+		movies, _ = productDao.ListMovieByCondition(categoryId, service.BasePage)
 		wg.Done()
 	}()
 	wg.Wait()
+
 	categoryDao := dao.NewCategoryDao(ctx)
 	var categoryStrings []string
 	for _, movie := range movies {
@@ -180,6 +190,44 @@ func (service *MovieService) List(ctx context.Context) serializer.Response {
 	}
 
 	return serializer.BuildListResponse(serializer.BuildMovies(movies, categoryStrings), uint(total))
+}
+
+// ListSales 获取电影票房列表
+func (service *MovieService) ListSales(ctx context.Context) serializer.Response {
+	var movies []*model.Movie
+	code := e.Success
+	if service.PageSize == 0 {
+		service.PageSize = 15
+	}
+	productDao := dao.NewMovieDao(ctx)
+	movies, err := productDao.ListMovieBySales(service.BasePage)
+	if err != nil {
+		code = e.Error
+		util.LogrusObj.Infoln("ListMovieBySales", err)
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+
+	categoryDao := dao.NewCategoryDao(ctx)
+	var categoryStrings []string
+	for _, movie := range movies {
+		var CategoryId []uint
+		json.Unmarshal(movie.CategoryId, &CategoryId)
+		categoryString, err := categoryDao.GetCategory(CategoryId)
+		if err != nil {
+			code = e.Error
+			util.LogrusObj.Infoln("GetCategory", err)
+			return serializer.Response{
+				Status: code,
+				Msg:    e.GetMsg(code),
+			}
+		}
+		categoryStrings = append(categoryStrings, categoryString)
+	}
+
+	return serializer.BuildListResponse(serializer.BuildMovies(movies, categoryStrings), uint(len(movies)))
 }
 
 // Search 搜索电影

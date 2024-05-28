@@ -22,20 +22,40 @@ func (dao *MovieDao) CreateMovie(product *model.Movie) (err error) {
 	return dao.DB.Model(&model.Movie{}).Create(&product).Error
 }
 
-func (dao *MovieDao) CountMovieByCondition(condition map[string]interface{}) (total int64, err error) {
-	err = dao.DB.Model(&model.Movie{}).Where(condition).Count(&total).Error
+func (dao *MovieDao) CountMovieByCondition(categoryId uint) (total int64, err error) {
+	if categoryId == 0 {
+		// 查询所有电影
+		err = dao.DB.Model(&model.Movie{}).Count(&total).Error
+	} else {
+		err = dao.DB.Model(&model.Movie{}).Where("JSON_CONTAINS(category_id, ?)", categoryId).Count(&total).Error
+	}
 	return
 }
 
-func (dao *MovieDao) ListMovieByCondition(condition map[string]interface{}, page model.BasePage) (products []*model.Movie, err error) {
-	err = dao.DB.Where(condition).Offset((page.PageNum - 1) * page.PageSize).Limit(page.PageSize).Find(&products).Error
+func (dao *MovieDao) ListMovieByCondition(categoryId uint, page model.BasePage) (movies []*model.Movie, err error) {
+	if categoryId == 0 {
+		// 查询所有电影
+		err = dao.DB.Model(&model.Movie{}).Offset((page.PageNum - 1) * page.PageSize).Limit(page.PageSize).Find(&movies).Error
+	} else {
+		err = dao.DB.Model(&model.Movie{}).Where("JSON_CONTAINS(category_id, ?)", categoryId).Offset((page.PageNum - 1) * page.PageSize).Limit(page.PageSize).Find(&movies).Error
+	}
+	return
+}
+
+func (dao *MovieDao) ListMovieBySales(page model.BasePage) (movies []*model.Movie, err error) {
+	err = dao.DB.Order("sales desc").Offset((page.PageNum - 1) * page.PageSize).Limit(page.PageSize).Find(&movies).Error
 	return
 }
 
 func (dao *MovieDao) SearchMovie(info string, page model.BasePage) (products []*model.Movie, err error) {
 	err = dao.DB.Model(&model.Movie{}).
-		Where("name LIKE ? OR info LIKE ?", "%"+info+"%", "%"+info+"%").
+		Where("chinese_name LIKE ? OR introduction LIKE ?", "%"+info+"%", "%"+info+"%").
 		Offset((page.PageNum - 1) * page.PageSize).
 		Limit(page.PageSize).Find(&products).Error
+	return
+}
+
+func (dao *MovieDao) AddMovieSales(id uint, price uint) (err error) {
+	err = dao.DB.Model(&model.Movie{}).Where("id=?", id).Update("sales", gorm.Expr("sales + ?", price)).Error
 	return
 }

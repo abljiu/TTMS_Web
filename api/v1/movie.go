@@ -35,6 +35,18 @@ func ListMovie(c *gin.Context) {
 	}
 }
 
+// ListMovieSales 获取电影票房列表
+func ListMovieSales(c *gin.Context) {
+	ListMovieSalesService := service.MovieService{}
+	if err := c.ShouldBind(&ListMovieSalesService); err == nil {
+		res := ListMovieSalesService.ListSales(c.Request.Context())
+		c.JSON(http.StatusOK, res)
+	} else {
+		c.JSON(http.StatusBadRequest, ErrorResponse(err))
+		util.LogrusObj.Infoln("ListMovieSales", err)
+	}
+}
+
 // SearchMovie 搜索电影
 func SearchMovie(c *gin.Context) {
 	SearchMovieService := service.MovieService{}

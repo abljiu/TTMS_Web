@@ -18,4 +18,5 @@ const (
 	//movie 模块
 	ErrorStatus           = 40001
 	ErrorProductImgUpload = 40002
+	ErrorMovieIndex       = 40003
 )
