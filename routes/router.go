@@ -23,7 +23,7 @@ func NewRouter() *gin.Engine {
 
 		//轮播图
 		v1.GET("carousels", api.ListCarousel)
-		//查询电影
+		//根据类型查询电影
 		v1.GET("movies", api.ListMovie)
 		//查询电影票房
 		v1.GET("sales", api.ListMovieSales)
@@ -39,8 +39,8 @@ func NewRouter() *gin.Engine {
 			authed.POST("user/valid-email", api.ValidEmail)
 
 			authed.POST("submit-order", api.SubmitOrder)
-			authed.POST("cancel-order", api.CancelOrder)
-			authed.POST("return-order", api.ReturnOrder)
+			authed.DELETE("cancel-order", api.CancelOrder)
+			authed.DELETE("return-order", api.ReturnOrder)
 
 			//显示金额
 			//authed.POST("money", api.ShowMoney)
@@ -57,9 +57,9 @@ func NewRouter() *gin.Engine {
 				//增加场次
 				admin.POST("add-session", api.AddSession)
 				//修改场次
-				admin.POST("alter-session", api.AlterSession)
+				admin.PUT("alter-session", api.AlterSession)
 				//删除场次
-				admin.POST("delete-session", api.DeleteSession)
+				admin.DELETE("delete-session", api.DeleteSession)
 				//添加剧院
 				//admin.POST("add-theater", api.AddTheater)
 			}
