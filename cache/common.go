@@ -2,7 +2,9 @@ package cache
 
 import (
 	"TTMS_Web/conf"
-	"github.com/go-redis/redis"
+	"context"
+	"fmt"
+	"github.com/go-redis/redis/v8"
 	"strconv"
 )
 
@@ -18,9 +20,14 @@ func Redis() {
 		Addr: conf.Config_.Redis.RedisAddr,
 		DB:   int(db),
 	})
-	_, err := client.Ping().Result()
+	_, err := client.Ping(context.Background()).Result()
 	if err != nil {
+		fmt.Println(err)
 		panic(err)
 	}
 	RedisClient = client
+}
+
+func GetRedisClient() *redis.Client {
+	return RedisClient
 }

@@ -15,18 +15,18 @@ import (
 )
 
 type MovieService struct {
-	MovieId      uint      `json:"movie_id" form:"movie_id"`
-	ChineseName  string    `json:"chinese_name" form:"chinese_name"`
-	EnglishName  string    `json:"english_name" form:"english_name"`
-	CategoryId   []uint    `json:"category_id" form:"category_id"`
-	Area         string    `json:"area" form:"area"`
-	Duration     string    `json:"duration" form:"duration"`
-	ShowTime     time.Time `json:"show_time" form:"show_time" time_format:"2006-01-02"`
-	Introduction string    `json:"introduction" form:"introduction"`
-	OnSale       bool      `json:"on_sale" form:"on_sale"`
-	Score        float64   `json:"score" form:"score"`
-	Directors    []string  `json:"directors" form:"directors"`
-	Actors       []string  `json:"actors" form:"actors"`
+	MovieId      uint          `json:"movie_id" form:"movie_id"`
+	ChineseName  string        `json:"chinese_name" form:"chinese_name"`
+	EnglishName  string        `json:"english_name" form:"english_name"`
+	CategoryId   []uint        `json:"category_id" form:"category_id"`
+	Area         string        `json:"area" form:"area"`
+	Duration     time.Duration `json:"duration" form:"duration"`
+	ShowTime     time.Time     `json:"show_time" form:"show_time" time_format:"2006-01-02"`
+	Introduction string        `json:"introduction" form:"introduction"`
+	OnSale       bool          `json:"on_sale" form:"on_sale"`
+	Score        float64       `json:"score" form:"score"`
+	Directors    []string      `json:"directors" form:"directors"`
+	Actors       []string      `json:"actors" form:"actors"`
 	model.BasePage
 }
 
@@ -72,7 +72,7 @@ func (service *MovieService) Create(ctx context.Context, movieImg, directorImg, 
 		CategoryId:   categoryIdJson,
 		Area:         service.Area,
 		Duration:     service.Duration,
-		ShowTime:     service.ShowTime.Format("2006-01-02"),
+		ShowTime:     service.ShowTime,
 		Introduction: service.Introduction,
 		ImgPath:      path,
 		OnSale:       false,

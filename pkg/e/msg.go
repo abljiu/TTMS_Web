@@ -15,6 +15,10 @@ var MsgFlags = map[int]string{
 	ErrorStatus:            "您并非管理员",
 	ErrorProductImgUpload:  "图片上传错误",
 	ErrorMovieIndex:        "请上传电影封面",
+	ErrorMovieId:           "电影id有误",
+	ErrorTheaterId:         "剧院id有误",
+	ErrorSessionId:         "场次id有误",
+	ErrorInitializeStock:   "初始化库存失败",
 }
 
 // GetMsg 获取状态码对应的信息

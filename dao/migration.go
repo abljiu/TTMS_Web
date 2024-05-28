@@ -11,6 +11,10 @@ func migration() {
 		AutoMigrate(
 			&model.Actor{},
 			&model.Address{},
+			&model.Admin{},
+			&model.BasePage{},
+			&model.Session{},
+			&model.Theater{},
 			&model.Director{},
 			&model.Actor{},
 			&model.Category{},
@@ -18,8 +22,6 @@ func migration() {
 			&model.Order{},
 			&model.Movie{},
 			&model.User{},
-			&model.Admin{},
-			&model.BasePage{},
 			&model.Carousel{})
 	if err != nil {
 		fmt.Println("err:", err)

@@ -37,6 +37,7 @@ func NewRouter() *gin.Engine {
 			authed.POST("avatar", api.UploadAvatar)
 			authed.POST("user/sending-email", api.SendEmail)
 			authed.POST("user/valid-email", api.ValidEmail)
+
 			authed.POST("submit-order", api.SubmitOrder)
 			authed.POST("cancel-order", api.CancelOrder)
 			authed.POST("return-order", api.ReturnOrder)
@@ -52,7 +53,11 @@ func NewRouter() *gin.Engine {
 			admin.Use(middleware.Admin())
 			{
 				//添加电影
-				admin.POST("movie", api.CreateMovie)
+				admin.POST("add-movie", api.CreateMovie)
+				//增加场次
+				admin.POST("add-session", api.AddSession)
+				//添加剧院
+				//admin.POST("add-theater", api.AddTheater)
 			}
 		}
 	}

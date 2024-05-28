@@ -55,6 +55,11 @@ func (dao *MovieDao) SearchMovie(info string, page model.BasePage) (products []*
 	return
 }
 
+func (dao *MovieDao) GetMovieByMovieID(id uint) (movie *model.Movie, err error) {
+	err = dao.DB.Model(&model.Movie{}).Where("id=?", id).First(&movie).Error
+	return
+}
+
 func (dao *MovieDao) AddMovieSales(id uint, price uint) (err error) {
 	err = dao.DB.Model(&model.Movie{}).Where("id=?", id).Update("sales", gorm.Expr("sales + ?", price)).Error
 	return

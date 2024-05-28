@@ -3,6 +3,7 @@ package model
 import (
 	"github.com/goccy/go-json"
 	"gorm.io/gorm"
+	"time"
 )
 
 type Movie struct {
@@ -11,8 +12,8 @@ type Movie struct {
 	EnglishName  string
 	CategoryId   json.RawMessage `gorm:"type:json"`
 	Area         string
-	Duration     string
-	ShowTime     string
+	Duration     time.Duration
+	ShowTime     time.Time
 	Introduction string
 	ImgPath      string
 	OnSale       bool `gorm:"default:false"`
