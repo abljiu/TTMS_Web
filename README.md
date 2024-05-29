@@ -1,6 +1,7 @@
 # TTMS_Web
 
 # 项目结构
+```
 gin-mall
 ├── api             # 用于定义接口函数，也就是controller的作用、
 ├── cache           # Redis缓存
@@ -15,3 +16,4 @@ gin-mall
 ├── serializer      # 将数据序列化为 json 的函数，便于返回给前端
 ├── service         # 接口函数的实现
 └── static          # 存放静态文件
+```
