@@ -4,9 +4,8 @@ import "gorm.io/gorm"
 
 type Hall struct {
 	gorm.Model
-	ID         int
 	Name       string
-	TheaterID  int
+	TheaterID  uint `gorm:"ForeignKey:TheaterID"`
 	SeatRow    int
 	SeatColumn int
 	Seat       string

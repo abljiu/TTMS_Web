@@ -1,6 +1,6 @@
 package model
 
 type ModifySeat struct {
-	HallID int    `json:"id"`
+	HallID uint   `json:"id"`
 	Seat   string `json:"seat"`
 }

@@ -10,15 +10,16 @@ import (
 
 var RedisClient *redis.Client
 
-func init() {
+func InitRedis() {
 	Redis()
 }
 
 func Redis() {
 	db, _ := strconv.ParseUint(conf.Config_.Redis.RedisDbName, 10, 64)
 	client := redis.NewClient(&redis.Options{
-		Addr: conf.Config_.Redis.RedisAddr,
-		DB:   int(db),
+		Addr:     conf.Config_.Redis.RedisAddr,
+		DB:       int(db),
+		Password: conf.Config_.Redis.RedisPw,
 	})
 	_, err := client.Ping(context.Background()).Result()
 	if err != nil {
