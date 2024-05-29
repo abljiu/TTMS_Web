@@ -4,6 +4,7 @@ import (
 	"TTMS_Web/model"
 	"context"
 	"gorm.io/gorm"
+	"strconv"
 )
 
 type MovieDao struct {
@@ -27,7 +28,7 @@ func (dao *MovieDao) CountMovieByCondition(categoryId uint) (total int64, err er
 		// 查询所有电影
 		err = dao.DB.Model(&model.Movie{}).Count(&total).Error
 	} else {
-		err = dao.DB.Model(&model.Movie{}).Where("JSON_CONTAINS(category_id, ?)", categoryId).Count(&total).Error
+		err = dao.DB.Model(&model.Movie{}).Where("category_id LIKE ? ", "%"+strconv.Itoa(int(categoryId))+"%").Count(&total).Error
 	}
 	return
 }
@@ -37,7 +38,7 @@ func (dao *MovieDao) ListMovieByCondition(categoryId uint, page model.BasePage) 
 		// 查询所有电影
 		err = dao.DB.Model(&model.Movie{}).Offset((page.PageNum - 1) * page.PageSize).Limit(page.PageSize).Find(&movies).Error
 	} else {
-		err = dao.DB.Model(&model.Movie{}).Where("JSON_CONTAINS(category_id, ?)", categoryId).Offset((page.PageNum - 1) * page.PageSize).Limit(page.PageSize).Find(&movies).Error
+		err = dao.DB.Model(&model.Movie{}).Where("category_id LIKE ? ", "%"+strconv.Itoa(int(categoryId))+"%").Offset((page.PageNum - 1) * page.PageSize).Limit(page.PageSize).Find(&movies).Error
 	}
 	return
 }
@@ -52,6 +53,11 @@ func (dao *MovieDao) SearchMovie(info string, page model.BasePage) (products []*
 		Where("chinese_name LIKE ? OR introduction LIKE ?", "%"+info+"%", "%"+info+"%").
 		Offset((page.PageNum - 1) * page.PageSize).
 		Limit(page.PageSize).Find(&products).Error
+	return
+}
+
+func (dao *MovieDao) GetMovieByMovieID(id uint) (movie *model.Movie, err error) {
+	err = dao.DB.Model(&model.Movie{}).Where("id=?", id).First(&movie).Error
 	return
 }
 

@@ -10,7 +10,11 @@ func migration() {
 	err := _db.Set("gorm:table_options", "charset=utf8mb4").
 		AutoMigrate(
 			&model.Actor{},
-			&model.Address{},
+			&model.Theater{},
+			&model.Admin{},
+			&model.BasePage{},
+			&model.Session{},
+			&model.Hall{},
 			&model.Director{},
 			&model.Actor{},
 			&model.Category{},
@@ -18,8 +22,6 @@ func migration() {
 			&model.Order{},
 			&model.Movie{},
 			&model.User{},
-			&model.Admin{},
-			&model.BasePage{},
 			&model.Carousel{})
 	if err != nil {
 		fmt.Println("err:", err)

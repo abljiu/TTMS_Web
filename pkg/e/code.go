@@ -19,4 +19,15 @@ const (
 	ErrorStatus           = 40001
 	ErrorProductImgUpload = 40002
 	ErrorMovieIndex       = 40003
+	ErrorMovieId          = 40004
+
+	//hall模块
+	ErrorHallId = 50001
+	ErrorInvalidSeatParam = 50002
+
+	//session模块
+	ErrorSessionId       = 60001
+	ErrorInitializeStock = 60002
+
+
 )

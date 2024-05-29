@@ -10,7 +10,7 @@ import (
 func UserRegister(c *gin.Context) {
 	var userRegister service.UserService
 	if err := c.ShouldBind(&userRegister); err == nil {
-		res := userRegister.Register(c.Request.Context())
+		res := userRegister.Register()
 		c.JSON(http.StatusOK, res)
 	} else {
 		c.JSON(http.StatusBadRequest, ErrorResponse(err))
@@ -58,7 +58,7 @@ func SendEmail(c *gin.Context) {
 	var sendEmail service.UserService
 	claims, _ := util.ParseToken(c.GetHeader("Authorization"))
 	if err := c.ShouldBind(&sendEmail); err == nil {
-		res := sendEmail.Send(c.Request.Context(), claims.UserID)
+		res := sendEmail.Send(claims.UserID)
 		c.JSON(http.StatusOK, res)
 	} else {
 		c.JSON(http.StatusBadRequest, ErrorResponse(err))
