@@ -13,7 +13,7 @@ mysql:
 redis:
   RedisDb: redis
   RedisAddr: 127.0.0.1:6379
-  RedisPw: '123456'
+#  RedisPw: '123456'
   RedisDbName: 2
 
 email:

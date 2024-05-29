@@ -18,17 +18,6 @@ func SubmitOrder(c *gin.Context) {
 	}
 }
 
-func CancelOrder(c *gin.Context) {
-	var cancelOrder service.OrderService
-	if err := c.ShouldBind(&cancelOrder); err == nil {
-		res := cancelOrder.Cancel(c.Request.Context())
-		c.JSON(http.StatusOK, res)
-	} else {
-		c.JSON(http.StatusBadRequest, ErrorResponse(err))
-		util.LogrusObj.Infoln("CancelOrder", err)
-	}
-}
-
 func ReturnOrder(c *gin.Context) {
 	var returnOrder service.OrderService
 	if err := c.ShouldBind(&returnOrder); err == nil {

@@ -20,6 +20,7 @@ const (
 	PasswordCost         = 12              //密码加密难度
 	Normal        string = "normal"        //普通用户
 	Administrator string = "administrator" //管理员
+	Conductor     string = "conductor"     //售票员
 )
 
 func (user *User) SetPassword(password string) error {
