@@ -23,8 +23,10 @@ func NewRouter() *gin.Engine {
 
 		//轮播图
 		v1.GET("carousels", api.ListCarousel)
-		//查询电影
+		//根据类型查询电影
 		v1.GET("movies", api.ListMovie)
+		//查询电影票房
+		v1.GET("sales", api.ListMovieSales)
 
 		//需要登录保护
 		authed := v1.Group("/") //api/v1/
@@ -36,18 +38,30 @@ func NewRouter() *gin.Engine {
 			authed.POST("user/sending-email", api.SendEmail)
 			authed.POST("user/valid-email", api.ValidEmail)
 
+			authed.POST("submit-order", api.SubmitOrder)
+			authed.DELETE("cancel-order", api.CancelOrder)
+			authed.DELETE("return-order", api.ReturnOrder)
+
 			//显示金额
-			authed.POST("money", api.ShowMoney)
+			//authed.POST("money", api.ShowMoney)
 
 			//搜索电影
-			authed.POST("movies", api.SearchMovie)
+			//authed.POST("movies", api.SearchMovie)
 
 			//管理员权限
 			admin := v1.Group("/admin") //api/v1/admin
 			admin.Use(middleware.Admin())
 			{
 				//添加电影
-				admin.POST("movie", api.CreateMovie)
+				admin.POST("add-movie", api.CreateMovie)
+				//增加场次
+				admin.POST("add-session", api.AddSession)
+				//修改场次
+				admin.PUT("alter-session", api.AlterSession)
+				//删除场次
+				admin.DELETE("delete-session", api.DeleteSession)
+				//添加剧院
+				//admin.POST("add-theater", api.AddTheater)
 			}
 		}
 

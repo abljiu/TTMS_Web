@@ -14,6 +14,11 @@ var MsgFlags = map[int]string{
 	ErrorSendEmail:         "发送邮件失败",
 	ErrorStatus:            "您并非管理员",
 	ErrorProductImgUpload:  "图片上传错误",
+	ErrorMovieIndex:        "请上传电影封面",
+	ErrorMovieId:           "电影id有误",
+	ErrorHallId:            "影厅id有误",
+	ErrorSessionId:         "场次id有误",
+	ErrorInitializeStock:   "初始化库存失败",
 	ErrorInvalidSeatParam:  "无效的座位参数",
 }
 

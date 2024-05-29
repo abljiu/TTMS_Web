@@ -3,6 +3,7 @@ package serializer
 import (
 	"TTMS_Web/conf"
 	"TTMS_Web/model"
+	"time"
 )
 
 type Movie struct {
@@ -11,12 +12,13 @@ type Movie struct {
 	EnglishName  string           `json:"english_name" `
 	Category     string           `json:"category" `
 	Area         string           `json:"area" `
-	Duration     string           `json:"duration" `
-	Showtime     string           `json:"showtime"`
+	Duration     time.Duration    `json:"duration" `
+	Showtime     time.Time        `json:"showtime"`
 	Introduction string           `json:"introduction"`
 	ImgPath      string           `json:"img_path"`
 	OnSale       bool             `json:"on_sale"`
 	Score        float64          `json:"score"`
+	Sales        int64            `json:"sales"`
 	Directors    []model.Director `json:"directors"`
 	Actors       []model.Actor    `json:"actors"`
 }

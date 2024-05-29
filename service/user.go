@@ -25,7 +25,7 @@ type UserService struct {
 }
 
 // Register 注册逻辑
-func (service *UserService) Register(ctx context.Context) serializer.Response {
+func (service *UserService) Register() serializer.Response {
 	var user model.User
 	code := e.Success
 
@@ -38,7 +38,6 @@ func (service *UserService) Register(ctx context.Context) serializer.Response {
 	}
 	//绑定邮箱
 	var address string
-	var notice *model.Notice
 	token, err := util.GenerateEmailToken(0, 1, service.NickName, service.Email, service.Password)
 	if err != nil {
 		code = e.ErrorAuthToken
@@ -47,17 +46,9 @@ func (service *UserService) Register(ctx context.Context) serializer.Response {
 			Msg:    e.GetMsg(code),
 		}
 	}
-	noticeDao := dao.NewNoticeDao(ctx)
-	notice, err = noticeDao.GetNoticeByType(1)
-	if err != nil {
-		code = e.Error
-		return serializer.Response{
-			Status: code,
-			Msg:    e.GetMsg(code),
-		}
-	}
+
 	address = conf.Config_.Email.ValidEmail + token //发送方
-	mailStr := notice.Text
+	mailStr := "您正在绑定邮箱Email"
 	mailText := strings.Replace(mailStr, "Email", address, -1)
 	m := mail.NewMessage()
 	m.SetHeader("From", conf.Config_.Email.SmtpEmail)
@@ -186,10 +177,10 @@ func (service *UserService) Post(ctx context.Context, uid uint, file multipart.F
 }
 
 // Send 发送邮件
-func (service *UserService) Send(ctx context.Context, uid uint) serializer.Response {
+func (service *UserService) Send(uid uint) serializer.Response {
 	code := e.Success
 	var address string
-	var notice *model.Notice
+	var mailStr string
 	token, err := util.GenerateEmailToken(uid, service.OperationType, service.NickName, service.Email, service.Password)
 	if err != nil {
 		code = e.ErrorAuthToken
@@ -198,17 +189,14 @@ func (service *UserService) Send(ctx context.Context, uid uint) serializer.Respo
 			Msg:    e.GetMsg(code),
 		}
 	}
-	noticeDao := dao.NewNoticeDao(ctx)
-	notice, err = noticeDao.GetNoticeByType(service.OperationType)
-	if err != nil {
-		code = e.Error
-		return serializer.Response{
-			Status: code,
-			Msg:    e.GetMsg(code),
-		}
+	if service.OperationType == 1 {
+		mailStr = "您正在绑定邮箱Email"
+	} else if service.OperationType == 2 {
+		mailStr = "您正在解绑邮箱Email"
+	} else if service.OperationType == 3 {
+		mailStr = "您正在修改密码Email"
 	}
 	address = conf.Config_.Email.ValidEmail + token //发送方
-	mailStr := notice.Text
 	mailText := strings.Replace(mailStr, "Email", address, -1)
 	m := mail.NewMessage()
 	m.SetHeader("From", conf.Config_.Email.SmtpEmail)
