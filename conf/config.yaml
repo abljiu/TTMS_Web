@@ -4,10 +4,10 @@ service:
 
 mysql:
   DB: mysql
-  DbHost: 117.78.11.45
+  DbHost: 127.0.0.1
   DbPort: 3306
-  DbUser: remote_user
-  DbPassword: '123456'
+  DbUser: root
+  DbPassword: xll040919
   DbName: TTMS_Web
 
 redis:
