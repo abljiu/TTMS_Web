@@ -11,3 +11,12 @@ type Hall struct {
 	SeatRow    uint
 	SeatColumn uint
 }
+
+//type HallInfo struct {
+//	ID         int
+//	Name       string
+//	TheaterID  int
+//	SeatRow    int
+//	SeatColumn int
+//	Seat       [][]int
+//}

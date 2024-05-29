@@ -23,6 +23,7 @@ const (
 
 	//hall模块
 	ErrorHallId = 50001
+	ErrorInvalidSeatParam = 50002
 
 	//session模块
 	ErrorSessionId       = 60001

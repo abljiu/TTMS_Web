@@ -66,8 +66,32 @@ func NewRouter() *gin.Engine {
 				admin.DELETE("delete-session", api.DeleteSession)
 				//添加剧院
 				//admin.POST("add-theater", api.AddTheater)
+
+				//某剧院的影厅列表
+				admin.GET("halls", api.ListHall)
+				//创建影厅
+				admin.POST("hall/create", api.CreateHall)
+				//删除影厅 根据影厅id
+				admin.DELETE("hall/delete", api.DeleteHall)
+				//更新影厅信息
+				admin.PUT("hall/update", api.UpdateHall)
+				//影厅详细信息
+				admin.GET("hall", api.GetHall)
 			}
 		}
+
 	}
+
+	//某剧院的影厅列表
+	r.GET("/halls", api.ListHall)
+	//创建影厅
+	r.POST("/hall/create", api.CreateHall)
+	//删除影厅 根据影厅id
+	r.DELETE("/hall/delete", api.DeleteHall)
+	//更新影厅信息
+	r.PUT("/hall/update", api.UpdateHall)
+	//影厅详细信息
+	r.GET("/hall", api.GetHall)
+
 	return r
 }
