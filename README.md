@@ -1,6 +1,6 @@
 # TTMS_Web
 
-#项目结构
+# 项目结构
 gin-mall
 ├── api             # 用于定义接口函数，也就是controller的作用、
 ├── cache           # Redis缓存
