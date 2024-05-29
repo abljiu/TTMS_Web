@@ -14,6 +14,7 @@ var MsgFlags = map[int]string{
 	ErrorSendEmail:         "发送邮件失败",
 	ErrorStatus:            "您并非管理员",
 	ErrorProductImgUpload:  "图片上传错误",
+	ErrorInvalidSeatParam:  "无效的座位参数",
 }
 
 // GetMsg 获取状态码对应的信息

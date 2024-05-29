@@ -18,4 +18,7 @@ const (
 	//movie 模块
 	ErrorStatus           = 40001
 	ErrorProductImgUpload = 40002
+
+	//hall
+	ErrorInvalidSeatParam = 50001
 )
