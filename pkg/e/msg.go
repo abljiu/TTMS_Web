@@ -19,6 +19,7 @@ var MsgFlags = map[int]string{
 	ErrorHallId:            "影厅id有误",
 	ErrorSessionId:         "场次id有误",
 	ErrorInitializeStock:   "初始化库存失败",
+	ErrorInvalidSeatParam:  "无效的座位参数",
 }
 
 // GetMsg 获取状态码对应的信息
