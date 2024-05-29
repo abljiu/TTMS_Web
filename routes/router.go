@@ -27,7 +27,19 @@ func NewRouter() *gin.Engine {
 		v1.GET("movies", api.ListMovie)
 		//查询电影票房
 		v1.GET("sales", api.ListMovieSales)
-
+		//获取剧院列表
+		v1.GET("theaters", api.ListTheater)
+		//测试
+		//添加剧院
+		v1.POST("cs/theater", api.CreateTheater)
+		//修改剧院
+		v1.PUT("cs/theater", api.UpdateTheater)
+		//删除剧院
+		v1.DELETE("cs/theater", api.DeleteTheater)
+		//查找剧院 根据名称
+		v1.GET("cs/theater", api.SearchTheater)
+		//查找剧院 根据id
+		v1.GET("cs/theaterById", api.SearchTheaterById)
 		//需要登录保护
 		authed := v1.Group("/") //api/v1/
 		authed.Use(middleware.JWT())
@@ -53,7 +65,18 @@ func NewRouter() *gin.Engine {
 			{
 				//添加电影
 				admin.POST("movie", api.CreateMovie)
+				//添加剧院
+				admin.POST("theater", api.CreateTheater)
+				//修改剧院
+				admin.PUT("theater", api.UpdateTheater)
+				//删除剧院
+				admin.DELETE("theater", api.DeleteTheater)
+				//查找剧院 根据名称
+				admin.GET("theater", api.SearchTheater)
+				//查找剧院 根据id
+				v1.GET("theaterById", api.SearchTheaterById)
 			}
+
 		}
 	}
 	return r

@@ -4,9 +4,9 @@ service:
 
 mysql:
   DB: mysql
-  DbHost: 127.0.0.1
+  DbHost: 117.78.11.45
   DbPort: 3306
-  DbUser: root
+  DbUser: remote_user
   DbPassword: '123456'
   DbName: TTMS_Web
 
