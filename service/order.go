@@ -115,6 +115,22 @@ func (service *OrderService) Submit(ctx context.Context) serializer.Response {
 	}
 }
 
+// Return 退票逻辑
 func (service *OrderService) Return(ctx context.Context) serializer.Response {
+	//session := &model.Session{}
+	//code := e.Success
+	//
+	//rdb := cache.GetRedisClient()
+	//sessionInfo, err := cache.GetSessionInfo(ctx, rdb, service.SessionID)
+	////反序列化到结构体
+	//err = json.Unmarshal([]byte(sessionInfo), session)
+	//
+	//if err != nil {
+	//	code = e.Error
+	//	return serializer.Response{
+	//		Status: code,
+	//		Msg:    e.GetMsg(code),
+	//	}
+	//}
 	return serializer.Response{}
 }

@@ -25,7 +25,7 @@ func (service *SessionServer) Add(ctx context.Context) serializer.Response {
 
 	sessionDao := dao.NewSessionDao(ctx)
 	movieDao := dao.NewMovieDao(ctx)
-	theaterDao := dao.NewHallDao(ctx)
+	hallDao := dao.NewHallDao(ctx)
 	rdb := cache.GetRedisClient()
 
 	//根据id获取电影
@@ -38,7 +38,7 @@ func (service *SessionServer) Add(ctx context.Context) serializer.Response {
 		}
 	}
 	// 根据id获取影厅
-	hall, err := theaterDao.GetHallByHallID(service.HallID)
+	hall, err := hallDao.GetHallByHallID(service.HallID)
 	if err != nil {
 		code = e.ErrorHallId
 		return serializer.Response{
@@ -158,5 +158,25 @@ func (service *SessionServer) Delete(ctx context.Context) serializer.Response {
 	return serializer.Response{
 		Status: code,
 		Msg:    e.GetMsg(code),
+	}
+}
+
+// Get  获取场次信息
+func (service *SessionServer) Get(ctx context.Context) serializer.Response {
+	code := e.Success
+	sessionDao := dao.NewSessionDao(ctx)
+	//判断场次是否存在
+	session, err := sessionDao.GetSessionByID(service.SessionID)
+	if err != nil {
+		code = e.ErrorSessionId
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+	return serializer.Response{
+		Status: code,
+		Msg:    e.GetMsg(code),
+		Data:   serializer.BuildSession(session),
 	}
 }

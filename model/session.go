@@ -18,5 +18,5 @@ type Session struct {
 	SurplusTicket int       `gorm:"not null"`
 	SeatStatus    string    `gorm:"not null"`
 	Price         float64   `gorm:"not null"`
-	SeatRow       uint      `gorm:"not null"`
+	SeatRow       int       `gorm:"not null"`
 }

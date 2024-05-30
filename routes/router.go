@@ -23,15 +23,17 @@ func NewRouter() *gin.Engine {
 
 		//轮播图
 		v1.GET("carousels", api.ListCarousel)
+
+		//查询电影票房
+		v1.GET("sales", api.ListMovieSales)
 		//根据类型查询热映电影
 		v1.GET("hot-movies", api.ListHotMovie)
 		//根据类型查询未上映电影
 		v1.GET("unreleased-movies", api.ListUnreleasedMovie)
 		//根据类型查询全部电影
 		v1.GET("all-movies", api.ListMovie)
-
-		//查询电影票房
-		v1.GET("sales", api.ListMovieSales)
+		//根据sessionId返回场次信息
+		v1.GET("session", api.GetSession)
 
 		//需要登录保护
 		authed := v1.Group("/") //api/v1/

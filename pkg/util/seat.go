@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-func ParseSeat(seat string) (seats []uint) {
+func ParseSeat(seat string) (seats []int) {
 	str := strings.Split(seat, ",")
 	for _, numStr := range str {
 		num, err := strconv.Atoi(numStr)
@@ -14,7 +14,7 @@ func ParseSeat(seat string) (seats []uint) {
 			return
 		}
 		// 将整数添加到切片中
-		seats = append(seats, uint(num))
+		seats = append(seats, int(num))
 	}
 	return
 }
