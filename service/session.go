@@ -64,7 +64,7 @@ func (service *SessionServer) Add(ctx context.Context) serializer.Response {
 		}
 	}
 	//添加库存
-	err = cache.InitializeStock(ctx, rdb, session.ID, hall.SeatNum)
+	err = cache.InitializeStock(ctx, rdb, session.ID, uint(hall.SeatNum))
 	if err != nil {
 		code = e.ErrorInitializeStock
 		return serializer.Response{
