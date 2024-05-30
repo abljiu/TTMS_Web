@@ -28,3 +28,14 @@ func ReturnOrder(c *gin.Context) {
 		util.LogrusObj.Infoln("ReturnOrder", err)
 	}
 }
+
+func PayOrder(c *gin.Context) {
+	var payOrder service.OrderService
+	if err := c.ShouldBind(&payOrder); err == nil {
+		res := payOrder.Pay(c.Request.Context())
+		c.JSON(http.StatusOK, res)
+	} else {
+		c.JSON(http.StatusBadRequest, ErrorResponse(err))
+		util.LogrusObj.Infoln("ReturnOrder", err)
+	}
+}

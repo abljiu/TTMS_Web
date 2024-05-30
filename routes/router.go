@@ -46,6 +46,7 @@ func NewRouter() *gin.Engine {
 			authed.POST("user/valid-email", api.ValidEmail)
 
 			authed.POST("submit-order", api.SubmitOrder)
+			//authed.POST("pay-order",api.)
 			authed.DELETE("return-order", api.ReturnOrder)
 
 			//显示金额

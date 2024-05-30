@@ -13,7 +13,7 @@ func InitializeStock(ctx context.Context, rdb *redis.Client, sessionID uint, sto
 }
 
 // AlterStock 更改场次库存
-func AlterStock(ctx context.Context, rdb *redis.Client, sessionID uint, num uint) error {
+func AlterStock(ctx context.Context, rdb *redis.Client, sessionID uint, num int) error {
 	key := fmt.Sprintf("ticket_stock:%d", sessionID)
 	return rdb.Set(ctx, key, num, 0).Err()
 }
