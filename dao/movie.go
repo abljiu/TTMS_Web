@@ -33,12 +33,52 @@ func (dao *MovieDao) CountMovieByCondition(categoryId uint) (total int64, err er
 	return
 }
 
+func (dao *MovieDao) CountHotMovieByCondition(categoryId uint) (total int64, err error) {
+	if categoryId == 0 {
+		// 查询所有电影
+		err = dao.DB.Model(&model.Movie{}).Count(&total).Error
+	} else {
+		err = dao.DB.Model(&model.Movie{}).Where("category_id LIKE ? and  on_sale = 1 ", "%"+strconv.Itoa(int(categoryId))+"%").Count(&total).Error
+	}
+	return
+}
+
+func (dao *MovieDao) CountUnreleasedMovieByCondition(categoryId uint) (total int64, err error) {
+	if categoryId == 0 {
+		// 查询所有电影
+		err = dao.DB.Model(&model.Movie{}).Count(&total).Error
+	} else {
+		err = dao.DB.Model(&model.Movie{}).Where("category_id LIKE ? and  on_sale = 0", "%"+strconv.Itoa(int(categoryId))+"%").Count(&total).Error
+	}
+	return
+}
+
 func (dao *MovieDao) ListMovieByCondition(categoryId uint, page model.BasePage) (movies []*model.Movie, err error) {
 	if categoryId == 0 {
 		// 查询所有电影
 		err = dao.DB.Model(&model.Movie{}).Offset((page.PageNum - 1) * page.PageSize).Limit(page.PageSize).Find(&movies).Error
 	} else {
 		err = dao.DB.Model(&model.Movie{}).Where("category_id LIKE ? ", "%"+strconv.Itoa(int(categoryId))+"%").Offset((page.PageNum - 1) * page.PageSize).Limit(page.PageSize).Find(&movies).Error
+	}
+	return
+}
+
+func (dao *MovieDao) ListHotMovieByCondition(categoryId uint, page model.BasePage) (movies []*model.Movie, err error) {
+	if categoryId == 0 {
+		// 查询所有电影
+		err = dao.DB.Model(&model.Movie{}).Offset((page.PageNum - 1) * page.PageSize).Limit(page.PageSize).Find(&movies).Error
+	} else {
+		err = dao.DB.Model(&model.Movie{}).Where("category_id LIKE ?	and  on_sale = 1", "%"+strconv.Itoa(int(categoryId))+"%").Offset((page.PageNum - 1) * page.PageSize).Limit(page.PageSize).Find(&movies).Error
+	}
+	return
+}
+
+func (dao *MovieDao) ListUnreleasedMovieByCondition(categoryId uint, page model.BasePage) (movies []*model.Movie, err error) {
+	if categoryId == 0 {
+		// 查询所有电影
+		err = dao.DB.Model(&model.Movie{}).Offset((page.PageNum - 1) * page.PageSize).Limit(page.PageSize).Find(&movies).Error
+	} else {
+		err = dao.DB.Model(&model.Movie{}).Where("category_id LIKE ?	and  on_sale = 0", "%"+strconv.Itoa(int(categoryId))+"%").Offset((page.PageNum - 1) * page.PageSize).Limit(page.PageSize).Find(&movies).Error
 	}
 	return
 }

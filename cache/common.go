@@ -8,7 +8,7 @@ import (
 	"strconv"
 )
 
-var RedisClient *redis.Client
+var rdb *redis.Client
 
 func InitRedis() {
 	Redis()
@@ -26,9 +26,9 @@ func Redis() {
 		fmt.Println(err)
 		panic(err)
 	}
-	RedisClient = client
+	rdb = client
 }
 
 func GetRedisClient() *redis.Client {
-	return RedisClient
+	return rdb
 }

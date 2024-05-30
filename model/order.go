@@ -10,13 +10,12 @@ type Order struct {
 	User      User    `gorm:"ForeignKey:UserID"`
 	MovieID   uint    `gorm:"not null"`
 	Movie     Movie   `gorm:"ForeignKey:MovieID"`
-	AddressID uint    `gorm:"not null"`
-	Address   Theater `gorm:"ForeignKey:TheaterID"`
 	TheaterID uint    `gorm:"not null"`
-	Theater   Hall    `gorm:"ForeignKey:TheaterID"`
+	Theater   Theater `gorm:"ForeignKey:TheaterID"`
+	SessionID uint    `gorm:"not null"`
+	Session   Session `gorm:"ForeignKey:SessionID"`
 	Seat      string  `gorm:"not null"`
-	Num       uint    `gorm:"not null"`
-	ShowTime  string  `gorm:"not null"`
+	Num       int     `gorm:"not null"`
 	Type      uint    //0 待支付 1 已支付 2 已完成
 	Money     float64
 }

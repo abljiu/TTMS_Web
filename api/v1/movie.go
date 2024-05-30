@@ -23,11 +23,35 @@ func CreateMovie(c *gin.Context) {
 	}
 }
 
+// ListHotMovie 获取热映电影列表
+func ListHotMovie(c *gin.Context) {
+	listMovie := service.MovieService{}
+	if err := c.ShouldBind(&listMovie); err == nil {
+		res := listMovie.ListHot(c.Request.Context())
+		c.JSON(http.StatusOK, res)
+	} else {
+		c.JSON(http.StatusBadRequest, ErrorResponse(err))
+		util.LogrusObj.Infoln("ListMovie", err)
+	}
+}
+
+// ListUnreleasedMovie 获取未上映电影列表
+func ListUnreleasedMovie(c *gin.Context) {
+	listMovie := service.MovieService{}
+	if err := c.ShouldBind(&listMovie); err == nil {
+		res := listMovie.ListUnreleased(c.Request.Context())
+		c.JSON(http.StatusOK, res)
+	} else {
+		c.JSON(http.StatusBadRequest, ErrorResponse(err))
+		util.LogrusObj.Infoln("ListMovie", err)
+	}
+}
+
 // ListMovie 获取电影列表
 func ListMovie(c *gin.Context) {
 	listMovie := service.MovieService{}
 	if err := c.ShouldBind(&listMovie); err == nil {
-		res := listMovie.List(c.Request.Context())
+		res := listMovie.ListAll(c.Request.Context())
 		c.JSON(http.StatusOK, res)
 	} else {
 		c.JSON(http.StatusBadRequest, ErrorResponse(err))
