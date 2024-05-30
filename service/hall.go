@@ -7,18 +7,19 @@ import (
 	"TTMS_Web/pkg/util"
 	"TTMS_Web/serializer"
 	"context"
+	"gorm.io/gorm"
 	"strconv"
 	"sync"
 )
 
 type HallListRequest struct {
-	TheaterId int `json:"theater_id" form:"theater_id" binding:"required"`
+	TheaterId uint `json:"theater_id" form:"theater_id" binding:"required"`
 	model.BasePage
 }
 
 type HallCreateRequest struct {
-	ID         int    `json:"id" form:"id"`
-	TheaterId  int    `json:"theater_id" form:"theater_id" binding:"required"`
+	ID         uint   `json:"id" form:"id"`
+	TheaterId  uint   `json:"theater_id" form:"theater_id" binding:"required"`
 	Name       string `json:"name" form:"name" binding:"required"`
 	SeatRow    int    `json:"seat_row" form:"seat_row" binding:"required"`
 	SeatColumn int    `json:"seat_column" form:"seat_column" binding:"required"`
@@ -26,12 +27,12 @@ type HallCreateRequest struct {
 }
 
 type HallIDRequest struct {
-	ID int `json:"id" form:"id" binding:"required"`
+	ID uint `json:"id" form:"id" binding:"required"`
 }
 
 type HallUpdateRequest struct {
-	ID         int    `json:"id" form:"id" binding:"required"`
-	TheaterId  int    `json:"theater_id" form:"theater_id" binding:"required"`
+	ID         uint   `json:"id" form:"id" binding:"required"`
+	TheaterId  uint   `json:"theater_id" form:"theater_id" binding:"required"`
 	Name       string `json:"name" form:"name" binding:"required"`
 	SeatRow    int    `json:"seat_row" form:"seat_row" binding:"required"`
 	SeatColumn int    `json:"seat_column" form:"seat_column" binding:"required"`
@@ -121,9 +122,7 @@ func (service *HallIDRequest) Delete(ctx context.Context) serializer.Response {
 	var err error
 	code := e.Success
 
-	hall := &model.Hall{
-		ID: service.ID,
-	}
+	hall := &model.Hall{}
 	HallDao := dao.NewHallDao(ctx)
 	err = HallDao.DeleteHall(hall)
 	if err != nil {
@@ -160,8 +159,9 @@ func (service *HallUpdateRequest) Update(ctx context.Context) serializer.Respons
 		}
 	}
 
+	gormModel := gorm.Model{ID: service.ID}
 	hall := &model.Hall{
-		ID:         service.ID,
+		Model:      gormModel,
 		Name:       service.Name,
 		TheaterID:  service.TheaterId,
 		SeatRow:    service.SeatRow,
@@ -192,8 +192,9 @@ func (service *HallIDRequest) Get(ctx context.Context) serializer.Response {
 	var err error
 	code := e.Success
 
+	gormModel := gorm.Model{ID: service.ID}
 	hall := &model.Hall{
-		ID: service.ID,
+		Model: gormModel,
 	}
 	HallDao := dao.NewHallDao(ctx)
 	err = HallDao.GetHall(hall)

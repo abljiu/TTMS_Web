@@ -7,9 +7,9 @@ import (
 )
 
 type Hall struct {
-	ID         int
+	ID         uint
 	Name       string
-	TheaterID  int
+	TheaterID  uint
 	SeatRow    int
 	SeatColumn int
 	Seat       [][]int

@@ -82,16 +82,5 @@ func NewRouter() *gin.Engine {
 
 	}
 
-	//某剧院的影厅列表
-	r.GET("/halls", api.ListHall)
-	//创建影厅
-	r.POST("/hall/create", api.CreateHall)
-	//删除影厅 根据影厅id
-	r.DELETE("/hall/delete", api.DeleteHall)
-	//更新影厅信息
-	r.PUT("/hall/update", api.UpdateHall)
-	//影厅详细信息
-	r.GET("/hall", api.GetHall)
-
 	return r
 }

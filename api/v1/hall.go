@@ -66,3 +66,13 @@ func GetHall(c *gin.Context) {
 		util.LogrusObj.Infoln("DeleteMovie", err)
 	}
 }
+
+//func Mo(c *gin.Context) {
+//	deleteProductService := service.ModifySeatService{}
+//	if err := c.ShouldBind(&deleteProductService); err == nil {
+//		deleteProductService.Modify(c.Request.Context())
+//	} else {
+//		c.JSON(http.StatusBadRequest, ErrorResponse(err))
+//		util.LogrusObj.Infoln("DeleteMovie", err)
+//	}
+//}
