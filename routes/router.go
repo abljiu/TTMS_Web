@@ -33,6 +33,9 @@ func NewRouter() *gin.Engine {
 		//查询电影票房
 		v1.GET("sales", api.ListMovieSales)
 
+		//获取首页热映电影
+		v1.GET("index_hot_movies", api.ListIndexHotMovies)
+
 		//需要登录保护
 		authed := v1.Group("/") //api/v1/
 		authed.Use(middleware.JWT())
@@ -50,7 +53,7 @@ func NewRouter() *gin.Engine {
 			//authed.POST("money", api.ShowMoney)
 
 			//搜索电影
-			//authed.POST("movies", api.SearchMovie)
+			authed.POST("movies", api.SearchMovie)
 
 			//管理员权限
 			admin := v1.Group("/admin") //api/v1/admin
@@ -64,6 +67,11 @@ func NewRouter() *gin.Engine {
 				admin.PUT("alter-session", api.AlterSession)
 				//删除场次
 				admin.DELETE("delete-session", api.DeleteSession)
+				//获取某影厅场次列表
+				admin.GET("sessions", api.ListSession)
+				//根据sessionID获取某场次详细信息
+				r.GET("session", api.GetSession)
+
 				//添加剧院
 				//admin.POST("add-theater", api.AddTheater)
 

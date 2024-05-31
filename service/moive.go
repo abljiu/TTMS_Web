@@ -8,7 +8,9 @@ import (
 	"TTMS_Web/pkg/util"
 	"TTMS_Web/serializer"
 	"context"
+	"errors"
 	"fmt"
+	"gorm.io/gorm"
 	"mime/multipart"
 	"strconv"
 	"strings"
@@ -397,9 +399,27 @@ func (service *MovieService) Search(ctx context.Context) serializer.Response {
 		service.PageSize = 15
 	}
 
+	var movies []*model.Movie
+
 	productDao := dao.NewMovieDao(ctx)
-	movies, err := productDao.SearchMovie(service.Introduction, service.BasePage)
-	if err != nil {
+	//精确查找
+	movie, err := productDao.SearchMovieExactly(service.Introduction)
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		util.LogrusObj.Infoln("SearchProduct", err)
+		code = e.Error
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+	movies = append(movies, movie)
+	//模糊
+	name := `%`
+	for _, ch := range service.Introduction {
+		name += string(ch) + "%"
+	}
+	movies, err = productDao.SearchMovie(name, service.BasePage)
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		util.LogrusObj.Infoln("SearchProduct", err)
 		code = e.Error
 		return serializer.Response{
@@ -437,4 +457,68 @@ func (service *MovieService) Search(ctx context.Context) serializer.Response {
 		categoryStrings = append(categoryStrings, categoryString)
 	}
 	return serializer.BuildListResponse(serializer.BuildMovies(movies, categoryStrings), uint(len(movies)))
+}
+
+// ListIndexHotMovies 获取首页热映电影
+func (service *MovieService) ListIndexHotMovies(ctx context.Context) serializer.Response {
+	var movies []*model.Movie
+	var err error
+	code := e.Success
+
+	service.PageSize = 8
+
+	now := time.Now()
+	// 获取 30 天前的日期
+	preDate := now.AddDate(0, 0, -30)
+
+	productDao := dao.NewMovieDao(ctx)
+	total, err := productDao.CountIndexHotMovie(now, preDate)
+	if err != nil {
+		code = e.Error
+		util.LogrusObj.Infoln("CountIndexHotMovie", err)
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+
+	wg := new(sync.WaitGroup)
+	wg.Add(1)
+	go func() {
+		productDao = dao.NewMovieDaoByDB(productDao.DB)
+		movies, _ = productDao.ListIndexHotMovie(now, preDate, service.PageSize)
+		wg.Done()
+	}()
+	wg.Wait()
+
+	categoryDao := dao.NewCategoryDao(ctx)
+	var categoryStrings []string
+	for _, movie := range movies {
+		CategoryId := make([]uint, len(movie.CategoryId))
+		strSlice := strings.Split(movie.CategoryId, ",")
+		for i, str := range strSlice {
+			num, err := strconv.ParseUint(str, 10, 64)
+			if err != nil {
+				code = e.Error
+				util.LogrusObj.Infoln("ParseUint", err)
+				return serializer.Response{
+					Status: code,
+					Msg:    e.GetMsg(code),
+				}
+			}
+			CategoryId[i] = uint(num)
+		}
+		categoryString, err := categoryDao.GetCategory(CategoryId)
+		if err != nil {
+			code = e.Error
+			util.LogrusObj.Infoln("GetCategory", err)
+			return serializer.Response{
+				Status: code,
+				Msg:    e.GetMsg(code),
+			}
+		}
+		categoryStrings = append(categoryStrings, categoryString)
+	}
+
+	return serializer.BuildListResponse(serializer.BuildMovies(movies, categoryStrings), uint(total))
 }

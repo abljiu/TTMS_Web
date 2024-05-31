@@ -15,16 +15,17 @@ func NewHallDao(ctx context.Context) *HallDao {
 	return &HallDao{NewDBClient(ctx)}
 }
 
-func (dao *HallDao) CountHallByTheaterID(theater uint) (total int64, err error) {
-	err = dao.DB.Model(&model.Hall{}).Where("theater_id=?", theater).Count(&total).Error
-	return
-}
 func NewHallDaoByDB(db *gorm.DB) *HallDao {
 	return &HallDao{db}
 }
 
+func (dao *HallDao) CountHallByTheaterID(theater uint) (total int64, err error) {
+	err = dao.DB.Model(&model.Hall{}).Where("theater_id=?", theater).Count(&total).Error
+	return
+}
+
 func (dao *HallDao) ListHallByTheaterID(theater uint, page model.BasePage) (products []*model.Hall, err error) {
-	err = dao.DB.Where("theater_id=? and deleted_at is NULL", theater).Offset((page.PageNum - 1) * page.PageSize).Limit(page.PageSize).Find(&products).Error
+	err = dao.DB.Model(&model.Hall{}).Where("theater_id=? and deleted_at is NULL", theater).Offset((page.PageNum - 1) * page.PageSize).Limit(page.PageSize).Find(&products).Error
 	return
 }
 
