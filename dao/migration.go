@@ -22,7 +22,10 @@ func migration() {
 			&model.Order{},
 			&model.Movie{},
 			&model.User{},
-			&model.Carousel{})
+			&model.Carousel{},
+			&model.Comment{},
+			&model.Upvote{},
+		)
 	if err != nil {
 		fmt.Println("err:", err)
 	}

@@ -40,3 +40,9 @@ func (dao *UpvoteDao) ListUpvote(page model.BasePage) (Upvotes []*model.Upvote, 
 	err = dao.DB.Model(&model.Upvote{}).Offset((page.PageNum - 1) * page.PageSize).Limit(page.PageSize).Find(&Upvotes).Error
 	return
 }
+
+// 根据user_id得到comment_id
+func (dao *UpvoteDao) GetComments(userID uint) (Upvotes []*model.Upvote, err error) {
+	err = dao.DB.Model(&model.Upvote{}).Where("user_id = ?", userID).Find(&Upvotes).Error
+	return
+}

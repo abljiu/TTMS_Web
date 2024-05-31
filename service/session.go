@@ -38,7 +38,7 @@ func (service *SessionServer) Add(ctx context.Context) serializer.Response {
 		}
 	}
 	// 根据id获取影厅
-	hall, err := theaterDao.GetHallByHallID(service.HallID)
+	_, err = theaterDao.GetHallByHallID(service.HallID)
 	if err != nil {
 		code = e.ErrorHallId
 		return serializer.Response{
@@ -64,7 +64,7 @@ func (service *SessionServer) Add(ctx context.Context) serializer.Response {
 		}
 	}
 	//添加库存
-	err = cache.InitializeStock(ctx, rdb, session.ID, hall.SeatNum)
+	err = cache.InitializeStock(ctx, rdb, session.ID, 1)
 	if err != nil {
 		code = e.ErrorInitializeStock
 		return serializer.Response{

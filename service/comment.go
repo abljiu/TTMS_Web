@@ -16,72 +16,96 @@ const (
 	NoFunc       = 0
 	GetAcclaim   = 1
 	GetUnAcclaim = 2
-	GetByMovie   = 5
-	GetByHeat    = 6
+	GetByUser    = 3
+	GetByMovie   = 4
 )
 
-type CommentService struct {
-	CommentId uint   `json:"comment_id" form:"comment_id"`
-	Content   string `json:"content" form:"content" `
-	UserId    uint   `json:"user_id" form:"user_id"`
-	RlyId     uint   `json:"rly_id" form:"rly_id"`
-	MovieID   uint   `json:"movie_id" form:"movie_id"`
-	Rate      int    `json:"rate" form:"rate"`
-	UpvoteNum int    `json:"upvote_num" form:"upvote_num"`
-	IP        string `json:"ip" form:"ip"`
+// 根据内容搜索全部评论
+type SearchComment struct {
+	Content string `json:"content" form:"content" binding:"required"`
 	model.BasePage
 }
+
+// 发布评论
 type PublishComment struct {
+	CommentId uint   `json:"comment_id" form:"comment_id"`
 	Content   string `json:"content" form:"content"`
 	UserId    uint   `json:"user_id" form:"user_id" binding:"required"`
-	RlyId     uint   `json:"rly_id" form:"rly_id"`
 	MovieID   uint   `json:"movie_id" form:"movie_id" binding:"required"`
 	Rate      int    `json:"rate" form:"rate"`
-	UpvoteNum int    `json:"upvote_num" form:"upvote_num"`
 	IP        string `json:"ip" form:"ip" binding:"required"`
 	model.BasePage
 }
-type GetCommentsByMovie struct {
-	Content   string `json:"content" form:"content"`
-	UserId    uint   `json:"user_id" form:"user_id"`
-	RlyId     uint   `json:"rly_id" form:"rly_id"`
+
+// 回复评论
+type ReplyComment struct {
+	CommentId uint   `json:"comment_id" form:"comment_id"`
+	Content   string `json:"content" form:"content"  binding:"required"`
+	UserId    uint   `json:"user_id" form:"user_id" binding:"required"`
+	RlyId     uint   `json:"rly_id" form:"rly_id"  binding:"required"`
 	MovieID   uint   `json:"movie_id" form:"movie_id" binding:"required"`
-	Rate      int    `json:"rate" form:"rate"`
-	UpvoteNum int    `json:"upvote_num" form:"upvote_num"`
 	IP        string `json:"ip" form:"ip" binding:"required"`
+	model.BasePage
+}
+
+// 得到影片的全部评论
+type GetCommentsByMovie struct {
+	MovieID uint `json:"movie_id" form:"movie_id" binding:"required"`
+	UserId  uint `json:"user_id" form:"user_id" binding:"required"`
+	model.BasePage
+}
+
+// 通过ID得到评论
+type GetCommentByID struct {
+	CommentId uint `json:"comment_id" form:"comment_id" binding:"required"`
 	model.BasePage
 }
 type GetCommentsByHeat struct {
-	Content   string `json:"content" form:"content"`
-	UserId    uint   `json:"user_id" form:"user_id"  binding:"required"`
-	RlyId     uint   `json:"rly_id" form:"rly_id"`
-	MovieID   uint   `json:"movie_id" form:"movie_id" binding:"required"`
-	Rate      int    `json:"rate" form:"rate"`
-	UpvoteNum int    `json:"upvote_num" form:"upvote_num"`
-	IP        string `json:"ip" form:"ip" binding:"required"`
+	UserId  uint `json:"user_id" form:"user_id"  binding:"required"`
+	MovieID uint `json:"movie_id" form:"movie_id" binding:"required"`
 	model.BasePage
 }
 type GetAcclaims struct {
-	Content   string `json:"content" form:"content"`
-	UserId    uint   `json:"user_id" form:"user_id"  binding:"required"`
-	RlyId     uint   `json:"rly_id" form:"rly_id"`
-	MovieID   uint   `json:"movie_id" form:"movie_id" binding:"required"`
-	Rate      int    `json:"rate" form:"rate"`
-	UpvoteNum int    `json:"upvote_num" form:"upvote_num"`
-	IP        string `json:"ip" form:"ip" binding:"required"`
+	UserId  uint `json:"user_id" form:"user_id"  binding:"required"`
+	MovieID uint `json:"movie_id" form:"movie_id" binding:"required"`
+	model.BasePage
+}
+type GetNegativeComments struct {
+	UserId  uint `json:"user_id" form:"user_id"  binding:"required"`
+	MovieID uint `json:"movie_id" form:"movie_id" binding:"required"`
+	model.BasePage
+}
+type GetAllComments struct {
+	model.BasePage
+}
+type GetCommentsByUserId struct {
+	UserId uint `json:"user_id" form:"user_id"  binding:"required"`
+	model.BasePage
+}
+type DeleteCommentByID struct {
+	CommentId uint `json:"comment_id" form:"comment_id"  binding:"required"`
+	UserId    uint `json:"user_id" form:"user_id"  binding:"required"`
+	MovieID   uint `json:"movie_id" form:"movie_id" binding:"required"`
+	model.BasePage
+}
+type DeleteCommentsByContent struct {
+	Content string `json:"content" form:"content"  binding:"required"`
 	model.BasePage
 }
 
-// Create 上传新剧院
+// PublishComment 发布评论
 func (service *PublishComment) PublishComment(ctx context.Context) serializer.Response {
 	var err error
 	code := e.Success
+	//判断是否看过该影片?
 
 	Comment := &model.Comment{
-		Model: gorm.Model{},
-		//Name:    service.CommentName,
-		//Address: service.Address,
-		//HallNum: service.HallNum,
+		Model:   gorm.Model{},
+		Content: service.Content,
+		UserID:  service.UserId,
+		MovieID: service.MovieID,
+		Rate:    service.Rate,
+		IP:      service.IP,
 	}
 
 	CommentDao := dao.NewCommentDao(ctx)
@@ -102,7 +126,39 @@ func (service *PublishComment) PublishComment(ctx context.Context) serializer.Re
 	}
 }
 
-// GetAcclaims 获取好评列表
+// ReplyComment 回复评论
+func (service *ReplyComment) ReplyComment(ctx context.Context) serializer.Response {
+	var err error
+	code := e.Success
+
+	Comment := &model.Comment{
+		Model:   gorm.Model{},
+		Content: service.Content,
+		UserID:  service.UserId,
+		RlyID:   service.RlyId,
+		MovieID: service.MovieID,
+		IP:      service.IP,
+	}
+
+	CommentDao := dao.NewCommentDao(ctx)
+	err = CommentDao.CreateComment(Comment)
+	if err != nil {
+		code = e.Error
+		util.LogrusObj.Infoln("CreateComment", err)
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+
+	return serializer.Response{
+		Status: code,
+		Msg:    e.GetMsg(code),
+		Data:   serializer.BuildComment(Comment),
+	}
+}
+
+// GetAcclaims 获取好评列表，显示自己点赞的评论
 func (service *GetAcclaims) GetAcclaims(ctx context.Context) serializer.Response {
 	var Comments []*model.Comment
 	var err error
@@ -111,7 +167,7 @@ func (service *GetAcclaims) GetAcclaims(ctx context.Context) serializer.Response
 		service.PageSize = 15
 	}
 	productDao := dao.NewCommentDao(ctx)
-	total, err := productDao.CountComment()
+	total, err := productDao.CountAcclaims()
 	if err != nil {
 		code = e.Error
 		util.LogrusObj.Infoln("CountCommentByCondition", err)
@@ -124,16 +180,62 @@ func (service *GetAcclaims) GetAcclaims(ctx context.Context) serializer.Response
 	wg.Add(1)
 	go func() {
 		productDao = dao.NewCommentDaoByDB(productDao.DB)
-		Comments, _ = productDao.ListComment(service.BasePage, []string{"rate", "created_at"}, GetAcclaim)
+		Comments, _ = productDao.ListComment(service.BasePage, []string{"rate", "created_at"}, []uint{0, 0, 0, service.MovieID, 0}, GetAcclaim)
 		wg.Done()
 	}()
 	wg.Wait()
 	fmt.Println("success")
-	return serializer.BuildListResponse(serializer.BuildComments(Comments), uint(total))
+	return JudgeUpvoteIsSelf(ctx, service.UserId, total, Comments)
 }
 
-// List 获取剧院列表
-func (service *CommentService) List(ctx context.Context) serializer.Response {
+// JudgeUpvoteIsSelf 根据userID得到自己点赞过的评论
+func JudgeUpvoteIsSelf(ctx context.Context, userID uint, total int64, comments []*model.Comment) serializer.Response {
+	//根据user_id得到comment_id
+	productDao := dao.NewUpvoteDao(ctx)
+	upvotes, _ := productDao.GetComments(userID)
+	//将comment字段进行标记
+	for _, i := range upvotes {
+		for _, j := range comments {
+			if j.ID == i.CommentID {
+				j.IsSelfUpvote = true
+			}
+		}
+	}
+	return serializer.BuildListResponse(serializer.BuildComments(comments), uint(total))
+}
+
+// GetNegativeComments 获取差评列表，并按照时间倒序
+func (service *GetNegativeComments) GetNegativeComments(ctx context.Context) serializer.Response {
+	var Comments []*model.Comment
+	var err error
+	code := e.Success
+	if service.PageSize == 0 {
+		service.PageSize = 15
+	}
+	productDao := dao.NewCommentDao(ctx)
+	total, err := productDao.CountBadComments()
+	if err != nil {
+		code = e.Error
+		util.LogrusObj.Infoln("CountCommentByCondition", err)
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+	wg := new(sync.WaitGroup)
+	wg.Add(1)
+	go func() {
+		productDao = dao.NewCommentDaoByDB(productDao.DB)
+		Comments, _ = productDao.ListComment(service.BasePage, []string{"rate", "created_at"}, []uint{0, 0, 0, service.MovieID, 0}, GetUnAcclaim)
+		wg.Done()
+	}()
+	wg.Wait()
+	fmt.Println("success")
+	return JudgeUpvoteIsSelf(ctx, service.UserId, total, Comments)
+}
+
+// List 获取评论列表
+func (service *GetAllComments) List(ctx context.Context) serializer.Response {
 	var Comments []*model.Comment
 	var err error
 	code := e.Success
@@ -155,7 +257,7 @@ func (service *CommentService) List(ctx context.Context) serializer.Response {
 	wg.Add(1)
 	go func() {
 		productDao = dao.NewCommentDaoByDB(productDao.DB)
-		Comments, _ = productDao.ListComment(service.BasePage, []string{}, 0)
+		Comments, _ = productDao.ListComment(service.BasePage, []string{"created_at"}, []uint{0, 0, 0, 0, 0}, NoFunc)
 		wg.Done()
 	}()
 	wg.Wait()
@@ -163,7 +265,7 @@ func (service *CommentService) List(ctx context.Context) serializer.Response {
 	return serializer.BuildListResponse(serializer.BuildComments(Comments), uint(total))
 }
 
-// List 获取剧院列表
+// GetCommentsByMovie 根据影片得到评论
 func (service *GetCommentsByMovie) GetCommentsByMovie(ctx context.Context) serializer.Response {
 	var Comments []*model.Comment
 	var err error
@@ -172,7 +274,7 @@ func (service *GetCommentsByMovie) GetCommentsByMovie(ctx context.Context) seria
 		service.PageSize = 15
 	}
 	productDao := dao.NewCommentDao(ctx)
-	total, err := productDao.CountComment()
+	total, err := productDao.CountCommentByMovieID(service.MovieID)
 	if err != nil {
 		code = e.Error
 		util.LogrusObj.Infoln("CountCommentByCondition", err)
@@ -186,15 +288,15 @@ func (service *GetCommentsByMovie) GetCommentsByMovie(ctx context.Context) seria
 	wg.Add(1)
 	go func() {
 		productDao = dao.NewCommentDaoByDB(productDao.DB)
-		Comments, _ = productDao.ListComment(service.BasePage, []string{}, 0)
+		Comments, _ = productDao.ListComment(service.BasePage, []string{"created_at"}, []uint{0, 0, 0, service.MovieID, 0}, GetByMovie)
 		wg.Done()
 	}()
 	wg.Wait()
 	fmt.Println("success")
-	return serializer.BuildListResponse(serializer.BuildComments(Comments), uint(total))
+	return JudgeUpvoteIsSelf(ctx, service.UserId, total, Comments)
 }
 
-// List 获取剧院列表
+// GetCommentsByHeat 根据热度得到评论
 func (service *GetCommentsByHeat) GetCommentsByHeat(ctx context.Context) serializer.Response {
 	var Comments []*model.Comment
 	var err error
@@ -203,7 +305,7 @@ func (service *GetCommentsByHeat) GetCommentsByHeat(ctx context.Context) seriali
 		service.PageSize = 15
 	}
 	productDao := dao.NewCommentDao(ctx)
-	total, err := productDao.CountComment()
+	total, err := productDao.CountCommentByMovieID(service.MovieID)
 	if err != nil {
 		code = e.Error
 		util.LogrusObj.Infoln("CountCommentByCondition", err)
@@ -217,7 +319,37 @@ func (service *GetCommentsByHeat) GetCommentsByHeat(ctx context.Context) seriali
 	wg.Add(1)
 	go func() {
 		productDao = dao.NewCommentDaoByDB(productDao.DB)
-		Comments, _ = productDao.ListComment(service.BasePage, []string{}, 0)
+		Comments, _ = productDao.ListComment(service.BasePage, []string{"upvote_num", "created_at"}, []uint{0, 0, 0, service.MovieID, 0}, GetByMovie)
+		wg.Done()
+	}()
+	wg.Wait()
+	fmt.Println("success")
+	return JudgeUpvoteIsSelf(ctx, service.UserId, total, Comments)
+}
+
+// GetCommentsByUserId 根据用户ID获取好评列表
+func (service *GetCommentsByUserId) GetCommentsByUserId(ctx context.Context) serializer.Response {
+	var Comments []*model.Comment
+	var err error
+	code := e.Success
+	if service.PageSize == 0 {
+		service.PageSize = 15
+	}
+	productDao := dao.NewCommentDao(ctx)
+	total, err := productDao.CountCommentByUserID(service.UserId)
+	if err != nil {
+		code = e.Error
+		util.LogrusObj.Infoln("CountCommentByCondition", err)
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+	wg := new(sync.WaitGroup)
+	wg.Add(1)
+	go func() {
+		productDao = dao.NewCommentDaoByDB(productDao.DB)
+		Comments, _ = productDao.ListComment(service.BasePage, []string{"created_at"}, []uint{0, 0, service.UserId, 0, 0}, GetByUser)
 		wg.Done()
 	}()
 	wg.Wait()
@@ -225,16 +357,16 @@ func (service *GetCommentsByHeat) GetCommentsByHeat(ctx context.Context) seriali
 	return serializer.BuildListResponse(serializer.BuildComments(Comments), uint(total))
 }
 
-// Search 搜索剧院根据名称
-func (service *CommentService) Search(ctx context.Context) serializer.Response {
+// Search 根据内容搜索评论
+func (service *SearchComment) Search(ctx context.Context) serializer.Response {
 	code := e.Success
 	if service.PageSize == 0 {
 		service.PageSize = 15
 	}
 
 	productDao := dao.NewCommentDao(ctx)
-	//?
-	Comments, err := productDao.SearchComment("", service.BasePage)
+	//查找不法词汇，其他所需词汇
+	Comments, err := productDao.SearchComment(service.Content, service.BasePage)
 	if err != nil {
 		util.LogrusObj.Infoln("SearchProduct", err)
 		code = e.Error
@@ -247,12 +379,9 @@ func (service *CommentService) Search(ctx context.Context) serializer.Response {
 	return serializer.BuildListResponse(serializer.BuildComments(Comments), uint(len(Comments)))
 }
 
-// Search 搜索剧院根据id
-func (service *CommentService) SearchById(ctx context.Context) serializer.Response {
+// GetCommentByID 通过ID得到评论
+func (service *GetCommentByID) GetCommentByID(ctx context.Context) serializer.Response {
 	code := e.Success
-	if service.PageSize == 0 {
-		service.PageSize = 15
-	}
 
 	productDao := dao.NewCommentDao(ctx)
 	Comment, err := productDao.GetCommentByID(service.CommentId)
@@ -272,8 +401,8 @@ func (service *CommentService) SearchById(ctx context.Context) serializer.Respon
 	}
 }
 
-// Delete 删除信息
-func (service *CommentService) Delete(ctx context.Context, uid uint) serializer.Response {
+// DeleteCommentByID 根据id删除信息
+func (service *DeleteCommentByID) DeleteCommentByID(ctx context.Context, uid uint) serializer.Response {
 	var Comment *model.Comment
 	var err error
 	code := e.Success
@@ -292,4 +421,23 @@ func (service *CommentService) Delete(ctx context.Context, uid uint) serializer.
 		Msg:    e.GetMsg(code),
 		Data:   serializer.BuildComment(Comment),
 	}
+}
+
+// DeleteCommentsByContent 根据内容删除信息
+func (service *DeleteCommentsByContent) DeleteCommentsByContent(ctx context.Context) serializer.Response {
+	var err error
+	code := e.Success
+	if service.PageSize == 0 {
+		service.PageSize = 15
+	}
+	CommentDao := dao.NewCommentDao(ctx)
+	Comments, err := CommentDao.DeleteCommentsByContent(service.Content, service.BasePage)
+	if err != nil {
+		code = e.Error
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+	return serializer.BuildListResponse(serializer.BuildComments(Comments), uint(len(Comments)))
 }

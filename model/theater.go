@@ -4,7 +4,7 @@ import "gorm.io/gorm"
 
 type Theater struct {
 	gorm.Model
-	Name    string `gorm:"unique"`
+	Name    string
 	Address string
 	HallNum int
 }
