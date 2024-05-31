@@ -24,7 +24,7 @@ func UpdateSessionSeat(session *model.Session, seat string, num int) {
 	row := session.SeatRow
 	bytes := []byte(session.SeatStatus)
 	for i, j := 0, 1; j < len(seats); i, j = i+2, j+2 {
-		bytes[(seats[i]-1)*row+seats[j]-1] = 2
+		bytes[(seats[i]-1)*row*2+2*seats[j]-2] = '2'
 	}
 	session.SurplusTicket -= num
 	session.SeatStatus = string(bytes)
@@ -34,7 +34,7 @@ func IsRepeatSeat(seat string, seatStatus string, row int) bool {
 	seats := ParseSeat(seat)
 	bytes := []byte(seatStatus)
 	for i, j := 0, 1; j < len(seats); i, j = i+2, j+2 {
-		if bytes[(seats[i]-1)*row+seats[j]-1] == 1 {
+		if bytes[(seats[i]-1)*row*2+2*seats[j]-2] == '2' {
 			return true
 		}
 	}

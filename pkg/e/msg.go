@@ -22,6 +22,8 @@ var MsgFlags = map[int]string{
 	ErrorCacheAddSession:   "添加场次信息到缓存失败",
 	ErrorAddOrder:          "添加订单失败",
 	ErrorOrderID:           "订单id有误",
+	ErrorSeat:              "座位已经被选定",
+	ErrorEndTime:           "订单超时",
 }
 
 // GetMsg 获取状态码对应的信息

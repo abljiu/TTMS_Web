@@ -90,7 +90,7 @@ func (dao *MovieDao) ListMovieBySales(page model.BasePage) (movies []*model.Movi
 
 func (dao *MovieDao) SearchMovie(info string, page model.BasePage) (products []*model.Movie, err error) {
 	err = dao.DB.Model(&model.Movie{}).
-		Where("chinese_name LIKE ? OR introduction LIKE ?", "%"+info+"%", "%"+info+"%").
+		Where("chinese_name LIKE ? ", "%"+info+"%").
 		Offset((page.PageNum - 1) * page.PageSize).
 		Limit(page.PageSize).Find(&products).Error
 	return

@@ -9,9 +9,6 @@ import (
 	"TTMS_Web/serializer"
 	"context"
 	"encoding/json"
-	"fmt"
-	"github.com/go-redis/redis/v8"
-	"sync"
 	"time"
 )
 
@@ -27,105 +24,108 @@ type OrderService struct {
 	Money     float64 `json:"money" form:"money"`
 }
 
-var countdowns = sync.Map{}
+var sessionWithMutex model.SessionWithMutex
 
-// Submit 提交订单逻辑
+// Submit 提交订单逻辑 //todo 逻辑问题
 func (service *OrderService) Submit(ctx context.Context) serializer.Response {
-	var (
-		err     error
-		code    = e.Success
-		session *model.Session
-		order   *model.Order
-	)
+	var err error
+	var code = e.Success
+	order := &model.Order{}
 	rdb := cache.GetRedisClient()
-	key := fmt.Sprintf("session_info:%d", service.SessionID)
-
-	// 开启 Redis 事务
-	txn := rdb.Watch(ctx, func(tx *redis.Tx) error {
-		// 从缓存获取场次信息
-		session, err = cache.GetSessionInfo(ctx, rdb, service.SessionID)
-		if err != nil {
-			return err
-		}
-
-		// 更新 session 的座位和余票
-		util.UpdateSessionSeat(session, service.Seat, service.Num)
-
-		// 序列化 session
-		sessionByte, err := json.Marshal(session)
-		if err != nil {
-			return err
-		}
-
-		// 创建数据库事务
-		db := dao.NewDBClient(ctx)
-		txDB := db.Begin()
-		if txDB.Error != nil {
-			return txDB.Error
-		}
-
-		// 确保在发生错误时正确回滚
-		defer func() {
-			if r := recover(); r != nil {
-				txDB.Rollback()
-				_ = cache.AlterStock(ctx, rdb, service.SessionID, session.SurplusTicket+service.Num)
-				_ = cache.DelSessionInfo(ctx, rdb, service.SessionID)
-				code = e.Error
-			}
-		}()
-
-		// 更新场次信息
-		sessionDao := dao.NewSessionDaoByDB(txDB)
-		if err := sessionDao.UpdateSessionByID(service.SessionID, session); err != nil {
-			txDB.Rollback()
-			return err
-		}
-
-		// 创建订单
-		order = &model.Order{
-			UserID:    service.UserID,
-			MovieID:   service.MovieID,
-			SessionID: service.SessionID,
-			TheaterID: session.TheaterID,
-			Seat:      service.Seat,
-			Num:       service.Num,
-			Type:      0,
-			Money:     session.Price,
-		}
-
-		orderDao := dao.NewOrderDaoByDB(txDB)
-		if err := orderDao.AddOrder(order); err != nil {
-			txDB.Rollback()
-			return err
-		}
-
-		// 提交数据库事务
-		if err := txDB.Commit().Error; err != nil {
-			txDB.Rollback()
-			_ = cache.AlterStock(ctx, rdb, service.SessionID, session.SurplusTicket+service.Num)
-			_ = cache.DelSessionInfo(ctx, rdb, service.SessionID)
-			return err
-		}
-
-		// 更新 Redis 缓存
-		pipe := tx.TxPipeline()
-		cache.AlterStockPipe(ctx, pipe, service.SessionID, session.SurplusTicket)
-		cache.SetSessionInfoPipe(ctx, pipe, string(sessionByte), service.SessionID)
-		_, err = pipe.Exec(ctx)
-		if err != nil {
-			txDB.Rollback()
-			return err
-		}
-
-		return nil
-	}, key)
-	if txn != nil {
+	// 创建数据库事务
+	db := dao.NewDBClient(ctx)
+	txDB := db.Begin()
+	if txDB.Error != nil {
 		return serializer.Response{
 			Status: e.Error,
 			Msg:    e.GetMsg(e.Error),
 		}
 	}
 
+	//获取读写锁
+	sessionWithMutex.Mutex.Lock()
+	defer sessionWithMutex.Mutex.Unlock()
+
+	// 从缓存获取场次信息
+	sessionWithMutex.Session, err = cache.GetSessionInfo(ctx, rdb, service.SessionID)
+	if err != nil {
+		return serializer.Response{
+			Status: e.Error,
+			Msg:    e.GetMsg(e.Error),
+		}
+	}
+	//判断座位是否有人占用
+	if util.IsRepeatSeat(service.Seat, sessionWithMutex.Session.SeatStatus, sessionWithMutex.Session.SeatRow) {
+		return serializer.Response{
+			Status: e.ErrorSeat,
+			Msg:    e.GetMsg(e.ErrorSeat),
+		}
+	}
+	// 更新 session 的座位和余票
+	util.UpdateSessionSeat(sessionWithMutex.Session, service.Seat, service.Num)
+	// 序列化 session
+	sessionByte, err := json.Marshal(sessionWithMutex.Session)
+	if err != nil {
+		return serializer.Response{
+			Status: e.Error,
+			Msg:    e.GetMsg(e.Error),
+		}
+	}
+	// 更新场次信息
+	sessionDao := dao.NewSessionDaoByDB(txDB)
+	if err := sessionDao.UpdateSessionByID(service.SessionID, sessionWithMutex.Session); err != nil {
+		txDB.Rollback()
+		return serializer.Response{
+			Status: e.Error,
+			Msg:    e.GetMsg(e.Error),
+		}
+	}
+
+	// 创建订单
+	order = &model.Order{
+		UserID:    service.UserID,
+		MovieID:   service.MovieID,
+		SessionID: service.SessionID,
+		TheaterID: sessionWithMutex.Session.TheaterID,
+		Seat:      service.Seat,
+		Num:       service.Num,
+		Type:      0,
+		Money:     sessionWithMutex.Session.Price,
+	}
+
+	orderDao := dao.NewOrderDaoByDB(txDB)
+	if err := orderDao.AddOrder(order); err != nil {
+		txDB.Rollback()
+		return serializer.Response{
+			Status: e.Error,
+			Msg:    e.GetMsg(e.Error),
+		}
+	}
+
+	// 提交数据库事务
+	if err := txDB.Commit().Error; err != nil {
+		txDB.Rollback()
+		_ = cache.AlterStock(ctx, rdb, service.SessionID, sessionWithMutex.Session.SurplusTicket+service.Num)
+		_ = cache.DelSessionInfo(ctx, rdb, service.SessionID)
+		return serializer.Response{
+			Status: e.Error,
+			Msg:    e.GetMsg(e.Error),
+		}
+	}
+
+	// 更新 Redis 缓存
+	pipe := rdb.TxPipeline()
+	cache.AlterStockPipe(ctx, pipe, service.SessionID, sessionWithMutex.Session.SurplusTicket)
+	cache.SetSessionInfoPipe(ctx, pipe, string(sessionByte), service.SessionID)
+	_, err = pipe.Exec(ctx)
+	if err != nil {
+		txDB.Rollback()
+		return serializer.Response{
+			Status: e.Error,
+			Msg:    e.GetMsg(e.Error),
+		}
+	}
+	sessionWithMutex.Session = &model.Session{}
 	return serializer.Response{
 		Status: code,
 		Msg:    e.GetMsg(code),
@@ -133,32 +133,38 @@ func (service *OrderService) Submit(ctx context.Context) serializer.Response {
 	}
 }
 
-// 倒计时函数
-func startCountdown(orderID uint, orderDao *dao.OrderDao) {
+// 写入倒计时
+func startCountdown(orderID uint, ctx context.Context) {
 	endTime := time.Now().Add(14 * time.Minute)
-	countdowns.Store(orderID, endTime)
-	//rdb := cache.GetRedisClient()
+	rdb := cache.GetRedisClient()
+	endString := endTime.Format("2006-01-02 15:04:05")
+	cache.SetOrderCount(ctx, rdb, endString, orderID)
+}
 
-	ticker := time.NewTicker(1 * time.Second)
-	defer ticker.Stop()
-
-	for {
-		select {
-		case <-ticker.C:
-			remaining := time.Until(endTime)
-			if remaining <= 0 {
-				// 倒计时结束，检查订单状态并更新
-				status, _ := orderDao.CheckOrderTypeByID(orderID)
-				if status == 0 {
-					//更新缓存和数据库的订单状态
-
-				}
-				countdowns.Delete(orderID)
-				return
-			}
-			// 更新倒计时
-			countdowns.Store(orderID, endTime)
+// Confirm 确认订单(查看)订单时间
+func (service *OrderService) Confirm(ctx context.Context) serializer.Response {
+	code := e.Success
+	rdb := cache.GetRedisClient()
+	endString, err := cache.GetOrderCount(ctx, rdb, service.OrderID)
+	if err != nil {
+		code = e.ErrorEndTime
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
 		}
+	}
+	endTime, err := time.Parse("2006-01-02 15:04:05", endString)
+	if err != nil {
+		code = e.Error
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+	return serializer.Response{
+		Status: code,
+		Msg:    e.GetMsg(code),
+		Data:   endTime.Sub(time.Now()),
 	}
 }
 
