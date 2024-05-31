@@ -70,7 +70,7 @@ func NewRouter() *gin.Engine {
 				//获取某影厅场次列表
 				admin.GET("sessions", api.ListSession)
 				//根据sessionID获取某场次详细信息
-				r.GET("session", api.GetSession)
+				admin.GET("session", api.GetSession)
 
 				//添加剧院
 				//admin.POST("add-theater", api.AddTheater)
