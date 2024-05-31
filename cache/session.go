@@ -11,3 +11,15 @@ func InitializeStock(ctx context.Context, rdb *redis.Client, sessionID uint, sto
 	key := fmt.Sprintf("ticket_stock:%d", sessionID)
 	return rdb.Set(ctx, key, stock, 0).Err()
 }
+
+// AlterStock 更改场次库存
+func AlterStock(ctx context.Context, rdb *redis.Client, sessionID uint, num int) error {
+	key := fmt.Sprintf("ticket_stock:%d", sessionID)
+	return rdb.Set(ctx, key, num, 0).Err()
+}
+
+// AlterStockPipe 更改场次库存
+func AlterStockPipe(ctx context.Context, pipe redis.Pipeliner, sessionID uint, num int) {
+	key := fmt.Sprintf("ticket_stock:%d", sessionID)
+	pipe.Set(ctx, key, num, 0)
+}

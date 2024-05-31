@@ -42,3 +42,14 @@ func DeleteSession(c *gin.Context) {
 		util.LogrusObj.Infoln("DeleteSession", err)
 	}
 }
+
+func GetSession(c *gin.Context) {
+	getSession := service.SessionServer{}
+	if err := c.ShouldBind(&getSession); err == nil {
+		res := getSession.Get(c.Request.Context())
+		c.JSON(http.StatusOK, res)
+	} else {
+		c.JSON(http.StatusBadRequest, ErrorResponse(err))
+		util.LogrusObj.Infoln("DeleteSession", err)
+	}
+}

@@ -22,12 +22,14 @@ const (
 	ErrorMovieId          = 40004
 
 	//hall模块
-	ErrorHallId = 50001
+	ErrorHallId           = 50001
 	ErrorInvalidSeatParam = 50002
 
 	//session模块
 	ErrorSessionId       = 60001
 	ErrorInitializeStock = 60002
-
-
+	ErrorCacheAddSession = 60003
+	//order模块
+	ErrorAddOrder = 70001
+	ErrorOrderID  = 70002
 )

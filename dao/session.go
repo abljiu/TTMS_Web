@@ -23,7 +23,7 @@ func (dao *SessionDao) AddSession(session *model.Session) error {
 }
 
 func (dao *SessionDao) GetSessionByID(id uint) (session *model.Session, err error) {
-	err = dao.DB.Model(&model.Session{}).Where("id=?", id).First(&session).Error
+	err = dao.DB.Preload("Movie").Preload("Theater").Preload("Hall").Model(&model.Session{}).Where("id=?", id).First(&session).Error
 	return
 }
 

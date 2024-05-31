@@ -10,7 +10,6 @@ import (
 	"context"
 	"fmt"
 	"mime/multipart"
-	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -129,27 +128,15 @@ func (service *MovieService) Create(ctx context.Context, movieImg, directorImg, 
 		}
 	}
 
-	//根据categoryId返回string
-	categoryDao := dao.NewCategoryDao(ctx)
-	categoryString, err := categoryDao.GetCategory(service.CategoryId)
-	if err != nil {
-		code = e.Error
-		util.LogrusObj.Infoln("GetCategory", err)
-		return serializer.Response{
-			Status: code,
-			Msg:    e.GetMsg(code),
-		}
-	}
-
 	return serializer.Response{
 		Status: code,
 		Msg:    e.GetMsg(code),
-		Data:   serializer.BuildMovie(movie, categoryString),
+		Data:   serializer.BuildMovie(movie),
 	}
 }
 
-// List 获取电影列表
-func (service *MovieService) List(ctx context.Context) serializer.Response {
+// ListAll 获取全部电影列表
+func (service *MovieService) ListAll(ctx context.Context) serializer.Response {
 	var movies []*model.Movie
 	var err error
 	code := e.Success
@@ -180,36 +167,77 @@ func (service *MovieService) List(ctx context.Context) serializer.Response {
 	}()
 	wg.Wait()
 
-	categoryDao := dao.NewCategoryDao(ctx)
-	var categoryStrings []string
-	for _, movie := range movies {
-		CategoryId := make([]uint, len(movie.CategoryId))
-		strSlice := strings.Split(movie.CategoryId, ",")
-		for i, str := range strSlice {
-			num, err := strconv.ParseUint(str, 10, 64)
-			if err != nil {
-				code = e.Error
-				util.LogrusObj.Infoln("ParseUint", err)
-				return serializer.Response{
-					Status: code,
-					Msg:    e.GetMsg(code),
-				}
-			}
-			CategoryId[i] = uint(num)
+	return serializer.BuildListResponse(serializer.BuildMovies(movies), uint(total))
+}
+
+// ListHot 获取热映电影列表
+func (service *MovieService) ListHot(ctx context.Context) serializer.Response {
+	var movies []*model.Movie
+	var err error
+	code := e.Success
+	if service.PageSize == 0 {
+		service.PageSize = 15
+	}
+	categoryId := uint(0)
+	if len(service.CategoryId) != 0 {
+		categoryId = service.CategoryId[0]
+	}
+	productDao := dao.NewMovieDao(ctx)
+	total, err := productDao.CountHotMovieByCondition(categoryId)
+	if err != nil {
+		code = e.Error
+		util.LogrusObj.Infoln("CountMovieByCondition", err)
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
 		}
-		categoryString, err := categoryDao.GetCategory(CategoryId)
-		if err != nil {
-			code = e.Error
-			util.LogrusObj.Infoln("GetCategory", err)
-			return serializer.Response{
-				Status: code,
-				Msg:    e.GetMsg(code),
-			}
-		}
-		categoryStrings = append(categoryStrings, categoryString)
 	}
 
-	return serializer.BuildListResponse(serializer.BuildMovies(movies, categoryStrings), uint(total))
+	wg := new(sync.WaitGroup)
+	wg.Add(1)
+	go func() {
+		productDao = dao.NewMovieDaoByDB(productDao.DB)
+		movies, _ = productDao.ListHotMovieByCondition(categoryId, service.BasePage)
+		wg.Done()
+	}()
+	wg.Wait()
+
+	return serializer.BuildListResponse(serializer.BuildMovies(movies), uint(total))
+}
+
+// ListUnreleased 获取未上映电影列表
+func (service *MovieService) ListUnreleased(ctx context.Context) serializer.Response {
+	var movies []*model.Movie
+	var err error
+	code := e.Success
+	if service.PageSize == 0 {
+		service.PageSize = 15
+	}
+	categoryId := uint(0)
+	if len(service.CategoryId) != 0 {
+		categoryId = service.CategoryId[0]
+	}
+	productDao := dao.NewMovieDao(ctx)
+	total, err := productDao.CountUnreleasedMovieByCondition(categoryId)
+	if err != nil {
+		code = e.Error
+		util.LogrusObj.Infoln("CountMovieByCondition", err)
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+
+	wg := new(sync.WaitGroup)
+	wg.Add(1)
+	go func() {
+		productDao = dao.NewMovieDaoByDB(productDao.DB)
+		movies, _ = productDao.ListUnreleasedMovieByCondition(categoryId, service.BasePage)
+		wg.Done()
+	}()
+	wg.Wait()
+
+	return serializer.BuildListResponse(serializer.BuildMovies(movies), uint(total))
 }
 
 // ListSales 获取电影票房列表
@@ -229,37 +257,7 @@ func (service *MovieService) ListSales(ctx context.Context) serializer.Response 
 			Msg:    e.GetMsg(code),
 		}
 	}
-
-	categoryDao := dao.NewCategoryDao(ctx)
-	var categoryStrings []string
-	for _, movie := range movies {
-		CategoryId := make([]uint, len(movie.CategoryId))
-		strSlice := strings.Split(movie.CategoryId, ",")
-		for i, str := range strSlice {
-			num, err := strconv.ParseUint(str, 10, 64)
-			if err != nil {
-				code = e.Error
-				util.LogrusObj.Infoln("ParseUint", err)
-				return serializer.Response{
-					Status: code,
-					Msg:    e.GetMsg(code),
-				}
-			}
-			CategoryId[i] = uint(num)
-		}
-		categoryString, err := categoryDao.GetCategory(CategoryId)
-		if err != nil {
-			code = e.Error
-			util.LogrusObj.Infoln("GetCategory", err)
-			return serializer.Response{
-				Status: code,
-				Msg:    e.GetMsg(code),
-			}
-		}
-		categoryStrings = append(categoryStrings, categoryString)
-	}
-
-	return serializer.BuildListResponse(serializer.BuildMovies(movies, categoryStrings), uint(len(movies)))
+	return serializer.BuildListResponse(serializer.BuildMovies(movies), uint(len(movies)))
 }
 
 // Search 搜索电影
@@ -280,33 +278,5 @@ func (service *MovieService) Search(ctx context.Context) serializer.Response {
 		}
 	}
 
-	categoryDao := dao.NewCategoryDao(ctx)
-	var categoryStrings []string
-	for _, movie := range movies {
-		CategoryId := make([]uint, len(movie.CategoryId))
-		strSlice := strings.Split(movie.CategoryId, ",")
-		for i, str := range strSlice {
-			num, err := strconv.ParseUint(str, 10, 64)
-			if err != nil {
-				code = e.Error
-				util.LogrusObj.Infoln("ParseUint", err)
-				return serializer.Response{
-					Status: code,
-					Msg:    e.GetMsg(code),
-				}
-			}
-			CategoryId[i] = uint(num)
-		}
-		categoryString, err := categoryDao.GetCategory(CategoryId)
-		if err != nil {
-			code = e.Error
-			util.LogrusObj.Infoln("GetCategory", err)
-			return serializer.Response{
-				Status: code,
-				Msg:    e.GetMsg(code),
-			}
-		}
-		categoryStrings = append(categoryStrings, categoryString)
-	}
-	return serializer.BuildListResponse(serializer.BuildMovies(movies, categoryStrings), uint(len(movies)))
+	return serializer.BuildListResponse(serializer.BuildMovies(movies), uint(len(movies)))
 }

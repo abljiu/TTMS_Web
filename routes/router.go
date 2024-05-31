@@ -23,10 +23,18 @@ func NewRouter() *gin.Engine {
 
 		//轮播图
 		v1.GET("carousels", api.ListCarousel)
-		//根据类型查询电影
-		v1.GET("movies", api.ListMovie)
+
 		//查询电影票房
 		v1.GET("sales", api.ListMovieSales)
+		//根据类型查询热映电影
+		v1.GET("hot-movies", api.ListHotMovie)
+		//根据类型查询未上映电影
+		v1.GET("unreleased-movies", api.ListUnreleasedMovie)
+		//根据类型查询全部电影
+		v1.GET("all-movies", api.ListMovie)
+		//根据sessionId返回场次信息
+		v1.GET("session", api.GetSession)
+
 		//获取剧院列表
 		v1.GET("theaters", api.ListTheater)
 		//需要登录保护
@@ -40,7 +48,7 @@ func NewRouter() *gin.Engine {
 			authed.POST("user/valid-email", api.ValidEmail)
 
 			authed.POST("submit-order", api.SubmitOrder)
-			authed.DELETE("cancel-order", api.CancelOrder)
+			//authed.POST("pay-order",api.)
 			authed.DELETE("return-order", api.ReturnOrder)
 
 			//显示金额
@@ -116,17 +124,6 @@ func NewRouter() *gin.Engine {
 		}
 
 	}
-
-	//某剧院的影厅列表
-	r.GET("/halls", api.ListHall)
-	//创建影厅
-	r.POST("/hall/create", api.CreateHall)
-	//删除影厅 根据影厅id
-	r.DELETE("/hall/delete", api.DeleteHall)
-	//更新影厅信息
-	r.PUT("/hall/update", api.UpdateHall)
-	//影厅详细信息
-	r.GET("/hall", api.GetHall)
 
 	return r
 }

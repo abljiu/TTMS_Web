@@ -16,7 +16,6 @@ func migration() {
 			&model.Session{},
 			&model.Hall{},
 			&model.Director{},
-			&model.Actor{},
 			&model.Category{},
 			&model.Notice{},
 			&model.Order{},
