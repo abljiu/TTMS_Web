@@ -77,17 +77,30 @@ func (service *HallCreateRequest) Create(ctx context.Context) serializer.Respons
 	code := e.Success
 
 	var seatNum int
-	for k := 0; k < len(service.Seat); k++ {
+	var num int
+	for k := range service.Seat {
 		n, _ := strconv.Atoi(string(service.Seat[k]))
+		if n != 0 && n != 1 {
+			return serializer.Response{
+				Status: code,
+				Msg:    e.GetMsg(e.ErrorInvalidSeatParam),
+			}
+		}
 		if n == 1 {
 			seatNum++
+		}
+		num = k
+	}
+	if num != service.SeatRow*service.SeatColumn {
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(e.ErrorInvalidSeatParam),
 		}
 	}
 	if seatNum > service.SeatRow*service.SeatColumn {
 		return serializer.Response{
 			Status: code,
 			Msg:    e.GetMsg(e.ErrorInvalidSeatParam),
-			Data:   nil,
 		}
 	}
 
@@ -147,10 +160,24 @@ func (service *HallUpdateRequest) Update(ctx context.Context) serializer.Respons
 	code := e.Success
 
 	var seatNum int
+	var num int
 	for k := range service.Seat {
 		n, _ := strconv.Atoi(string(service.Seat[k]))
+		if n != 0 && n != 1 {
+			return serializer.Response{
+				Status: code,
+				Msg:    e.GetMsg(e.ErrorInvalidSeatParam),
+			}
+		}
 		if n == 1 {
 			seatNum++
+		}
+		num = k
+	}
+	if num != service.SeatRow*service.SeatColumn {
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(e.ErrorInvalidSeatParam),
 		}
 	}
 	if seatNum > service.SeatRow*service.SeatColumn {
