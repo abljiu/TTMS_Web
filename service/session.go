@@ -8,7 +8,6 @@ import (
 	"TTMS_Web/pkg/util"
 	"TTMS_Web/serializer"
 	"context"
-	"fmt"
 	"sync"
 	"time"
 )
@@ -185,18 +184,20 @@ func (service *SessionListRequest) List(ctx context.Context) serializer.Response
 	}
 
 	productDao := dao.NewSessionDao(ctx)
+
+	//curTime
+	curTime := time.Now()
+	curTimeStr := curTime.Format("2006-01-02 15:04")
+
 	var total int64
-
-	fmt.Println(service.Date)
-
 	if len(service.Date) != 0 && service.MovieID != 0 { //date && movieID
-		total, err = productDao.CountSessionByMovieIDAndDate(service.TheaterID, service.MovieID, service.Date)
+		total, err = productDao.CountSessionByMovieIDAndDate(service.TheaterID, service.MovieID, service.Date, curTimeStr)
 	} else if len(service.Date) != 0 { //date
-		total, err = productDao.CountSessionByDate(service.TheaterID, service.Date)
+		total, err = productDao.CountSessionByDate(service.TheaterID, service.Date, curTimeStr)
 	} else if service.MovieID != 0 { //movieID
-		total, err = productDao.CountSessionByMovieID(service.TheaterID, service.MovieID)
+		total, err = productDao.CountSessionByMovieID(service.TheaterID, service.MovieID, curTimeStr)
 	} else {
-		total, err = productDao.CountSession(service.TheaterID)
+		total, err = productDao.CountSession(service.TheaterID, curTimeStr)
 	}
 	if err != nil {
 		code = e.Error
@@ -212,13 +213,13 @@ func (service *SessionListRequest) List(ctx context.Context) serializer.Response
 	go func() {
 		productDao = dao.NewSessionDaoByDB(productDao.DB)
 		if len(service.Date) != 0 && service.MovieID != 0 { //date && movieID
-			sessions, _ = productDao.ListSessionByDateAndMovieID(service.TheaterID, service.MovieID, service.Date, service.BasePage)
+			sessions, _ = productDao.ListSessionByDateAndMovieID(service.TheaterID, service.MovieID, service.Date, curTimeStr, service.BasePage)
 		} else if len(service.Date) != 0 { //date
-			sessions, _ = productDao.ListSessionByDate(service.TheaterID, service.Date, service.BasePage)
+			sessions, _ = productDao.ListSessionByDate(service.TheaterID, service.Date, curTimeStr, service.BasePage)
 		} else if service.MovieID != 0 { //movieID
-			sessions, _ = productDao.ListSessionByMovieID(service.TheaterID, service.MovieID, service.BasePage)
+			sessions, _ = productDao.ListSessionByMovieID(service.TheaterID, service.MovieID, curTimeStr, service.BasePage)
 		} else {
-			sessions, _ = productDao.ListSession(service.TheaterID, service.BasePage)
+			sessions, _ = productDao.ListSession(service.TheaterID, curTimeStr, service.BasePage)
 		}
 		wg.Done()
 	}()
