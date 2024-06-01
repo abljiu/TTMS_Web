@@ -21,8 +21,8 @@ type HallCreateRequest struct {
 	ID         uint   `json:"id" form:"id"`
 	TheaterId  uint   `json:"theater_id" form:"theater_id" binding:"required"`
 	Name       string `json:"name" form:"name" binding:"required"`
-	SeatRow    int    `json:"seat_row" form:"seat_row" binding:"required"`
-	SeatColumn int    `json:"seat_column" form:"seat_column" binding:"required"`
+	SeatRow    int    `json:"seat_row" form:"seat_row" binding:"required,gt=0"`
+	SeatColumn int    `json:"seat_column" form:"seat_column" binding:"required,gt=0"`
 	Seat       string `json:"seat" form:"seat" binding:"required"`
 }
 
@@ -34,8 +34,8 @@ type HallUpdateRequest struct {
 	ID         uint   `json:"id" form:"id" binding:"required"`
 	TheaterId  uint   `json:"theater_id" form:"theater_id" binding:"required"`
 	Name       string `json:"name" form:"name" binding:"required"`
-	SeatRow    int    `json:"seat_row" form:"seat_row" binding:"required"`
-	SeatColumn int    `json:"seat_column" form:"seat_column" binding:"required"`
+	SeatRow    int    `json:"seat_row" form:"seat_row" binding:"required,gt=0"`
+	SeatColumn int    `json:"seat_column" form:"seat_column" binding:"required,gt=0"`
 	Seat       string `json:"seat" form:"seat" binding:"required"`
 }
 
@@ -107,6 +107,7 @@ func (service *HallCreateRequest) Create(ctx context.Context) serializer.Respons
 		return serializer.Response{
 			Status: code,
 			Msg:    e.GetMsg(code),
+			Data:   err,
 		}
 	}
 
@@ -177,6 +178,7 @@ func (service *HallUpdateRequest) Update(ctx context.Context) serializer.Respons
 		return serializer.Response{
 			Status: code,
 			Msg:    e.GetMsg(code),
+			Data:   err,
 		}
 	}
 
