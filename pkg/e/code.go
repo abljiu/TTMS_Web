@@ -32,4 +32,6 @@ const (
 	//order模块
 	ErrorAddOrder = 70001
 	ErrorOrderID  = 70002
+	ErrorSeat     = 70003
+	ErrorEndTime  = 70004
 )

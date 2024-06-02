@@ -55,7 +55,7 @@ func Init() {
 		log.Fatalf("Failed to parse YAML: %v", err)
 	}
 
-	pathRead := strings.Join([]string{Config_.Mysql.DbUser, ":", Config_.Mysql.DbPassword, "@tcp(", Config_.Mysql.DbHost, ":", Config_.Mysql.DbPort, ")/", Config_.Mysql.DbName, "?charset=utf8mb4&parseTime=true"}, "")
-	pathWrite := strings.Join([]string{Config_.Mysql.DbUser, ":", Config_.Mysql.DbPassword, "@tcp(", Config_.Mysql.DbHost, ":", Config_.Mysql.DbPort, ")/", Config_.Mysql.DbName, "?charset=utf8mb4&parseTime=true"}, "")
+	pathRead := strings.Join([]string{Config_.Mysql.DbUser, ":", Config_.Mysql.DbPassword, "@tcp(", Config_.Mysql.DbHost, ":", Config_.Mysql.DbPort, ")/", Config_.Mysql.DbName, "?charset=utf8mb4&parseTime=true&loc=Local"}, "")
+	pathWrite := strings.Join([]string{Config_.Mysql.DbUser, ":", Config_.Mysql.DbPassword, "@tcp(", Config_.Mysql.DbHost, ":", Config_.Mysql.DbPort, ")/", Config_.Mysql.DbName, "?charset=utf8mb4&parseTime=true&loc=Local"}, "")
 	dao.Database(pathRead, pathWrite)
 }

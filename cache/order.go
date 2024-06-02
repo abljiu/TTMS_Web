@@ -103,9 +103,27 @@ func SetOrderInfo(ctx context.Context, rdb *redis.Client, orderInfoJSON string, 
 	return
 }
 
-// SetOrderInfoPipe 添加场次信息
+// SetOrderInfoPipe 添加订单信息
 func SetOrderInfoPipe(ctx context.Context, pipe redis.Pipeliner, orderInfoJSON string, orderID uint) {
 	// 将场次信息写入Redis缓存，并设置过期时间
 	key := fmt.Sprintf("order_info:%d", orderID)
 	pipe.Set(ctx, key, orderInfoJSON, 10*time.Minute)
+}
+
+// SetOrderCount 添加订单倒计时
+func SetOrderCount(ctx context.Context, rdb *redis.Client, endTime string, orderID uint) {
+	// 将结束写入Redis缓存，并设置过期时间
+	key := fmt.Sprintf("order_count:%d", orderID)
+	rdb.Set(ctx, key, endTime, 14*time.Minute)
+}
+
+// GetOrderCount 获取订单倒计时
+func GetOrderCount(ctx context.Context, rdb *redis.Client, orderID uint) (endTime string, err error) {
+	// 将结束写入Redis缓存，并设置过期时间
+	key := fmt.Sprintf("order_count:%d", orderID)
+	endTime, err = rdb.Get(ctx, key).Result()
+	if err != nil {
+		return "", err
+	}
+	return endTime, nil
 }

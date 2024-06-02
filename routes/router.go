@@ -50,6 +50,7 @@ func NewRouter() *gin.Engine {
 			authed.POST("submit-order", api.SubmitOrder)
 			//authed.POST("pay-order",api.)
 			authed.DELETE("return-order", api.ReturnOrder)
+			authed.GET("confirm-order", api.ConfirmOrder)
 
 			//显示金额
 			//authed.POST("money", api.ShowMoney)
@@ -87,6 +88,10 @@ func NewRouter() *gin.Engine {
 				admin.PUT("alter-session", api.AlterSession)
 				//删除场次
 				admin.DELETE("delete-session", api.DeleteSession)
+				//添加剧院
+				//admin.POST("add-theater", api.AddTheater)
+				//获取影院热映电影列表
+				admin.GET("movie/getHot", api.ListHotMovieByTheater)
 
 				//某剧院的影厅列表
 				admin.GET("halls", api.ListHall)
