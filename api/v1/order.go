@@ -50,3 +50,14 @@ func PayOrder(c *gin.Context) {
 		util.LogrusObj.Infoln("ReturnOrder", err)
 	}
 }
+
+func GetOrders(c *gin.Context) {
+	var payOrder service.OrderService
+	if err := c.ShouldBind(&payOrder); err == nil {
+		res := payOrder.Get(c.Request.Context())
+		c.JSON(http.StatusOK, res)
+	} else {
+		c.JSON(http.StatusBadRequest, ErrorResponse(err))
+		util.LogrusObj.Infoln("ReturnOrder", err)
+	}
+}

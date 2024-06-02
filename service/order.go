@@ -9,6 +9,7 @@ import (
 	"TTMS_Web/serializer"
 	"context"
 	"encoding/json"
+	"fmt"
 	"time"
 )
 
@@ -22,11 +23,12 @@ type OrderService struct {
 	Num       int     `json:"num" form:"num"`
 	Type      uint    `json:"type" form:"type"`
 	Money     float64 `json:"money" form:"money"`
+	model.BasePage
 }
 
 var sessionWithMutex model.SessionWithMutex
 
-// Submit 提交订单逻辑 //todo 逻辑问题
+// Submit 提交订单逻辑
 func (service *OrderService) Submit(ctx context.Context) serializer.Response {
 	var err error
 	var code = e.Success
@@ -94,7 +96,7 @@ func (service *OrderService) Submit(ctx context.Context) serializer.Response {
 	}
 
 	orderDao := dao.NewOrderDaoByDB(txDB)
-	if err := orderDao.AddOrder(order); err != nil {
+	if order, err = orderDao.AddOrder(order); err != nil {
 		txDB.Rollback()
 		return serializer.Response{
 			Status: e.Error,
@@ -125,6 +127,17 @@ func (service *OrderService) Submit(ctx context.Context) serializer.Response {
 			Msg:    e.GetMsg(e.Error),
 		}
 	}
+	endTime := time.Now().Add(14 * time.Minute)
+	endString := endTime.Format("2006-01-02 15:04:05")
+	err = cache.SetOrderCount(ctx, rdb, endString, order.ID)
+	if err != nil {
+		code = e.Error
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(e.Error),
+		}
+	}
+	go startCountdown(order.ID, ctx)
 	sessionWithMutex.Session = &model.Session{}
 	return serializer.Response{
 		Status: code,
@@ -133,12 +146,19 @@ func (service *OrderService) Submit(ctx context.Context) serializer.Response {
 	}
 }
 
-// 写入倒计时
+// 开始倒计时
 func startCountdown(orderID uint, ctx context.Context) {
-	endTime := time.Now().Add(14 * time.Minute)
 	rdb := cache.GetRedisClient()
-	endString := endTime.Format("2006-01-02 15:04:05")
-	cache.SetOrderCount(ctx, rdb, endString, orderID)
+	time.Sleep(14 * time.Minute)
+	orderDao := dao.NewOrderDao(ctx)
+	order, _ := orderDao.GetOrderByOrderID(orderID)
+	//未支付订单
+	if order.Type == 0 {
+		session, _ := cache.GetSessionInfo(ctx, rdb, order.SessionID)
+		_ = cache.AlterStock(ctx, rdb, order.SessionID, session.SurplusTicket-order.Num)
+		_ = cache.DelSessionInfo(ctx, rdb, order.SessionID)
+		_ = orderDao.DeleteOrderByID(orderID)
+	}
 }
 
 // Confirm 确认订单(查看)订单时间
@@ -146,6 +166,7 @@ func (service *OrderService) Confirm(ctx context.Context) serializer.Response {
 	code := e.Success
 	rdb := cache.GetRedisClient()
 	endString, err := cache.GetOrderCount(ctx, rdb, service.OrderID)
+
 	if err != nil {
 		code = e.ErrorEndTime
 		return serializer.Response{
@@ -153,7 +174,7 @@ func (service *OrderService) Confirm(ctx context.Context) serializer.Response {
 			Msg:    e.GetMsg(code),
 		}
 	}
-	endTime, err := time.Parse("2006-01-02 15:04:05", endString)
+	endTime, err := time.ParseInLocation("2006-01-02 15:04:05", endString, time.Local)
 	if err != nil {
 		code = e.Error
 		return serializer.Response{
@@ -164,41 +185,18 @@ func (service *OrderService) Confirm(ctx context.Context) serializer.Response {
 	return serializer.Response{
 		Status: code,
 		Msg:    e.GetMsg(code),
-		Data:   endTime.Sub(time.Now()),
+		Data:   endTime.Sub(time.Now()).Minutes(),
 	}
 }
 
 // Pay 支付订单逻辑
 func (service *OrderService) Pay(ctx context.Context) serializer.Response {
-	//code := e.Success
-	return serializer.Response{}
-}
-
-// Return 退票逻辑
-func (service *OrderService) Return(ctx context.Context) serializer.Response {
-	//session := &model.Session{}
-	//code := e.Success
-	//
-	//rdb := cache.GetRedisClient()
-	//sessionInfo, err := cache.GetSessionInfo(ctx, rdb, service.SessionID)
-	////反序列化到结构体
-	//err = json.Unmarshal([]byte(sessionInfo), session)
-	//
-	//if err != nil {
-	//	code = e.Error
-	//	return serializer.Response{
-	//		Status: code,
-	//		Msg:    e.GetMsg(code),
-	//	}
-	//}
-	return serializer.Response{}
-}
-
-func (service *OrderService) Get(ctx context.Context) serializer.Response {
 	code := e.Success
 	orderDao := dao.NewOrderDao(ctx)
-	//判断订单是否存在
-	order, err := orderDao.GetOrderByID(service.OrderID)
+	order := &model.Order{
+		Type: 1,
+	}
+	err := orderDao.UpdateOrderByID(service.OrderID, order)
 	if err != nil {
 		code = e.Error
 		return serializer.Response{
@@ -209,20 +207,91 @@ func (service *OrderService) Get(ctx context.Context) serializer.Response {
 	return serializer.Response{
 		Status: code,
 		Msg:    e.GetMsg(code),
-		Data:   serializer.BuildOrder(order),
 	}
 }
 
-//查看座位是否有重复 有重复且订单未支付 修改前一个订单的seat 已支付返回失败 todo
-//if util.IsRepeatSeat(service.Seat, session.SeatStatus, session.SeatRow) {
-//	//从缓存获取订单信息
-//	orderDao := dao.NewOrderDao(ctx)
-//	order, err := cache.GetOrderInfo(ctx, rdb, service.OrderID)
-//	if err != nil {
-//		code = e.Error
-//		return serializer.Response{
-//			Status: code,
-//			Msg:    e.GetMsg(code),
-//		}
-//	}
-//}
+// Get 获取该用户订单
+func (service *OrderService) Get(ctx context.Context) serializer.Response {
+	code := e.Success
+	orderDao := dao.NewOrderDao(ctx)
+	userDao := dao.NewUserDao(ctx)
+	if service.PageSize == 0 {
+		service.PageSize = 15
+	}
+	//判断用户是否存在
+	_, err := userDao.GetUserByID(service.UserID)
+	if err != nil {
+		code = e.ErrorExistUserNotFound
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+	orders, err := orderDao.ListUserOrders(service.UserID, service.BasePage)
+	if err != nil {
+		code = e.ErrorExistUserNotFound
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+	fmt.Println(orders)
+	return serializer.Response{
+		Status: code,
+		Msg:    e.GetMsg(code),
+		Data:   serializer.BuildOrders(orders),
+	}
+}
+
+// Return 退票逻辑
+func (service *OrderService) Return(ctx context.Context) serializer.Response {
+	session := &model.Session{}
+	code := e.Success
+	rdb := cache.GetRedisClient()
+	orderDao := dao.NewOrderDao(ctx)
+	order, err := orderDao.GetOrderByOrderID(service.OrderID)
+	fmt.Println(err)
+	if err != nil {
+		code = e.ErrorOrderID
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+	if order.Type == 0 {
+		code = e.ErrorOrderType
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+	err = cache.AlterStock(ctx, rdb, service.SessionID, session.SurplusTicket-service.Num)
+	if err != nil {
+		code = e.Error
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+	err = cache.DelSessionInfo(ctx, rdb, service.SessionID)
+	if err != nil {
+		code = e.Error
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+	err = orderDao.DeleteOrderByID(service.OrderID)
+	if err != nil {
+		code = e.ErrorOrderID
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+	return serializer.Response{
+		Status: code,
+		Msg:    e.GetMsg(code),
+	}
+
+}
