@@ -11,7 +11,7 @@ import (
 var rdb *redis.Client
 
 func InitRedis() {
-	Redis()
+	//Redis()
 }
 
 func Redis() {

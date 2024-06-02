@@ -21,7 +21,10 @@ func NewCommentDaoByDB(db *gorm.DB) *CommentDao {
 func (dao *CommentDao) CreateComment(Comment *model.Comment) error {
 	return dao.DB.Model(&model.Comment{}).Create(&Comment).Error
 }
-
+func (dao *CommentDao) UpdateCommentByID(uid uint, Comment *model.Comment) error {
+	err := dao.DB.Model(&model.Comment{}).Where("id=?", uid).Updates(&Comment).Error
+	return err
+}
 func (dao *CommentDao) GetCommentByID(id uint) (Comment *model.Comment, err error) {
 	err = dao.DB.Model(&model.Comment{}).Where("id=?", id).First(&Comment).Error
 	return
@@ -35,7 +38,7 @@ func (dao *CommentDao) DeleteCommentsByIDs(products []*model.Comment) (Comments 
 	for _, i := range products {
 		comment, err := dao.DeleteCommentByID(i.ID)
 		if err == nil {
-			return
+			return nil, err
 		}
 		Comments = append(Comments, comment)
 	}

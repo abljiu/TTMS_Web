@@ -13,6 +13,6 @@ type Comment struct {
 	Movie        Movie    `gorm:"ForeignKey:MovieID"`
 	Rate         int
 	IP           string `gorm:"not null"`
-	UpvoteNum    int
-	IsSelfUpvote bool
+	UpvoteNum    int    `gorm:"upvote_num"`
+	IsSelfUpvote bool   `gorm:"is_self_upvote"`
 }

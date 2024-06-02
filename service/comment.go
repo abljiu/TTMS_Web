@@ -43,7 +43,7 @@ type ReplyComment struct {
 	Content   string `json:"content" form:"content"  binding:"required"`
 	UserId    uint   `json:"user_id" form:"user_id" binding:"required"`
 	RlyId     uint   `json:"rly_id" form:"rly_id"  binding:"required"`
-	MovieID   uint   `json:"movie_id" form:"movie_id" binding:"required"`
+	MovieID   uint   `json:"movie_id" form:"movie_id"`
 	IP        string `json:"ip" form:"ip" binding:"required"`
 	model.BasePage
 }
@@ -97,8 +97,9 @@ type DeleteCommentsByContent struct {
 func (service *PublishComment) PublishComment(ctx context.Context) serializer.Response {
 	var err error
 	code := e.Success
-	//判断是否看过该影片?
-
+	//判断用户是否看过该影片?
+	//productDao:=dao.NewOrderDao(ctx)
+	//productDao.
 	Comment := &model.Comment{
 		Model:   gorm.Model{},
 		Content: service.Content,

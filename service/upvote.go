@@ -41,7 +41,27 @@ func (service *Upvote) Upvote(ctx context.Context) serializer.Response {
 			Msg:    e.GetMsg(code),
 		}
 	}
+	CommentDao := dao.NewCommentDao(ctx)
+	Comment, _ := CommentDao.GetCommentByID(service.CommentId)
+	Comment.UpvoteNum = Comment.UpvoteNum + 1
+	err = CommentDao.UpdateCommentByID(Comment.ID, Comment)
+	if err != nil {
+		code = e.Error
+		util.LogrusObj.Infoln("CreateComment", err)
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
 
+	if err != nil {
+		code = e.Error
+		util.LogrusObj.Infoln("comment add upvote-num", err)
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
 	return serializer.Response{
 		Status: code,
 		Msg:    e.GetMsg(code),
@@ -58,6 +78,18 @@ func (service *DownVote) DownVote(ctx context.Context) serializer.Response {
 	if err != nil {
 		code = e.Error
 		util.LogrusObj.Infoln("DownVote", err)
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+	CommentDao := dao.NewCommentDao(ctx)
+	Comment, _ := CommentDao.GetCommentByID(service.CommentId)
+	Comment.UpvoteNum = Comment.UpvoteNum - 1
+	err = CommentDao.UpdateCommentByID(Comment.ID, Comment)
+	if err != nil {
+		code = e.Error
+		util.LogrusObj.Infoln("UpdateComment", err)
 		return serializer.Response{
 			Status: code,
 			Msg:    e.GetMsg(code),

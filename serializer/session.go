@@ -14,7 +14,6 @@ type Session struct {
 	TheaterName string        `json:"theater_name"`
 	HallName    string        `json:"hall_name"`
 	Address     string        `json:"address"`
-	Telephone   string        `json:"telephone"`
 	Duration    time.Duration `json:"duration"`
 	ShowTime    time.Time     `json:"show_time"`
 	EndTime     time.Time     `json:"end_time"`
@@ -39,7 +38,6 @@ func BuildSession(session *model.Session) *Session {
 		TheaterName: session.Theater.Name,
 		HallName:    session.Hall.Name,
 		Address:     session.Theater.Address,
-		Telephone:   session.Theater.Telephone,
 		Duration:    session.Movie.Duration,
 		ShowTime:    session.ShowTime,
 		EndTime:     session.EndTime,
