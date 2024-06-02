@@ -28,6 +28,7 @@ type MovieService struct {
 	Score        float64       `json:"score" form:"score"`
 	Directors    []string      `json:"directors" form:"directors"`
 	Actors       []string      `json:"actors" form:"actors"`
+	TheaterId    uint          `json:"theater_id" form:"theater_id"`
 	model.BasePage
 }
 
@@ -198,6 +199,34 @@ func (service *MovieService) ListHot(ctx context.Context) serializer.Response {
 	go func() {
 		productDao = dao.NewMovieDaoByDB(productDao.DB)
 		movies, _ = productDao.ListHotMovieByCondition(categoryId, service.BasePage)
+		wg.Done()
+	}()
+	wg.Wait()
+
+	return serializer.BuildListResponse(serializer.BuildMovies(movies), uint(total))
+}
+
+// ListHotByTheater 获取影院热映电影列表
+func (service *MovieService) ListHotByTheater(ctx context.Context) serializer.Response {
+	var movies []*model.Movie
+	var err error
+	code := e.Success
+
+	movieDao := dao.NewMovieDao(ctx)
+	total, err := movieDao.CountHotMovieByTheater(service.MovieId, service.TheaterId)
+	if err != nil {
+		code = e.Error
+		util.LogrusObj.Infoln("CountHotMovieByTheater", err)
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+
+	wg := new(sync.WaitGroup)
+	wg.Add(1)
+	go func() {
+		movies, _ = movieDao.ListHotMovieByTheater(service.MovieId, service.TheaterId)
 		wg.Done()
 	}()
 	wg.Wait()

@@ -70,6 +70,8 @@ func NewRouter() *gin.Engine {
 				admin.DELETE("delete-session", api.DeleteSession)
 				//添加剧院
 				//admin.POST("add-theater", api.AddTheater)
+				//获取影院热映电影列表
+				admin.GET("movie/getHot", api.ListHotMovieByTheater)
 
 				//某剧院的影厅列表
 				admin.GET("halls", api.ListHall)

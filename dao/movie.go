@@ -33,6 +33,11 @@ func (dao *MovieDao) CountMovieByCondition(categoryId uint) (total int64, err er
 	return
 }
 
+func (dao *MovieDao) CountHotMovieByTheater(movieId, theaterId uint) (total int64, err error) {
+	err = dao.DB.Model(&model.MovieThreat{}).Where("movie_id = ? and thread_id = ?", movieId, theaterId).Count(&total).Error
+	return
+}
+
 func (dao *MovieDao) CountHotMovieByCondition(categoryId uint) (total int64, err error) {
 	if categoryId == 0 {
 		// 查询所有电影
@@ -60,6 +65,11 @@ func (dao *MovieDao) ListMovieByCondition(categoryId uint, page model.BasePage) 
 	} else {
 		err = dao.DB.Model(&model.Movie{}).Where("category_id LIKE ? ", "%"+strconv.Itoa(int(categoryId))+"%").Offset((page.PageNum - 1) * page.PageSize).Limit(page.PageSize).Find(&movies).Error
 	}
+	return
+}
+
+func (dao *MovieDao) ListHotMovieByTheater(movieId, theaterId uint) (movies []*model.Movie, err error) {
+	err = dao.DB.Model(&model.Movie{}).Where("movie_id = ? and thread_id = ?", movieId, theaterId).Find(&movies).Error
 	return
 }
 
@@ -103,5 +113,10 @@ func (dao *MovieDao) GetMovieByMovieID(id uint) (movie *model.Movie, err error) 
 
 func (dao *MovieDao) AddMovieSales(id uint, price uint) (err error) {
 	err = dao.DB.Model(&model.Movie{}).Where("id=?", id).Update("sales", gorm.Expr("sales + ?", price)).Error
+	return
+}
+
+func (dao *MovieDao) UpdateMovie(id uint, movie *model.Movie) (err error) {
+	err = dao.DB.Model(&model.Movie{}).Where("id=?", id).Updates(movie).Error
 	return
 }
