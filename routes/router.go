@@ -54,12 +54,8 @@ func NewRouter() *gin.Engine {
 			authed.DELETE("return-order", api.ReturnOrder)
 			authed.GET("orders", api.GetOrders)
 
-			//显示金额
-			//authed.POST("money", api.ShowMoney)
-
 			//搜索电影
 			authed.POST("movies", api.SearchMovie)
-			//authed.POST("movies", api.SearchMovie)
 			//用户发布评论，评分
 			authed.POST("publishComment", api.PublishComment)
 			//用户点赞某个评论	：为每条评论添加字段，判断是否为该用户点赞
@@ -132,7 +128,6 @@ func NewRouter() *gin.Engine {
 				//管理员删除不合法内容的评论
 				admin.DELETE("deleteCommentsByContent", api.DeleteCommentsByContent)
 
-				admin.POST("movie", api.CreateMovie)
 			}
 		}
 
