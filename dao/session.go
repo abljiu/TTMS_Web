@@ -5,6 +5,7 @@ import (
 	"context"
 	"gorm.io/gorm"
 	"sync"
+	"time"
 )
 
 type SessionDao struct {
@@ -118,4 +119,11 @@ func (dao *SessionDao) ListSession(theaterID uint, curTime string, page model.Ba
 		Offset((page.PageNum - 1) * page.PageSize).Limit(page.PageSize).
 		Find(&products).Error
 	return
+}
+
+func (dao *SessionDao) IsTimeOverlap(StartTime, EndTime time.Time) bool {
+	var count int64
+	dao.Model(&model.Session{}).
+		Where("((? BETWEEN show_time AND end_time) OR (? BETWEEN show_time AND end_time)) OR (show_time BETWEEN ? AND ? OR end_time BETWEEN ? AND ?)", StartTime, EndTime, StartTime, EndTime, StartTime, EndTime).Count(&count)
+	return count > 0
 }

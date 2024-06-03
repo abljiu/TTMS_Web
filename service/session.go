@@ -72,6 +72,13 @@ func (service *SessionServer) Add(ctx context.Context) serializer.Response {
 		SeatRow:       hall.SeatRow,
 		Price:         service.Price,
 	}
+	if sessionDao.IsTimeOverlap(session.ShowTime, session.EndTime) {
+		code = e.ErrorSessionTime
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
 
 	//添加场次
 	err = sessionDao.AddSession(session)
