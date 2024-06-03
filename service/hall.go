@@ -89,7 +89,9 @@ func (service *HallCreateRequest) Create(ctx context.Context) serializer.Respons
 		if n == 1 {
 			seatNum++
 		}
-		num = k
+		if string(service.Seat[k]) != "," {
+			num++
+		}
 	}
 	if num != service.SeatRow*service.SeatColumn {
 		return serializer.Response{
@@ -172,7 +174,9 @@ func (service *HallUpdateRequest) Update(ctx context.Context) serializer.Respons
 		if n == 1 {
 			seatNum++
 		}
-		num = k
+		if string(service.Seat[k]) != "," {
+			num++
+		}
 	}
 	if num != service.SeatRow*service.SeatColumn {
 		return serializer.Response{
