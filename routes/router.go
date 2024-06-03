@@ -37,6 +37,37 @@ func NewRouter() *gin.Engine {
 
 		//获取剧院列表
 		v1.GET("theaters", api.ListTheater)
+		//用户发布评论，评分
+		v1.POST("cs/publishComment", api.PublishComment) //
+		//用户点赞某个评论	：为每条评论添加字段，判断是否为该用户点赞
+		v1.POST("cs/upvote", api.Upvote) //
+		//用户取消点赞
+		v1.DELETE("cs/downVote", api.DownVote) //
+		//用户回复评论 ：任何用户都可以回复
+		v1.POST("cs/replyComment", api.ReplyComment) //
+		//用户查看影片所有影评
+		v1.GET("cs/getCommentsByMovie", api.GetCommentsByMovie)
+		//用户查看影片所有影评，点赞数倒叙
+		v1.GET("cs/getCommentsByHeat", api.GetCommentsByHeat)
+		//用户查看影片所有影评，好评和时间倒叙
+		v1.GET("cs/getAcclaims", api.GetAcclaims)
+		//用户查看影片所有影评 :按照时间倒序；点赞数倒叙；好评（差）和时间倒叙
+		v1.GET("cs/getNegativeComments", api.GetNegativeComments)
+		//用户删除自己的评论
+		v1.DELETE("cs/deleteCommentById", api.DeleteCommentByID)
+		//管理员查看所有影片评论
+		v1.GET("cs/getAllComments", api.GetAllComments)
+		//管理员通过评论ID查看评论
+		v1.GET("cs/getCommentByID", api.GetCommentByID)
+		//管理员查看用户的影片评论
+		v1.GET("cs/getCommentsByUserId", api.GetCommentsByUserId)
+		//管理员根据内容查找评论
+		v1.GET("cs/searchComment", api.SearchComment)
+		//管理员根据ID删除评论
+		//v1.DELETE("cs/deleteCommentById", api.DeleteCommentByID)
+		//管理员删除不合法内容的评论
+		v1.DELETE("cs/deleteCommentsByContent", api.DeleteCommentsByContent)
+
 		//需要登录保护
 		authed := v1.Group("/") //api/v1/
 		authed.Use(middleware.JWT())

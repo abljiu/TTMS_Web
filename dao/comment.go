@@ -22,6 +22,12 @@ func (dao *CommentDao) CreateComment(Comment *model.Comment) error {
 	return dao.DB.Model(&model.Comment{}).Create(&Comment).Error
 }
 func (dao *CommentDao) UpdateCommentByID(uid uint, Comment *model.Comment) error {
+	if Comment.UpvoteNum == 0 {
+		err := dao.DB.Model(&model.Comment{}).Where("id=?", uid).Updates(map[string]interface{}{"upvote_num": 0}).Error
+		if err != nil {
+			return err
+		}
+	}
 	err := dao.DB.Model(&model.Comment{}).Where("id=?", uid).Updates(&Comment).Error
 	return err
 }
@@ -68,11 +74,13 @@ func (dao *CommentDao) CountBadComments() (total int64, err error) {
 func (dao *CommentDao) ListComment(page model.BasePage, sortBy []string, ids []uint, book int) (Comments []*model.Comment, err error) {
 	orderStr := ""
 	//book 0 没有额外操作 ；1 当rate>=8；2 当rate<=5 ；3 user_id=?	4 movie_id=?
-	for _, field := range sortBy {
-		if orderStr != "" {
-			orderStr += " desc,"
-		}
+	for i, field := range sortBy {
 		orderStr += field
+		if i < len(sortBy)-1 {
+			orderStr += " desc,"
+		} else {
+			orderStr += " desc"
+		}
 	}
 	if book == 1 {
 		err = dao.DB.Model(&model.Comment{}).

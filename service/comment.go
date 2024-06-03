@@ -7,6 +7,7 @@ import (
 	"TTMS_Web/pkg/util"
 	"TTMS_Web/serializer"
 	"context"
+	"database/sql"
 	"fmt"
 	"gorm.io/gorm"
 	"sync"
@@ -105,7 +106,7 @@ func (service *PublishComment) PublishComment(ctx context.Context) serializer.Re
 		Content: service.Content,
 		UserID:  service.UserId,
 		MovieID: service.MovieID,
-		Rate:    service.Rate,
+		Rate:    uint(service.Rate),
 		IP:      service.IP,
 	}
 
@@ -136,7 +137,10 @@ func (service *ReplyComment) ReplyComment(ctx context.Context) serializer.Respon
 		Model:   gorm.Model{},
 		Content: service.Content,
 		UserID:  service.UserId,
-		RlyID:   service.RlyId,
+		RlyID: sql.NullInt64{
+			Int64: int64(service.RlyId),
+			Valid: true,
+		},
 		MovieID: service.MovieID,
 		IP:      service.IP,
 	}
@@ -202,6 +206,8 @@ func JudgeUpvoteIsSelf(ctx context.Context, userID uint, total int64, comments [
 			}
 		}
 	}
+	fmt.Println("______comments")
+	fmt.Println(serializer.BuildComments(comments)[0].IsSelfUpvote)
 	return serializer.BuildListResponse(serializer.BuildComments(comments), uint(total))
 }
 

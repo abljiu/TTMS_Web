@@ -74,17 +74,17 @@ func (service *DownVote) DownVote(ctx context.Context) serializer.Response {
 	var err error
 	code := e.Success
 	DownVoteDao := dao.NewUpvoteDao(ctx)
-	downVote, err := DownVoteDao.DeleteUpvoteByID(service.UpvoteId)
+	CommentDao := dao.NewCommentDao(ctx)
+	Comment, _ := CommentDao.GetCommentByID(service.CommentId)
 	if err != nil {
 		code = e.Error
-		util.LogrusObj.Infoln("DownVote", err)
+		util.LogrusObj.Infoln("GetCommentByID", err)
 		return serializer.Response{
 			Status: code,
 			Msg:    e.GetMsg(code),
 		}
 	}
-	CommentDao := dao.NewCommentDao(ctx)
-	Comment, _ := CommentDao.GetCommentByID(service.CommentId)
+	//更新点赞数目
 	Comment.UpvoteNum = Comment.UpvoteNum - 1
 	err = CommentDao.UpdateCommentByID(Comment.ID, Comment)
 	if err != nil {
@@ -95,6 +95,17 @@ func (service *DownVote) DownVote(ctx context.Context) serializer.Response {
 			Msg:    e.GetMsg(code),
 		}
 	}
+	//通过点赞ID删除
+	downVote, err := DownVoteDao.DeleteUpvoteByID(service.UpvoteId)
+	if err != nil {
+		code = e.Error
+		util.LogrusObj.Infoln("DownVote", err)
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+
 	return serializer.Response{
 		Status: code,
 		Msg:    e.GetMsg(code),
