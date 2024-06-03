@@ -43,8 +43,21 @@ func DeleteSession(c *gin.Context) {
 	}
 }
 
+// ListSession 获取某影厅场次列表
+func ListSession(c *gin.Context) {
+	listSession := service.SessionListRequest{}
+	if err := c.ShouldBind(&listSession); err == nil {
+		res := listSession.List(c.Request.Context())
+		c.JSON(http.StatusOK, res)
+	} else {
+		c.JSON(http.StatusBadRequest, ErrorResponse(err))
+		util.LogrusObj.Infoln("DeleteSession", err)
+	}
+}
+
+// GetSession 获取某场次详细信息
 func GetSession(c *gin.Context) {
-	getSession := service.SessionServer{}
+	getSession := service.SessionRequest{}
 	if err := c.ShouldBind(&getSession); err == nil {
 		res := getSession.Get(c.Request.Context())
 		c.JSON(http.StatusOK, res)

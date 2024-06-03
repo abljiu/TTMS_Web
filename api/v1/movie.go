@@ -94,3 +94,15 @@ func SearchMovie(c *gin.Context) {
 		util.LogrusObj.Infoln("SearchMovie", err)
 	}
 }
+
+// ListIndexHotMovies 获取首页热映电影
+func ListIndexHotMovies(c *gin.Context) {
+	searchMovie := service.MovieService{}
+	if err := c.ShouldBind(&searchMovie); err == nil {
+		res := searchMovie.ListIndexHotMovies(c.Request.Context())
+		c.JSON(http.StatusOK, res)
+	} else {
+		c.JSON(http.StatusBadRequest, ErrorResponse(err))
+		util.LogrusObj.Infoln("SearchMovie", err)
+	}
+}

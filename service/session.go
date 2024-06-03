@@ -5,8 +5,10 @@ import (
 	"TTMS_Web/dao"
 	"TTMS_Web/model"
 	"TTMS_Web/pkg/e"
+	"TTMS_Web/pkg/util"
 	"TTMS_Web/serializer"
 	"context"
+	"sync"
 	"time"
 )
 
@@ -17,6 +19,17 @@ type SessionServer struct {
 	HallID    uint      `form:"hall_id" json:"hall_id"`
 	TheaterID uint      `form:"theater_id" json:"theater_id"`
 	ShowTime  time.Time `form:"show_time" json:"show_time" time_format:"2006-01-02 15:04"`
+}
+
+type SessionListRequest struct {
+	TheaterID uint   `form:"theater_id" json:"theater_id" binding:"required"`
+	MovieID   uint   `form:"movie_id" json:"movie_id"`
+	Date      string `json:"date" form:"date"`
+	model.BasePage
+}
+
+type SessionRequest struct {
+	ID uint `json:"id" form:"id"`
 }
 
 // Add 添加场次
@@ -56,7 +69,7 @@ func (service *SessionServer) Add(ctx context.Context) serializer.Response {
 		EndTime:       service.ShowTime.Add(movie.Duration),
 		SurplusTicket: hall.SeatNum,
 		SeatStatus:    hall.Seat,
-		SeatRow:       hall.SeatRow,
+		SeatRow:       uint(hall.SeatRow),
 		Price:         service.Price,
 	}
 
@@ -84,7 +97,7 @@ func (service *SessionServer) Add(ctx context.Context) serializer.Response {
 	}
 
 	//添加库存
-	err = cache.InitializeStock(ctx, rdb, session.ID, uint(hall.SeatNum))
+	err = cache.InitializeStock(ctx, rdb, session.ID, hall.SeatNum)
 	if err != nil {
 		code = e.ErrorInitializeStock
 		return serializer.Response{
@@ -177,22 +190,102 @@ func (service *SessionServer) Delete(ctx context.Context) serializer.Response {
 	}
 }
 
-// Get  获取场次信息
-func (service *SessionServer) Get(ctx context.Context) serializer.Response {
+// List 获取场次列表
+func (service *SessionListRequest) List(ctx context.Context) serializer.Response {
+	var sessions []*model.Session
+	var err error
 	code := e.Success
-	sessionDao := dao.NewSessionDao(ctx)
-	//判断场次是否存在
-	session, err := sessionDao.GetSessionByID(service.SessionID)
+	if service.PageSize == 0 {
+		service.PageSize = 15
+	}
+
+	productDao := dao.NewSessionDao(ctx)
+
+	//curTime
+	curTime := time.Now()
+	curTimeStr := curTime.Format("2006-01-02 15:04")
+
+	var total int64
+	if len(service.Date) != 0 && service.MovieID != 0 { //date && movieID
+		total, err = productDao.CountSessionByMovieIDAndDate(service.TheaterID, service.MovieID, service.Date, curTimeStr)
+	} else if len(service.Date) != 0 { //date
+		total, err = productDao.CountSessionByDate(service.TheaterID, service.Date, curTimeStr)
+	} else if service.MovieID != 0 { //movieID
+		total, err = productDao.CountSessionByMovieID(service.TheaterID, service.MovieID, curTimeStr)
+	} else {
+		total, err = productDao.CountSession(service.TheaterID, curTimeStr)
+	}
 	if err != nil {
-		code = e.ErrorSessionId
+		code = e.Error
+		util.LogrusObj.Infoln("CountSession", err)
 		return serializer.Response{
 			Status: code,
 			Msg:    e.GetMsg(code),
 		}
 	}
+
+	wg := new(sync.WaitGroup)
+	wg.Add(1)
+	go func() {
+		productDao = dao.NewSessionDaoByDB(productDao.DB)
+		if len(service.Date) != 0 && service.MovieID != 0 { //date && movieID
+			sessions, _ = productDao.ListSessionByDateAndMovieID(service.TheaterID, service.MovieID, service.Date, curTimeStr, service.BasePage)
+		} else if len(service.Date) != 0 { //date
+			sessions, _ = productDao.ListSessionByDate(service.TheaterID, service.Date, curTimeStr, service.BasePage)
+		} else if service.MovieID != 0 { //movieID
+			sessions, _ = productDao.ListSessionByMovieID(service.TheaterID, service.MovieID, curTimeStr, service.BasePage)
+		} else {
+			sessions, _ = productDao.ListSession(service.TheaterID, curTimeStr, service.BasePage)
+		}
+		wg.Done()
+	}()
+	wg.Wait()
+
+	return serializer.BuildListResponse(serializer.BuildSessions(sessions, service.TheaterID, ctx), uint(total))
+}
+
+// Get 获取某场次详细信息
+func (service *SessionRequest) Get(ctx context.Context) serializer.Response {
+	var err error
+	code := e.Success
+
+	SessionDao := dao.NewSessionDao(ctx)
+	session, err := SessionDao.GetSessionByID(service.ID)
+	if err != nil {
+		code = e.Error
+		util.LogrusObj.Infoln("GetSession", err)
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+
+	movieDao := dao.NewMovieDao(ctx)
+	hallDao := dao.NewHallDao(ctx)
+	//movie
+	movie, err := movieDao.GetMovieByMovieID(session.MovieID)
+	if err != nil {
+		code = e.Error
+		util.LogrusObj.Infoln("GetMovieByMovieID", err)
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+	//hall
+	hall, err := hallDao.GetHallByHallID(session.HallID)
+	if err != nil {
+		code = e.Error
+		util.LogrusObj.Infoln("GetHallByHallID", err)
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+
 	return serializer.Response{
 		Status: code,
 		Msg:    e.GetMsg(code),
-		Data:   serializer.BuildSession(session),
+		Data:   serializer.BuildSession(session, movie, hall),
 	}
 }

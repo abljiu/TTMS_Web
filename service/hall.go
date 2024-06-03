@@ -21,8 +21,8 @@ type HallCreateRequest struct {
 	ID         uint   `json:"id" form:"id"`
 	TheaterId  uint   `json:"theater_id" form:"theater_id" binding:"required"`
 	Name       string `json:"name" form:"name" binding:"required"`
-	SeatRow    int    `json:"seat_row" form:"seat_row" binding:"required"`
-	SeatColumn int    `json:"seat_column" form:"seat_column" binding:"required"`
+	SeatRow    int    `json:"seat_row" form:"seat_row" binding:"required,gt=0"`
+	SeatColumn int    `json:"seat_column" form:"seat_column" binding:"required,gt=0"`
 	Seat       string `json:"seat" form:"seat" binding:"required"`
 }
 
@@ -34,8 +34,8 @@ type HallUpdateRequest struct {
 	ID         uint   `json:"id" form:"id" binding:"required"`
 	TheaterId  uint   `json:"theater_id" form:"theater_id" binding:"required"`
 	Name       string `json:"name" form:"name" binding:"required"`
-	SeatRow    int    `json:"seat_row" form:"seat_row" binding:"required"`
-	SeatColumn int    `json:"seat_column" form:"seat_column" binding:"required"`
+	SeatRow    int    `json:"seat_row" form:"seat_row" binding:"required,gt=0"`
+	SeatColumn int    `json:"seat_column" form:"seat_column" binding:"required,gt=0"`
 	Seat       string `json:"seat" form:"seat" binding:"required"`
 }
 
@@ -77,17 +77,30 @@ func (service *HallCreateRequest) Create(ctx context.Context) serializer.Respons
 	code := e.Success
 
 	var seatNum int
-	for k := 0; k < len(service.Seat); k++ {
+	var num int
+	for k := range service.Seat {
 		n, _ := strconv.Atoi(string(service.Seat[k]))
+		if n != 0 && n != 1 {
+			return serializer.Response{
+				Status: code,
+				Msg:    e.GetMsg(e.ErrorInvalidSeatParam),
+			}
+		}
 		if n == 1 {
 			seatNum++
+		}
+		num = k
+	}
+	if num != service.SeatRow*service.SeatColumn {
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(e.ErrorInvalidSeatParam),
 		}
 	}
 	if seatNum > service.SeatRow*service.SeatColumn {
 		return serializer.Response{
 			Status: code,
 			Msg:    e.GetMsg(e.ErrorInvalidSeatParam),
-			Data:   nil,
 		}
 	}
 
@@ -107,6 +120,7 @@ func (service *HallCreateRequest) Create(ctx context.Context) serializer.Respons
 		return serializer.Response{
 			Status: code,
 			Msg:    e.GetMsg(code),
+			Data:   err,
 		}
 	}
 
@@ -146,10 +160,24 @@ func (service *HallUpdateRequest) Update(ctx context.Context) serializer.Respons
 	code := e.Success
 
 	var seatNum int
+	var num int
 	for k := range service.Seat {
 		n, _ := strconv.Atoi(string(service.Seat[k]))
+		if n != 0 && n != 1 {
+			return serializer.Response{
+				Status: code,
+				Msg:    e.GetMsg(e.ErrorInvalidSeatParam),
+			}
+		}
 		if n == 1 {
 			seatNum++
+		}
+		num = k
+	}
+	if num != service.SeatRow*service.SeatColumn {
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(e.ErrorInvalidSeatParam),
 		}
 	}
 	if seatNum > service.SeatRow*service.SeatColumn {
@@ -177,6 +205,7 @@ func (service *HallUpdateRequest) Update(ctx context.Context) serializer.Respons
 		return serializer.Response{
 			Status: code,
 			Msg:    e.GetMsg(code),
+			Data:   err,
 		}
 	}
 

@@ -23,17 +23,18 @@ func NewRouter() *gin.Engine {
 
 		//轮播图
 		v1.GET("carousels", api.ListCarousel)
-
-		//查询电影票房
-		v1.GET("sales", api.ListMovieSales)
 		//根据类型查询热映电影
 		v1.GET("hot-movies", api.ListHotMovie)
 		//根据类型查询未上映电影
 		v1.GET("unreleased-movies", api.ListUnreleasedMovie)
 		//根据类型查询全部电影
 		v1.GET("all-movies", api.ListMovie)
-		//根据sessionId返回场次信息
-		v1.GET("session", api.GetSession)
+
+		//查询电影票房
+		v1.GET("sales", api.ListMovieSales)
+
+		//获取首页热映电影
+		v1.GET("index_hot_movies", api.ListIndexHotMovies)
 
 		//获取剧院列表
 		v1.GET("theaters", api.ListTheater)
@@ -57,6 +58,7 @@ func NewRouter() *gin.Engine {
 			//authed.POST("money", api.ShowMoney)
 
 			//搜索电影
+			authed.POST("movies", api.SearchMovie)
 			//authed.POST("movies", api.SearchMovie)
 			//用户发布评论，评分
 			authed.POST("publishComment", api.PublishComment)
@@ -89,6 +91,11 @@ func NewRouter() *gin.Engine {
 				admin.PUT("alter-session", api.AlterSession)
 				//删除场次
 				admin.DELETE("delete-session", api.DeleteSession)
+				//获取某影厅场次列表
+				admin.GET("sessions", api.ListSession)
+				//根据sessionID获取某场次详细信息
+				admin.GET("session", api.GetSession)
+
 				//添加剧院
 				//admin.POST("add-theater", api.AddTheater)
 				//获取影院热映电影列表
