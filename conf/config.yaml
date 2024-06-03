@@ -19,7 +19,7 @@ redis:
   RedisDbName: 2
 
 email:
-  ValidEmail: 'http://117.78.11.45:8080/#vaild/email/'
+  ValidEmail: 'http://117.78.11.45:5173/#vaild/email/'
   SmtpHost: smtp.qq.com
   SmtpEmail: '1160433376@qq.com'
   SmtpPass: 'qwbyyqacqjqijbbh'
