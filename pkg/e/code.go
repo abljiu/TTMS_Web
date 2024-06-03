@@ -30,8 +30,9 @@ const (
 	ErrorInitializeStock = 60002
 	ErrorCacheAddSession = 60003
 	//order模块
-	ErrorAddOrder = 70001
-	ErrorOrderID  = 70002
-	ErrorSeat     = 70003
-	ErrorEndTime  = 70004
+	ErrorAddOrder  = 70001
+	ErrorOrderID   = 70002
+	ErrorSeat      = 70003
+	ErrorEndTime   = 70004
+	ErrorOrderType = 7005
 )

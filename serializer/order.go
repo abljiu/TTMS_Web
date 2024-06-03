@@ -35,3 +35,11 @@ func BuildOrder(order *model.Order) *Order {
 		Money:     order.Money,
 	}
 }
+
+func BuildOrders(items []*model.Order) (products []Order) {
+	for i := 0; i < len(items); i++ {
+		product := BuildOrder(items[i])
+		products = append(products, *product)
+	}
+	return products
+}

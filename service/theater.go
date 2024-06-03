@@ -103,7 +103,7 @@ func (service *TheaterService) Search(ctx context.Context) serializer.Response {
 	return serializer.BuildListResponse(serializer.BuildTheaters(Theaters), uint(len(Theaters)))
 }
 
-// Search 搜索剧院根据名称
+// SearchById  搜索剧院根据名称
 func (service *TheaterService) SearchById(ctx context.Context) serializer.Response {
 	code := e.Success
 	if service.PageSize == 0 {

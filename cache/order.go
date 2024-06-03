@@ -72,7 +72,7 @@ func GetOrderInfo(ctx context.Context, rdb *redis.Client, orderID uint) (order *
 	orderInfo, err := rdb.Get(ctx, key).Result()
 	//缓存未命中
 	if errors.Is(err, redis.Nil) {
-		order, err := orderDao.GetOrderByID(orderID)
+		order, err := orderDao.GetOrderByOrderID(orderID)
 		if err != nil {
 			return nil, err
 		}
@@ -111,10 +111,10 @@ func SetOrderInfoPipe(ctx context.Context, pipe redis.Pipeliner, orderInfoJSON s
 }
 
 // SetOrderCount 添加订单倒计时
-func SetOrderCount(ctx context.Context, rdb *redis.Client, endTime string, orderID uint) {
+func SetOrderCount(ctx context.Context, rdb *redis.Client, endTime string, orderID uint) error {
 	// 将结束写入Redis缓存，并设置过期时间
 	key := fmt.Sprintf("order_count:%d", orderID)
-	rdb.Set(ctx, key, endTime, 14*time.Minute)
+	return rdb.Set(ctx, key, endTime, 14*time.Minute).Err()
 }
 
 // GetOrderCount 获取订单倒计时

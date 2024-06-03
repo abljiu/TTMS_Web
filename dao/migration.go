@@ -22,6 +22,7 @@ func migration() {
 			&model.Movie{},
 			&model.User{},
 			&model.Carousel{},
+			&model.MovieThreat{},
 			&model.Comment{},
 			&model.Upvote{},
 		)

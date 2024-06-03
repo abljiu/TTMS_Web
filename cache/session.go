@@ -9,7 +9,8 @@ import (
 // InitializeStock 初始化场次库存
 func InitializeStock(ctx context.Context, rdb *redis.Client, sessionID uint, stock uint) error {
 	key := fmt.Sprintf("ticket_stock:%d", sessionID)
-	return rdb.Set(ctx, key, stock, 0).Err()
+	err := rdb.Set(ctx, key, stock, 0).Err()
+	return err
 }
 
 // AlterStock 更改场次库存
