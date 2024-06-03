@@ -25,6 +25,7 @@ var MsgFlags = map[int]string{
 	ErrorSeat:              "座位已经被选定",
 	ErrorEndTime:           "订单超时",
 	ErrorOrderType:         "订单状态错误",
+	ErrorTheaterID:         "剧院id错误",
 }
 
 // GetMsg 获取状态码对应的信息

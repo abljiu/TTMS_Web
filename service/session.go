@@ -69,7 +69,7 @@ func (service *SessionServer) Add(ctx context.Context) serializer.Response {
 		EndTime:       service.ShowTime.Add(movie.Duration),
 		SurplusTicket: hall.SeatNum,
 		SeatStatus:    hall.Seat,
-		SeatRow:       uint(hall.SeatRow),
+		SeatRow:       hall.SeatRow,
 		Price:         service.Price,
 	}
 
@@ -86,7 +86,19 @@ func (service *SessionServer) Add(ctx context.Context) serializer.Response {
 	//更新电影信息
 	if !movie.OnSale {
 		movie.OnSale = true
+		movieTheater := &model.MovieTheater{
+			MovieID:   service.MovieID,
+			TheaterID: service.TheaterID,
+		}
 		err = movieDao.UpdateMovie(movie.ID, movie)
+		if err != nil {
+			code = e.Error
+			return serializer.Response{
+				Status: code,
+				Msg:    e.GetMsg(code),
+			}
+		}
+		err = movieDao.AddMovieTheater(movieTheater)
 		if err != nil {
 			code = e.Error
 			return serializer.Response{

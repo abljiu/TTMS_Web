@@ -7,7 +7,7 @@ import (
 )
 
 // InitializeStock 初始化场次库存
-func InitializeStock(ctx context.Context, rdb *redis.Client, sessionID uint, stock uint) error {
+func InitializeStock(ctx context.Context, rdb *redis.Client, sessionID uint, stock int) error {
 	key := fmt.Sprintf("ticket_stock:%d", sessionID)
 	err := rdb.Set(ctx, key, stock, 0).Err()
 	return err

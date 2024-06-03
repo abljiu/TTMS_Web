@@ -185,7 +185,7 @@ func (service *OrderService) Confirm(ctx context.Context) serializer.Response {
 	return serializer.Response{
 		Status: code,
 		Msg:    e.GetMsg(code),
-		Data:   endTime.Sub(time.Now()).Minutes(),
+		Data:   endTime.Sub(time.Now()).Seconds(),
 	}
 }
 

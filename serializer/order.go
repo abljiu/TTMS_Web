@@ -20,7 +20,7 @@ type Order struct {
 func BuildOrder(order *model.Order) *Order {
 	seat := make([][2]int, 0)
 	seats := util.ParseSeat(order.Seat)
-	for i, j := 0, 1; j < len(seats); i, j = i+1, j+1 {
+	for i, j := 0, 1; j < len(seats); i, j = i+2, j+2 {
 		seat = append(seat, [2]int{seats[i], seats[j]})
 	}
 	return &Order{

@@ -22,7 +22,7 @@ func migration() {
 			&model.Movie{},
 			&model.User{},
 			&model.Carousel{},
-			&model.MovieThreat{},
+			&model.MovieTheater{},
 			&model.Comment{},
 			&model.Upvote{},
 		)

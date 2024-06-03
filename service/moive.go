@@ -210,12 +210,12 @@ func (service *MovieService) ListHot(ctx context.Context) serializer.Response {
 
 // ListHotByTheater 获取影院热映电影列表
 func (service *MovieService) ListHotByTheater(ctx context.Context) serializer.Response {
-	var movies []*model.Movie
+	var movies []*model.MovieTheater
 	var err error
 	code := e.Success
 
 	movieDao := dao.NewMovieDao(ctx)
-	total, err := movieDao.CountHotMovieByTheater(service.MovieId, service.TheaterId)
+	total, err := movieDao.CountHotMovieByTheater(service.TheaterId)
 	if err != nil {
 		code = e.Error
 		util.LogrusObj.Infoln("CountHotMovieByTheater", err)
@@ -228,12 +228,12 @@ func (service *MovieService) ListHotByTheater(ctx context.Context) serializer.Re
 	wg := new(sync.WaitGroup)
 	wg.Add(1)
 	go func() {
-		movies, _ = movieDao.ListHotMovieByTheater(service.MovieId, service.TheaterId)
+		movies, _ = movieDao.ListHotMovieByTheater(service.TheaterId)
 		wg.Done()
 	}()
 	wg.Wait()
 
-	return serializer.BuildListResponse(serializer.BuildMovies(movies), uint(total))
+	return serializer.BuildListResponse(serializer.BuildMoviesByTheater(movies), uint(total))
 }
 
 // ListUnreleased 获取未上映电影列表
@@ -362,34 +362,5 @@ func (service *MovieService) ListIndexHotMovies(ctx context.Context) serializer.
 	}()
 	wg.Wait()
 
-	categoryDao := dao.NewCategoryDao(ctx)
-	var categoryStrings []string
-	for _, movie := range movies {
-		CategoryId := make([]uint, len(movie.CategoryId))
-		strSlice := strings.Split(movie.CategoryId, ",")
-		for i, str := range strSlice {
-			num, err := strconv.ParseUint(str, 10, 64)
-			if err != nil {
-				code = e.Error
-				util.LogrusObj.Infoln("ParseUint", err)
-				return serializer.Response{
-					Status: code,
-					Msg:    e.GetMsg(code),
-				}
-			}
-			CategoryId[i] = uint(num)
-		}
-		categoryString, err := categoryDao.GetCategory(CategoryId)
-		if err != nil {
-			code = e.Error
-			util.LogrusObj.Infoln("GetCategory", err)
-			return serializer.Response{
-				Status: code,
-				Msg:    e.GetMsg(code),
-			}
-		}
-		categoryStrings = append(categoryStrings, categoryString)
-	}
-
-	return serializer.BuildListResponse(serializer.BuildMovies(movies, categoryStrings), uint(total))
+	return serializer.BuildListResponse(serializer.BuildMovies(movies), uint(total))
 }

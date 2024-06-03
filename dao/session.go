@@ -45,6 +45,11 @@ func (dao *SessionDao) DeleteSessionByID(uid uint) error {
 	return err
 }
 
+func (dao *SessionDao) ListSessionByTheater(id uint) (session []*model.Session, err error) {
+	err = dao.DB.Model(&model.Session{}).Where("theater_id=?", id).Find(&session).Error
+	return
+}
+
 func (dao *SessionDao) CountSessionByMovieIDAndDate(theaterID uint, movieID uint, date string, curTime string) (total int64, err error) {
 	dao.mu.RLock()         // 获取读锁
 	defer dao.mu.RUnlock() // 操作结束后释放读锁

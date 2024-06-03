@@ -35,4 +35,6 @@ const (
 	ErrorSeat      = 70003
 	ErrorEndTime   = 70004
 	ErrorOrderType = 7005
+	//theater模块
+	ErrorTheaterID = 80001
 )
