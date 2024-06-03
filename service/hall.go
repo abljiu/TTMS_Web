@@ -80,7 +80,8 @@ func (service *HallCreateRequest) Create(ctx context.Context) serializer.Respons
 	var num int
 	for k := range service.Seat {
 		n, _ := strconv.Atoi(string(service.Seat[k]))
-		if n != 0 && n != 1 {
+		s := string(service.Seat[k])
+		if n != 0 && n != 1 && s != "," {
 			return serializer.Response{
 				Status: code,
 				Msg:    e.GetMsg(e.ErrorInvalidSeatParam),
@@ -89,7 +90,7 @@ func (service *HallCreateRequest) Create(ctx context.Context) serializer.Respons
 		if n == 1 {
 			seatNum++
 		}
-		if string(service.Seat[k]) != "," {
+		if s != "," {
 			num++
 		}
 	}
@@ -165,7 +166,8 @@ func (service *HallUpdateRequest) Update(ctx context.Context) serializer.Respons
 	var num int
 	for k := range service.Seat {
 		n, _ := strconv.Atoi(string(service.Seat[k]))
-		if n != 0 && n != 1 {
+		s := string(service.Seat[k])
+		if n != 0 && n != 1 && s != "," {
 			return serializer.Response{
 				Status: code,
 				Msg:    e.GetMsg(e.ErrorInvalidSeatParam),
@@ -174,7 +176,7 @@ func (service *HallUpdateRequest) Update(ctx context.Context) serializer.Respons
 		if n == 1 {
 			seatNum++
 		}
-		if string(service.Seat[k]) != "," {
+		if s != "," {
 			num++
 		}
 	}
