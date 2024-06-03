@@ -38,7 +38,7 @@ func (service *SessionServer) Add(ctx context.Context) serializer.Response {
 
 	sessionDao := dao.NewSessionDao(ctx)
 	movieDao := dao.NewMovieDao(ctx)
-	theaterDao := dao.NewHallDao(ctx)
+	hallDao := dao.NewHallDao(ctx)
 	rdb := cache.GetRedisClient()
 
 	//根据id获取电影
@@ -50,8 +50,9 @@ func (service *SessionServer) Add(ctx context.Context) serializer.Response {
 			Msg:    e.GetMsg(code),
 		}
 	}
+
 	// 根据id获取影厅
-	hall, err := theaterDao.GetHallByHallID(service.HallID)
+	hall, err := hallDao.GetHallByHallID(service.HallID)
 	if err != nil {
 		code = e.ErrorHallId
 		return serializer.Response{
@@ -68,9 +69,10 @@ func (service *SessionServer) Add(ctx context.Context) serializer.Response {
 		EndTime:       service.ShowTime.Add(movie.Duration),
 		SurplusTicket: hall.SeatNum,
 		SeatStatus:    hall.Seat,
-		SeatRow:       uint(hall.SeatRow),
+		SeatRow:       hall.SeatRow,
 		Price:         service.Price,
 	}
+
 	//添加场次
 	err = sessionDao.AddSession(session)
 	if err != nil {
@@ -80,6 +82,32 @@ func (service *SessionServer) Add(ctx context.Context) serializer.Response {
 			Msg:    e.GetMsg(code),
 		}
 	}
+
+	//更新电影信息
+	if !movie.OnSale {
+		movie.OnSale = true
+		movieTheater := &model.MovieTheater{
+			MovieID:   service.MovieID,
+			TheaterID: service.TheaterID,
+		}
+		err = movieDao.UpdateMovie(movie.ID, movie)
+		if err != nil {
+			code = e.Error
+			return serializer.Response{
+				Status: code,
+				Msg:    e.GetMsg(code),
+			}
+		}
+		err = movieDao.AddMovieTheater(movieTheater)
+		if err != nil {
+			code = e.Error
+			return serializer.Response{
+				Status: code,
+				Msg:    e.GetMsg(code),
+			}
+		}
+	}
+
 	//添加库存
 	err = cache.InitializeStock(ctx, rdb, session.ID, hall.SeatNum)
 	if err != nil {

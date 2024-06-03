@@ -83,7 +83,7 @@ func (service *HallCreateRequest) Create(ctx context.Context) serializer.Respons
 		s := string(service.Seat[k])
 		if n != 0 && n != 1 && s != "," {
 			return serializer.Response{
-				Status: code,
+				Status: e.ErrorInvalidSeatParam,
 				Msg:    e.GetMsg(e.ErrorInvalidSeatParam),
 			}
 		}
@@ -94,15 +94,16 @@ func (service *HallCreateRequest) Create(ctx context.Context) serializer.Respons
 			num++
 		}
 	}
+
 	if num != service.SeatRow*service.SeatColumn {
 		return serializer.Response{
-			Status: code,
+			Status: e.ErrorInvalidSeatParam,
 			Msg:    e.GetMsg(e.ErrorInvalidSeatParam),
 		}
 	}
 	if seatNum > service.SeatRow*service.SeatColumn {
 		return serializer.Response{
-			Status: code,
+			Status: e.ErrorInvalidSeatParam,
 			Msg:    e.GetMsg(e.ErrorInvalidSeatParam),
 		}
 	}

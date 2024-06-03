@@ -16,6 +16,6 @@ type Order struct {
 	Session   Session `gorm:"ForeignKey:SessionID"`
 	Seat      string  `gorm:"not null"`
 	Num       int     `gorm:"not null"`
-	Type      uint    //0 待支付 1 已支付 2 已完成
+	Type      uint    //0 待支付 1 已支付 2 已完成 3 已退款
 	Money     float64
 }

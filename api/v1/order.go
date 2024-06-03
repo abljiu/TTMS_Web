@@ -18,10 +18,43 @@ func SubmitOrder(c *gin.Context) {
 	}
 }
 
+func ConfirmOrder(c *gin.Context) {
+	var confirmOrder service.OrderService
+	if err := c.ShouldBind(&confirmOrder); err == nil {
+		res := confirmOrder.Confirm(c.Request.Context())
+		c.JSON(http.StatusOK, res)
+	} else {
+		c.JSON(http.StatusBadRequest, ErrorResponse(err))
+		util.LogrusObj.Infoln("ReturnOrder", err)
+	}
+}
+
 func ReturnOrder(c *gin.Context) {
 	var returnOrder service.OrderService
 	if err := c.ShouldBind(&returnOrder); err == nil {
 		res := returnOrder.Return(c.Request.Context())
+		c.JSON(http.StatusOK, res)
+	} else {
+		c.JSON(http.StatusBadRequest, ErrorResponse(err))
+		util.LogrusObj.Infoln("ReturnOrder", err)
+	}
+}
+
+func PayOrder(c *gin.Context) {
+	var payOrder service.OrderService
+	if err := c.ShouldBind(&payOrder); err == nil {
+		res := payOrder.Pay(c.Request.Context())
+		c.JSON(http.StatusOK, res)
+	} else {
+		c.JSON(http.StatusBadRequest, ErrorResponse(err))
+		util.LogrusObj.Infoln("ReturnOrder", err)
+	}
+}
+
+func GetOrders(c *gin.Context) {
+	var payOrder service.OrderService
+	if err := c.ShouldBind(&payOrder); err == nil {
+		res := payOrder.Get(c.Request.Context())
 		c.JSON(http.StatusOK, res)
 	} else {
 		c.JSON(http.StatusBadRequest, ErrorResponse(err))
