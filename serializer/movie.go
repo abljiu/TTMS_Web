@@ -60,7 +60,7 @@ func BuildMovies(items []*model.Movie) (products []Movie) {
 	return products
 }
 
-func BuildMoviesByTheater(items []*model.MovieTheater) (products []Movie) {
+func BuildMoviesByTheater(items []model.MovieTheater) (products []Movie) {
 	for i := 0; i < len(items); i++ {
 		product := BuildMovie(&items[i].Movie)
 		products = append(products, product)

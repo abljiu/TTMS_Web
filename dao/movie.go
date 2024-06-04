@@ -3,6 +3,7 @@ package dao
 import (
 	"TTMS_Web/model"
 	"context"
+	"fmt"
 	"gorm.io/gorm"
 	"strconv"
 	"time"
@@ -134,9 +135,10 @@ func (dao *MovieDao) CountHotMovieByTheater(theaterId uint) (total int64, err er
 	return
 }
 
-func (dao *MovieDao) ListHotMovieByTheater(theaterId uint) (movies []*model.MovieTheater, err error) {
+func (dao *MovieDao) ListHotMovieByTheater(theaterId uint) (movies []model.MovieTheater, err error) {
 	err = dao.DB.Model(&model.MovieTheater{}).Preload("Movie").Preload("Theater").
 		Where("theater_id = ?", theaterId).Find(&movies).Error
+	fmt.Println(movies[0])
 	return
 }
 

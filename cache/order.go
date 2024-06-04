@@ -13,6 +13,8 @@ import (
 
 // GetSessionInfo 从缓存中获取场次信息
 func GetSessionInfo(ctx context.Context, rdb *redis.Client, sessionID uint) (*model.Session, error) {
+	Mutex.Lock()
+	defer Mutex.Unlock()
 	session := &model.Session{}
 	key := fmt.Sprintf("session_info:%d", sessionID)
 	sessionDao := dao.NewSessionDao(ctx)
@@ -44,6 +46,8 @@ func GetSessionInfo(ctx context.Context, rdb *redis.Client, sessionID uint) (*mo
 
 // SetSessionInfo 添加场次信息
 func SetSessionInfo(ctx context.Context, rdb *redis.Client, sessionInfoJSON string, sessionID uint) (err error) {
+	Mutex.Lock()
+	defer Mutex.Unlock()
 	// 将场次信息写入Redis缓存，并设置过期时间
 	key := fmt.Sprintf("session_info:%d", sessionID)
 	err = rdb.Set(ctx, key, sessionInfoJSON, 10*time.Minute).Err()
@@ -52,6 +56,8 @@ func SetSessionInfo(ctx context.Context, rdb *redis.Client, sessionInfoJSON stri
 
 // DelSessionInfo 删除场次信息
 func DelSessionInfo(ctx context.Context, rdb *redis.Client, sessionID uint) (err error) {
+	Mutex.Lock()
+	defer Mutex.Unlock()
 	// 将场次信息写入Redis缓存，并设置过期时间
 	key := fmt.Sprintf("session_info:%d", sessionID)
 	err = rdb.Del(ctx, key).Err()
@@ -60,6 +66,8 @@ func DelSessionInfo(ctx context.Context, rdb *redis.Client, sessionID uint) (err
 
 // SetSessionInfoPipe 添加场次信息
 func SetSessionInfoPipe(ctx context.Context, pipe redis.Pipeliner, sessionInfoJSON string, sessionID uint) {
+	Mutex.Lock()
+	defer Mutex.Unlock()
 	// 将场次信息写入Redis缓存，并设置过期时间
 	key := fmt.Sprintf("session_info:%d", sessionID)
 	pipe.Set(ctx, key, sessionInfoJSON, 10*time.Minute)
@@ -67,6 +75,8 @@ func SetSessionInfoPipe(ctx context.Context, pipe redis.Pipeliner, sessionInfoJS
 
 // GetOrderInfo 从缓存中获取订单信息
 func GetOrderInfo(ctx context.Context, rdb *redis.Client, orderID uint) (order *model.Order, err error) {
+	Mutex.Lock()
+	defer Mutex.Unlock()
 	key := fmt.Sprintf("order_info:%d", orderID)
 	orderDao := dao.NewOrderDao(ctx)
 	orderInfo, err := rdb.Get(ctx, key).Result()
@@ -105,6 +115,8 @@ func SetOrderInfo(ctx context.Context, rdb *redis.Client, orderInfoJSON string, 
 
 // SetOrderInfoPipe 添加订单信息
 func SetOrderInfoPipe(ctx context.Context, pipe redis.Pipeliner, orderInfoJSON string, orderID uint) {
+	Mutex.Lock()
+	defer Mutex.Unlock()
 	// 将场次信息写入Redis缓存，并设置过期时间
 	key := fmt.Sprintf("order_info:%d", orderID)
 	pipe.Set(ctx, key, orderInfoJSON, 10*time.Minute)

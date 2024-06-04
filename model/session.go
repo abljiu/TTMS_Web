@@ -2,7 +2,6 @@ package model
 
 import (
 	"gorm.io/gorm"
-	"sync"
 	"time"
 )
 
@@ -20,9 +19,4 @@ type Session struct {
 	SeatStatus    string    `gorm:"not null"`
 	Price         float64   `gorm:"not null"`
 	SeatRow       int       `gorm:"not null"`
-}
-
-type SessionWithMutex struct {
-	Session *Session
-	Mutex   sync.RWMutex
 }

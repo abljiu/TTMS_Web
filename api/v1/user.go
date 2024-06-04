@@ -99,3 +99,14 @@ func AddAdmin(c *gin.Context) {
 		util.LogrusObj.Infoln("UserUpdate", err)
 	}
 }
+
+func AddConductor(c *gin.Context) {
+	var addConductor service.UserService
+	if err := c.ShouldBind(&addConductor); err == nil {
+		res := addConductor.AddConductor(c.Request.Context())
+		c.JSON(http.StatusOK, res)
+	} else {
+		c.JSON(http.StatusBadRequest, ErrorResponse(err))
+		util.LogrusObj.Infoln("UserUpdate", err)
+	}
+}

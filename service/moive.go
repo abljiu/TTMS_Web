@@ -210,7 +210,7 @@ func (service *MovieService) ListHot(ctx context.Context) serializer.Response {
 
 // ListHotByTheater 获取影院热映电影列表
 func (service *MovieService) ListHotByTheater(ctx context.Context) serializer.Response {
-	var movies []*model.MovieTheater
+	var movies []model.MovieTheater
 	var err error
 	code := e.Success
 
@@ -232,7 +232,6 @@ func (service *MovieService) ListHotByTheater(ctx context.Context) serializer.Re
 		wg.Done()
 	}()
 	wg.Wait()
-
 	return serializer.BuildListResponse(serializer.BuildMoviesByTheater(movies), uint(total))
 }
 
@@ -370,9 +369,16 @@ func (service *MovieService) Delete(ctx context.Context) serializer.Response {
 	code := e.Success
 
 	movieDao := dao.NewMovieDao(ctx)
-	_, err := movieDao.GetMovieByMovieID(service.MovieId)
+	movie, err := movieDao.GetMovieByMovieID(service.MovieId)
 	if err != nil {
 		code = e.ErrorMovieId
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+	if movie.OnSale {
+		code = e.ErrorMovieStatus
 		return serializer.Response{
 			Status: code,
 			Msg:    e.GetMsg(code),

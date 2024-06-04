@@ -9,8 +9,9 @@ import (
 
 func SubmitOrder(c *gin.Context) {
 	var submitOrder service.OrderService
+	claims, _ := util.ParseToken(c.GetHeader("Authorization"))
 	if err := c.ShouldBind(&submitOrder); err == nil {
-		res := submitOrder.Submit(c.Request.Context())
+		res := submitOrder.Submit(c.Request.Context(), claims.UserID)
 		c.JSON(http.StatusOK, res)
 	} else {
 		c.JSON(http.StatusBadRequest, ErrorResponse(err))
@@ -31,8 +32,9 @@ func ConfirmOrder(c *gin.Context) {
 
 func ReturnOrder(c *gin.Context) {
 	var returnOrder service.OrderService
+	claims, _ := util.ParseToken(c.GetHeader("Authorization"))
 	if err := c.ShouldBind(&returnOrder); err == nil {
-		res := returnOrder.Return(c.Request.Context())
+		res := returnOrder.Return(c.Request.Context(), claims.UserID)
 		c.JSON(http.StatusOK, res)
 	} else {
 		c.JSON(http.StatusBadRequest, ErrorResponse(err))
@@ -42,8 +44,9 @@ func ReturnOrder(c *gin.Context) {
 
 func PayOrder(c *gin.Context) {
 	var payOrder service.OrderService
+	claims, _ := util.ParseToken(c.GetHeader("Authorization"))
 	if err := c.ShouldBind(&payOrder); err == nil {
-		res := payOrder.Pay(c.Request.Context())
+		res := payOrder.Pay(c.Request.Context(), claims.UserID)
 		c.JSON(http.StatusOK, res)
 	} else {
 		c.JSON(http.StatusBadRequest, ErrorResponse(err))
@@ -53,8 +56,9 @@ func PayOrder(c *gin.Context) {
 
 func GetOrders(c *gin.Context) {
 	var payOrder service.OrderService
+	claims, _ := util.ParseToken(c.GetHeader("Authorization"))
 	if err := c.ShouldBind(&payOrder); err == nil {
-		res := payOrder.Get(c.Request.Context())
+		res := payOrder.Get(c.Request.Context(), claims.UserID)
 		c.JSON(http.StatusOK, res)
 	} else {
 		c.JSON(http.StatusBadRequest, ErrorResponse(err))

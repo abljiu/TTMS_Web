@@ -53,6 +53,8 @@ func NewRouter() *gin.Engine {
 			authed.POST("pay-order", api.PayOrder)
 			authed.DELETE("return-order", api.ReturnOrder)
 			authed.GET("orders", api.GetOrders)
+			//根据sessionID获取某场次详细信息
+			authed.GET("session", api.GetSession)
 
 			//搜索电影
 			authed.POST("movies", api.SearchMovie)
@@ -81,6 +83,8 @@ func NewRouter() *gin.Engine {
 			{
 				//添加管理员
 				admin.PUT("add-admin", api.AddAdmin)
+				//添加售票员
+				admin.PUT("add-conductor", api.AddConductor)
 				//添加电影
 				admin.POST("add-movie", api.CreateMovie)
 				//删除电影

@@ -250,11 +250,12 @@ func (service *UserService) Valid(ctx context.Context, token string) serializer.
 			Msg:    e.GetMsg(code),
 		}
 	}
+
 	user := &model.User{
 		NickName: nickName,
 		Status:   model.Normal,
 		Avatar:   "avatar.JPG",
-		Money:    0,
+		Money:    1000,
 	}
 
 	if operationType == 1 {
@@ -351,6 +352,36 @@ func (service *UserService) AddAdmin(ctx context.Context) serializer.Response {
 	}
 
 	user.Status = model.Administrator
+	err = userDao.UpdateUserByID(user.ID, user)
+	if err != nil {
+		code = e.Error
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+
+	return serializer.Response{
+		Status: code,
+		Data:   serializer.BuildUser(user),
+		Msg:    e.GetMsg(code),
+	}
+}
+
+// AddConductor 添加管理员
+func (service *UserService) AddConductor(ctx context.Context) serializer.Response {
+	code := e.Success
+	userDao := dao.NewUserDao(ctx)
+	user, _, err := userDao.ExitOrNorByUserID(service.UserID)
+	if err != nil {
+		code = e.Error
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+
+	user.Status = model.Conductor
 	err = userDao.UpdateUserByID(user.ID, user)
 	if err != nil {
 		code = e.Error
