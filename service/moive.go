@@ -364,3 +364,31 @@ func (service *MovieService) ListIndexHotMovies(ctx context.Context) serializer.
 
 	return serializer.BuildListResponse(serializer.BuildMovies(movies), uint(total))
 }
+
+// Delete 删除电影
+func (service *MovieService) Delete(ctx context.Context) serializer.Response {
+	code := e.Success
+
+	movieDao := dao.NewMovieDao(ctx)
+	_, err := movieDao.GetMovieByMovieID(service.MovieId)
+	if err != nil {
+		code = e.ErrorMovieId
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+	_, err = movieDao.DeleteMovie(service.MovieId)
+	if err != nil {
+		code = e.ErrorMovieId
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+
+	return serializer.Response{
+		Status: code,
+		Msg:    e.GetMsg(code),
+	}
+}

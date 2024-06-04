@@ -24,6 +24,11 @@ func (dao *MovieDao) CreateMovie(product *model.Movie) (err error) {
 	return dao.DB.Model(&model.Movie{}).Create(&product).Error
 }
 
+func (dao *MovieDao) DeleteMovie(id uint) (product *model.Movie, err error) {
+	dao.DB.Model(&model.Movie{}).Where("id = ?", id).Delete(&product)
+	return product, nil
+}
+
 func (dao *MovieDao) CountMovieByCondition(categoryId uint) (total int64, err error) {
 	if categoryId == 0 {
 		// 查询所有电影

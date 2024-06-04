@@ -88,3 +88,14 @@ func ShowMoney(c *gin.Context) {
 		util.LogrusObj.Infoln("ShowMoney", err)
 	}
 }
+
+func AddAdmin(c *gin.Context) {
+	var addAmin service.UserService
+	if err := c.ShouldBind(&addAmin); err == nil {
+		res := addAmin.AddAdmin(c.Request.Context())
+		c.JSON(http.StatusOK, res)
+	} else {
+		c.JSON(http.StatusBadRequest, ErrorResponse(err))
+		util.LogrusObj.Infoln("UserUpdate", err)
+	}
+}

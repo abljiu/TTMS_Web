@@ -79,8 +79,12 @@ func NewRouter() *gin.Engine {
 			admin := v1.Group("/admin") //api/v1/admin
 			admin.Use(middleware.Admin())
 			{
+				//添加管理员
+				admin.PUT("add-admin", api.AddAdmin)
 				//添加电影
 				admin.POST("add-movie", api.CreateMovie)
+				//删除电影
+				admin.DELETE("del-movie", api.DeleteMovie)
 				//增加场次
 				admin.POST("add-session", api.AddSession)
 				//修改场次

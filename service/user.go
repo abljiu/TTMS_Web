@@ -336,3 +336,33 @@ func (service *UserService) Show(ctx context.Context, uid uint) serializer.Respo
 		Msg:    e.GetMsg(code),
 	}
 }
+
+// AddAdmin 添加管理员
+func (service *UserService) AddAdmin(ctx context.Context) serializer.Response {
+	code := e.Success
+	userDao := dao.NewUserDao(ctx)
+	user, _, err := userDao.ExitOrNorByUserID(service.UserID)
+	if err != nil {
+		code = e.Error
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+
+	user.Status = model.Administrator
+	err = userDao.UpdateUserByID(user.ID, user)
+	if err != nil {
+		code = e.Error
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+
+	return serializer.Response{
+		Status: code,
+		Data:   serializer.BuildUser(user),
+		Msg:    e.GetMsg(code),
+	}
+}

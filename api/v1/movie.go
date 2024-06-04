@@ -103,6 +103,18 @@ func ListIndexHotMovies(c *gin.Context) {
 		c.JSON(http.StatusOK, res)
 	} else {
 		c.JSON(http.StatusBadRequest, ErrorResponse(err))
-		util.LogrusObj.Infoln("SearchMovie", err)
+		util.LogrusObj.Infoln("ListIndexHotMovies", err)
+	}
+}
+
+// DeleteMovie 获取首页热映电影
+func DeleteMovie(c *gin.Context) {
+	searchMovie := service.MovieService{}
+	if err := c.ShouldBind(&searchMovie); err == nil {
+		res := searchMovie.Delete(c.Request.Context())
+		c.JSON(http.StatusOK, res)
+	} else {
+		c.JSON(http.StatusBadRequest, ErrorResponse(err))
+		util.LogrusObj.Infoln("DeleteMovie", err)
 	}
 }
