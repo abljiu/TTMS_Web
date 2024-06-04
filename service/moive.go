@@ -30,6 +30,7 @@ type MovieService struct {
 	Score        float64       `json:"score" form:"score"`
 	Directors    []string      `json:"directors" form:"directors"`
 	Actors       []string      `json:"actors" form:"actors"`
+	Theaters     []string      `json:"theaters" form:"theaters"`
 	TheaterId    uint          `json:"theater_id" form:"theater_id"`
 	model.BasePage
 }
@@ -210,8 +211,8 @@ func (service *MovieService) ListHot(ctx context.Context) serializer.Response {
 
 // ListHotByTheater 获取影院热映电影列表
 func (service *MovieService) ListHotByTheater(ctx context.Context) serializer.Response {
-	var movies []model.MovieTheater
 	var err error
+	var movies []*model.Movie
 	code := e.Success
 
 	movieDao := dao.NewMovieDao(ctx)
@@ -232,7 +233,7 @@ func (service *MovieService) ListHotByTheater(ctx context.Context) serializer.Re
 		wg.Done()
 	}()
 	wg.Wait()
-	return serializer.BuildListResponse(serializer.BuildMoviesByTheater(movies), uint(total))
+	return serializer.BuildListResponse(serializer.BuildMovies(movies), uint(total))
 }
 
 // ListUnreleased 获取未上映电影列表

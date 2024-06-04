@@ -93,25 +93,24 @@ func (service *SessionServer) Add(ctx context.Context) serializer.Response {
 	//更新电影信息
 	if !movie.OnSale {
 		movie.OnSale = true
-		movieTheater := &model.MovieTheater{
-			MovieID:   service.MovieID,
-			TheaterID: service.TheaterID,
+	}
+
+	theaterDao := dao.NewTheaterDao(ctx)
+	theater, err := theaterDao.GetTheaterByID(service.TheaterID)
+	if err != nil {
+		code = e.ErrorTheaterID
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
 		}
-		err = movieDao.UpdateMovie(movie.ID, movie)
-		if err != nil {
-			code = e.Error
-			return serializer.Response{
-				Status: code,
-				Msg:    e.GetMsg(code),
-			}
-		}
-		err = movieDao.AddMovieTheater(movieTheater)
-		if err != nil {
-			code = e.Error
-			return serializer.Response{
-				Status: code,
-				Msg:    e.GetMsg(code),
-			}
+	}
+	movie.Theaters = append(movie.Theaters, *theater)
+	err = movieDao.UpdateMovie(movie.ID, movie)
+	if err != nil {
+		code = e.Error
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
 		}
 	}
 
