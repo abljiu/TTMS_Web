@@ -140,7 +140,10 @@ func (service *HallIDRequest) Delete(ctx context.Context) serializer.Response {
 	var err error
 	code := e.Success
 
-	hall := &model.Hall{}
+	gormModel := gorm.Model{ID: service.ID}
+	hall := &model.Hall{
+		Model: gormModel,
+	}
 	HallDao := dao.NewHallDao(ctx)
 	err = HallDao.DeleteHall(hall)
 	if err != nil {
