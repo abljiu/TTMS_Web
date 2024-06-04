@@ -23,19 +23,20 @@ func NewRouter() *gin.Engine {
 
 		//轮播图
 		v1.GET("carousels", api.ListCarousel)
+		//获取电影详细信息
+		v1.GET("get-movie", api.GetMovie)
 		//根据类型查询热映电影
 		v1.GET("hot-movies", api.ListHotMovie)
 		//根据类型查询未上映电影
 		v1.GET("unreleased-movies", api.ListUnreleasedMovie)
 		//根据类型查询全部电影
 		v1.GET("all-movies", api.ListMovie)
-
 		//查询电影票房
 		v1.GET("sales", api.ListMovieSales)
-
 		//获取首页热映电影
 		v1.GET("index_hot_movies", api.ListIndexHotMovies)
-
+		//根据sessionID获取某场次详细信息
+		v1.GET("session", api.GetSession)
 		//获取剧院列表
 		v1.GET("theaters", api.ListTheater)
 		//需要登录保护
@@ -48,13 +49,16 @@ func NewRouter() *gin.Engine {
 			authed.POST("user/sending-email", api.SendEmail)
 			authed.POST("user/valid-email", api.ValidEmail)
 
+			//提交订单
 			authed.POST("submit-order", api.SubmitOrder)
+			//确认订单
 			authed.GET("confirm-order", api.ConfirmOrder)
+			//支付订单
 			authed.POST("pay-order", api.PayOrder)
+			//退票
 			authed.DELETE("return-order", api.ReturnOrder)
+			//用户查看个人订单
 			authed.GET("orders", api.GetOrders)
-			//根据sessionID获取某场次详细信息
-			authed.GET("session", api.GetSession)
 
 			//搜索电影
 			authed.POST("movies", api.SearchMovie)
@@ -85,6 +89,7 @@ func NewRouter() *gin.Engine {
 				admin.PUT("add-admin", api.AddAdmin)
 				//添加售票员
 				admin.PUT("add-conductor", api.AddConductor)
+
 				//添加电影
 				admin.POST("add-movie", api.CreateMovie)
 				//删除电影
@@ -100,8 +105,6 @@ func NewRouter() *gin.Engine {
 				//根据sessionID获取某场次详细信息
 				admin.GET("session", api.GetSession)
 
-				//添加剧院
-				//admin.POST("add-theater", api.AddTheater)
 				//获取影院热映电影列表
 				admin.GET("movie/getHot", api.ListHotMovieByTheater)
 

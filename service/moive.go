@@ -399,3 +399,23 @@ func (service *MovieService) Delete(ctx context.Context) serializer.Response {
 		Msg:    e.GetMsg(code),
 	}
 }
+
+// Get 获取电影详细信息
+func (service *MovieService) Get(ctx context.Context) serializer.Response {
+	code := e.Success
+	movieDao := dao.NewMovieDao(ctx)
+	movie, err := movieDao.GetMovieByMovieID(service.MovieId)
+	if err != nil {
+		code = e.ErrorMovieId
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+	fmt.Println(movie)
+	return serializer.Response{
+		Status: code,
+		Msg:    e.GetMsg(code),
+		Data:   serializer.BuildMovie(movie),
+	}
+}

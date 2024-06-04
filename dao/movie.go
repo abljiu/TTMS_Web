@@ -109,7 +109,7 @@ func (dao *MovieDao) SearchMovie(info string, page model.BasePage) (products []*
 }
 
 func (dao *MovieDao) GetMovieByMovieID(id uint) (movie *model.Movie, err error) {
-	err = dao.DB.Model(&model.Movie{}).Where("id=?", id).First(&movie).Error
+	err = dao.DB.Model(&model.Movie{}).Preload("Directors").Preload("Actors").Where("id=?", id).First(&movie).Error
 	return
 }
 

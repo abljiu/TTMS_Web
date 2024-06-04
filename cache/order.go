@@ -46,8 +46,7 @@ func GetSessionInfo(ctx context.Context, rdb *redis.Client, sessionID uint) (*mo
 
 // SetSessionInfo 添加场次信息
 func SetSessionInfo(ctx context.Context, rdb *redis.Client, sessionInfoJSON string, sessionID uint) (err error) {
-	Mutex.Lock()
-	defer Mutex.Unlock()
+
 	// 将场次信息写入Redis缓存，并设置过期时间
 	key := fmt.Sprintf("session_info:%d", sessionID)
 	err = rdb.Set(ctx, key, sessionInfoJSON, 10*time.Minute).Err()
@@ -66,8 +65,7 @@ func DelSessionInfo(ctx context.Context, rdb *redis.Client, sessionID uint) (err
 
 // SetSessionInfoPipe 添加场次信息
 func SetSessionInfoPipe(ctx context.Context, pipe redis.Pipeliner, sessionInfoJSON string, sessionID uint) {
-	Mutex.Lock()
-	defer Mutex.Unlock()
+
 	// 将场次信息写入Redis缓存，并设置过期时间
 	key := fmt.Sprintf("session_info:%d", sessionID)
 	pipe.Set(ctx, key, sessionInfoJSON, 10*time.Minute)

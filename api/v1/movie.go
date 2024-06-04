@@ -97,9 +97,9 @@ func SearchMovie(c *gin.Context) {
 
 // ListIndexHotMovies 获取首页热映电影
 func ListIndexHotMovies(c *gin.Context) {
-	searchMovie := service.MovieService{}
-	if err := c.ShouldBind(&searchMovie); err == nil {
-		res := searchMovie.ListIndexHotMovies(c.Request.Context())
+	listIndexHotMovies := service.MovieService{}
+	if err := c.ShouldBind(&listIndexHotMovies); err == nil {
+		res := listIndexHotMovies.ListIndexHotMovies(c.Request.Context())
 		c.JSON(http.StatusOK, res)
 	} else {
 		c.JSON(http.StatusBadRequest, ErrorResponse(err))
@@ -109,12 +109,24 @@ func ListIndexHotMovies(c *gin.Context) {
 
 // DeleteMovie 获取首页热映电影
 func DeleteMovie(c *gin.Context) {
-	searchMovie := service.MovieService{}
-	if err := c.ShouldBind(&searchMovie); err == nil {
-		res := searchMovie.Delete(c.Request.Context())
+	deleteMovie := service.MovieService{}
+	if err := c.ShouldBind(&deleteMovie); err == nil {
+		res := deleteMovie.Delete(c.Request.Context())
 		c.JSON(http.StatusOK, res)
 	} else {
 		c.JSON(http.StatusBadRequest, ErrorResponse(err))
 		util.LogrusObj.Infoln("DeleteMovie", err)
+	}
+}
+
+// GetMovie 获取电影详细信息
+func GetMovie(c *gin.Context) {
+	getMovie := service.MovieService{}
+	if err := c.ShouldBind(&getMovie); err == nil {
+		res := getMovie.Get(c.Request.Context())
+		c.JSON(http.StatusOK, res)
+	} else {
+		c.JSON(http.StatusBadRequest, ErrorResponse(err))
+		util.LogrusObj.Infoln("SearchMovie", err)
 	}
 }
