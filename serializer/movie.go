@@ -3,6 +3,8 @@ package serializer
 import (
 	"TTMS_Web/conf"
 	"TTMS_Web/model"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -25,6 +27,11 @@ type Movie struct {
 
 func BuildMovie(item *model.Movie) Movie {
 	CategoryID := make([]uint, len(item.CategoryId))
+	strSlice := strings.Split(item.CategoryId, ",")
+	for i, str := range strSlice {
+		num, _ := strconv.ParseUint(str, 10, 64)
+		CategoryID[i] = uint(num)
+	}
 	return Movie{
 		Id:           item.ID,
 		ChineseName:  item.ChineseName,
