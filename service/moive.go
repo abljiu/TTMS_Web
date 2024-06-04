@@ -69,8 +69,8 @@ func (service *MovieService) Create(ctx context.Context, movieImg, directorImg, 
 	for _, actor := range service.Actors {
 		actors = append(actors, model.Actor{Name: actor, ImageURL: conf.Config_.Path.Host + conf.Config_.Service.HttpPort + conf.Config_.Path.ActorPath + actor + ".jpg"})
 	}
-	strSlice := make([]string, len(service.CategoryId))
 
+	strSlice := make([]string, len(service.CategoryId))
 	// 将每个uint转换为字符串并存储在strSlice中
 	for i, num := range service.CategoryId {
 		strSlice[i] = fmt.Sprintf("%d", num)
