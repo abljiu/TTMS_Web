@@ -3,7 +3,6 @@ package dao
 import (
 	"TTMS_Web/model"
 	"context"
-	"fmt"
 	"gorm.io/gorm"
 	"strconv"
 	"time"
@@ -122,25 +121,27 @@ func (dao *MovieDao) AddMovieSales(id uint, price uint) (err error) {
 func (dao *MovieDao) UpdateMovie(id uint, movie *model.Movie) (err error) {
 	err = dao.DB.Model(&model.Movie{}).Where("id=?", id).Updates(movie).Error
 	if err == nil {
-		fmt.Println(movie.ID)
-		fmt.Println(movie.Theaters[0].ID)
 		err = dao.DB.Model(movie).Association("Theaters").Append(movie.Theaters)
 	} else {
 		return
 	}
-	fmt.Println(err)
 	return
 }
 
 func (dao *MovieDao) CountHotMovieByTheater(theaterId uint) (total int64, err error) {
-	err = dao.DB.Model(&model.Movie{}).Preload("Movie").Preload("Theater").
-		Where("theater_id = ?", theaterId).Count(&total).Error
+	err = dao.DB.Model(&model.Movie{}).
+		Joins("JOIN movie_theaters ON movie.id = movie_theaters.movie_id").
+		Where("movie_theaters.theater_id = ?", theaterId).
+		Count(&total).Error
 	return
 }
 
 func (dao *MovieDao) ListHotMovieByTheater(theaterId uint) (movies []*model.Movie, err error) {
-	err = dao.DB.Model(&model.Movie{}).Preload("Movie").Preload("Theater").
-		Where("theater_id = ?", theaterId).Find(&movies).Error
+	err = dao.DB.Model(&model.Movie{}).
+		Joins("JOIN movie_theaters ON movie.id = movie_theaters.movie_id").
+		Where("movie_theaters.theater_id = ?", theaterId).
+		Where("theater_id = ?", theaterId).
+		Find(&movies).Error
 	return
 }
 
