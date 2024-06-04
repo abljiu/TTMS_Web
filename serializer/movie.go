@@ -29,7 +29,10 @@ func BuildMovie(item *model.Movie) Movie {
 	strSlice := strings.Split(item.CategoryId, ",")
 	numbers := make([]uint, len(strSlice))
 	for i, s := range strSlice {
-		num, _ := strconv.ParseUint(s, 10, 0)
+		num, err := strconv.ParseUint(s, 10, 0)
+		if err != nil {
+			continue
+		}
 		numbers[i] = uint(num)
 	}
 	return Movie{
