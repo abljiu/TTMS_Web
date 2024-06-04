@@ -97,7 +97,7 @@ func (dao *MovieDao) SearchMovieExactly(info string) (products *model.Movie, err
 
 func (dao *MovieDao) SearchMovie(info string, page model.BasePage) (products []*model.Movie, err error) {
 	err = dao.DB.Model(&model.Movie{}).
-		Where("chinese_name LIKE ?", info).
+		Where("chinese_name LIKE ? ", "%"+info+"%").
 		Offset((page.PageNum - 1) * page.PageSize).
 		Limit(page.PageSize).Find(&products).Error
 	return
@@ -110,6 +110,28 @@ func (dao *MovieDao) GetMovieByMovieID(id uint) (movie *model.Movie, err error) 
 
 func (dao *MovieDao) AddMovieSales(id uint, price uint) (err error) {
 	err = dao.DB.Model(&model.Movie{}).Where("id=?", id).Update("sales", gorm.Expr("sales + ?", price)).Error
+	return
+}
+
+func (dao *MovieDao) UpdateMovie(id uint, movie *model.Movie) (err error) {
+	err = dao.DB.Model(&model.Movie{}).Where("id=?", id).Updates(movie).Error
+	return
+}
+
+func (dao *MovieDao) AddMovieTheater(movieTheater *model.MovieTheater) (err error) {
+	err = dao.DB.Model(&model.MovieTheater{}).Create(movieTheater).Error
+	return
+}
+
+func (dao *MovieDao) CountHotMovieByTheater(theaterId uint) (total int64, err error) {
+	err = dao.DB.Model(&model.MovieTheater{}).Preload("Movie").Preload("Theater").
+		Where("theater_id = ?", theaterId).Count(&total).Error
+	return
+}
+
+func (dao *MovieDao) ListHotMovieByTheater(theaterId uint) (movies []*model.MovieTheater, err error) {
+	err = dao.DB.Model(&model.MovieTheater{}).Preload("Movie").Preload("Theater").
+		Where("theater_id = ?", theaterId).Find(&movies).Error
 	return
 }
 

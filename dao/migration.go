@@ -16,13 +16,16 @@ func migration() {
 			&model.Session{},
 			&model.Hall{},
 			&model.Director{},
-			&model.Actor{},
 			&model.Category{},
 			&model.Notice{},
 			&model.Order{},
 			&model.Movie{},
 			&model.User{},
-			&model.Carousel{})
+			&model.Carousel{},
+			&model.MovieTheater{},
+			&model.Comment{},
+			&model.Upvote{},
+		)
 	if err != nil {
 		fmt.Println("err:", err)
 	}

@@ -35,6 +35,18 @@ func ListHotMovie(c *gin.Context) {
 	}
 }
 
+// ListHotMovieByTheater 获取热映电影列表
+func ListHotMovieByTheater(c *gin.Context) {
+	listMovie := service.MovieService{}
+	if err := c.ShouldBind(&listMovie); err == nil {
+		res := listMovie.ListHotByTheater(c.Request.Context())
+		c.JSON(http.StatusOK, res)
+	} else {
+		c.JSON(http.StatusBadRequest, ErrorResponse(err))
+		util.LogrusObj.Infoln("ListMovie", err)
+	}
+}
+
 // ListUnreleasedMovie 获取未上映电影列表
 func ListUnreleasedMovie(c *gin.Context) {
 	listMovie := service.MovieService{}

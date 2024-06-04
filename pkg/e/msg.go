@@ -21,6 +21,12 @@ var MsgFlags = map[int]string{
 	ErrorInitializeStock:   "初始化库存失败",
 	ErrorCacheAddSession:   "添加场次信息到缓存失败",
 	ErrorAddOrder:          "添加订单失败",
+	ErrorOrderID:           "订单id有误",
+	ErrorSeat:              "座位已经被选定",
+	ErrorEndTime:           "订单超时",
+	ErrorOrderType:         "订单状态错误",
+	ErrorTheaterID:         "剧院id错误",
+	ErrorSessionTime:       "场次时间冲突",
 }
 
 // GetMsg 获取状态码对应的信息

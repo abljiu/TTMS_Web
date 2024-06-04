@@ -5,6 +5,7 @@ import (
 	"context"
 	"gorm.io/gorm"
 	"sync"
+	"time"
 )
 
 type SessionDao struct {
@@ -29,7 +30,7 @@ func (dao *SessionDao) AddSession(session *model.Session) error {
 func (dao *SessionDao) GetSessionByID(id uint) (session *model.Session, err error) {
 	dao.mu.RLock()         // 获取读锁
 	defer dao.mu.RUnlock() // 操作结束后释放读锁
-	err = dao.DB.Model(&model.Session{}).Where("id=?", id).First(&session).Error
+	err = dao.DB.Preload("Movie").Preload("Theater").Preload("Hall").Model(&model.Session{}).Where("id=?", id).First(&session).Error
 	return
 }
 
@@ -43,6 +44,11 @@ func (dao *SessionDao) UpdateSessionByID(uid uint, session *model.Session) error
 func (dao *SessionDao) DeleteSessionByID(uid uint) error {
 	err := dao.DB.Where("id=?", uid).Delete(&model.Session{}).Error
 	return err
+}
+
+func (dao *SessionDao) ListSessionByTheater(id uint) (session []*model.Session, err error) {
+	err = dao.DB.Model(&model.Session{}).Where("theater_id=?", id).Find(&session).Error
+	return
 }
 
 func (dao *SessionDao) CountSessionByMovieIDAndDate(theaterID uint, movieID uint, date string, curTime string) (total int64, err error) {
@@ -113,4 +119,11 @@ func (dao *SessionDao) ListSession(theaterID uint, curTime string, page model.Ba
 		Offset((page.PageNum - 1) * page.PageSize).Limit(page.PageSize).
 		Find(&products).Error
 	return
+}
+
+func (dao *SessionDao) IsTimeOverlap(StartTime, EndTime time.Time) bool {
+	var count int64
+	dao.Model(&model.Session{}).
+		Where("((? BETWEEN show_time AND end_time) OR (? BETWEEN show_time AND end_time)) OR (show_time BETWEEN ? AND ? OR end_time BETWEEN ? AND ?)", StartTime, EndTime, StartTime, EndTime, StartTime, EndTime).Count(&count)
+	return count > 0
 }
