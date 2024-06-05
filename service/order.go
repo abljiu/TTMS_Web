@@ -10,7 +10,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"sync"
 	"time"
 )
 
@@ -131,21 +130,17 @@ func (service *OrderService) Submit(ctx context.Context, userID uint) serializer
 			Msg:    e.GetMsg(e.Error),
 		}
 	}
-	var wg sync.WaitGroup
-	wg.Add(1)
-	go startCountdown(order.ID, ctx, &wg)
-	wg.Wait()
+	go startCountdown(order.ID)
 	return serializer.Response{
 		Status: code,
 		Msg:    e.GetMsg(code),
 		Data:   serializer.BuildOrder(order),
 	}
-
 }
 
 // 开始倒计时
-func startCountdown(orderID uint, ctx context.Context, wg *sync.WaitGroup) {
-	defer wg.Done()
+func startCountdown(orderID uint) {
+	ctx := context.Background()
 	rdb := cache.GetRedisClient()
 	time.Sleep(14 * time.Minute)
 	orderDao := dao.NewOrderDao(ctx)
