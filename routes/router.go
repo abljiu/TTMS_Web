@@ -48,6 +48,8 @@ func NewRouter() *gin.Engine {
 			authed.POST("avatar", api.UploadAvatar)
 			authed.POST("user/sending-email", api.SendEmail)
 			authed.POST("user/valid-email", api.ValidEmail)
+			authed.GET("show-user", api.ShowData)
+			authed.POST("add-money", api.AddUserMoney)
 
 			//提交订单
 			authed.POST("submit-order", api.SubmitOrder)
