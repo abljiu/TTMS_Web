@@ -389,7 +389,7 @@ func (service *OrderService) Return(ctx context.Context, userID uint) serializer
 		}
 	}
 	sessionDao := dao.NewSessionDao(ctx)
-	session, err := sessionDao.GetSessionByID(service.SessionID)
+	session, err := sessionDao.GetSessionByID(order.SessionID)
 	if err != nil {
 		code = e.ErrorSessionId
 		return serializer.Response{
@@ -397,7 +397,7 @@ func (service *OrderService) Return(ctx context.Context, userID uint) serializer
 			Msg:    e.GetMsg(code),
 		}
 	}
-	err = cache.AlterStock(ctx, rdb, service.SessionID, session.SurplusTicket+service.Num)
+	err = cache.AlterStock(ctx, rdb, order.SessionID, session.SurplusTicket+order.Num)
 	if err != nil {
 		code = e.Error
 		return serializer.Response{
@@ -405,7 +405,7 @@ func (service *OrderService) Return(ctx context.Context, userID uint) serializer
 			Msg:    e.GetMsg(code),
 		}
 	}
-	err = cache.DelSessionInfo(ctx, rdb, service.SessionID)
+	err = cache.DelSessionInfo(ctx, rdb, order.SessionID)
 	if err != nil {
 		code = e.Error
 		return serializer.Response{
@@ -413,7 +413,7 @@ func (service *OrderService) Return(ctx context.Context, userID uint) serializer
 			Msg:    e.GetMsg(code),
 		}
 	}
-	err = orderDao.DeleteOrderByID(service.OrderID)
+	err = orderDao.DeleteOrderByID(order.ID)
 	if err != nil {
 		code = e.ErrorOrderID
 		return serializer.Response{
