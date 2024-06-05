@@ -79,7 +79,7 @@ func (service *OrderService) Submit(ctx context.Context, userID uint) serializer
 	// 创建订单
 	order = &model.Order{
 		UserID:    userID,
-		MovieID:   service.MovieID,
+		MovieID:   session.MovieID,
 		SessionID: service.SessionID,
 		TheaterID: session.TheaterID,
 		Seat:      service.Seat,
@@ -87,7 +87,6 @@ func (service *OrderService) Submit(ctx context.Context, userID uint) serializer
 		Type:      0,
 		Money:     session.Price,
 	}
-
 	orderDao := dao.NewOrderDaoByDB(txDB)
 	if order, err = orderDao.AddOrder(order); err != nil {
 		txDB.Rollback()

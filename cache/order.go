@@ -70,10 +70,11 @@ func SetSessionInfoPipe(ctx context.Context, pipe redis.Pipeliner, sessionInfoJS
 }
 
 // GetOrderInfo 从缓存中获取订单信息
-func GetOrderInfo(ctx context.Context, rdb *redis.Client, orderID uint) (order *model.Order, err error) {
+func GetOrderInfo(ctx context.Context, rdb *redis.Client, orderID uint) (*model.Order, error) {
 	Mutex.Lock()
 	defer Mutex.Unlock()
 	key := fmt.Sprintf("order_info:%d", orderID)
+	order := &model.Order{}
 	orderDao := dao.NewOrderDao(ctx)
 	orderInfo, err := rdb.Get(ctx, key).Result()
 	//缓存未命中
@@ -96,7 +97,6 @@ func GetOrderInfo(ctx context.Context, rdb *redis.Client, orderID uint) (order *
 	} else if err != nil {
 		return nil, err
 	}
-
 	err = json.Unmarshal([]byte(orderInfo), order)
 	return order, nil
 }
