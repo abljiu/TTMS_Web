@@ -8,10 +8,10 @@ import (
 )
 
 type Session struct {
-	ID        uint
-	Movie     *model.Movie
-	TheaterID uint
-	//Theater *model.Theater
+	ID            uint
+	Movie         *model.Movie
+	TheaterID     uint
+	Theater       model.Theater
 	Hall          *model.Hall
 	ShowTime      time.Time
 	EndTime       time.Time
@@ -32,6 +32,8 @@ func BuildSession(item *model.Session, movie *model.Movie, hall *model.Hall) Ses
 		SeatStatus:    hall.Seat,
 		Price:         item.Price,
 		SeatRow:       uint(hall.SeatRow),
+		Theater:       item.Theater,
+		TheaterID:     item.TheaterID,
 	}
 }
 
