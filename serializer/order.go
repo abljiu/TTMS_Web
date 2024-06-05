@@ -8,8 +8,8 @@ import (
 type Order struct {
 	ID          uint     `json:"id"`
 	UserID      uint     `json:"user_id"`
-	MovieID     uint     `json:"movie_id"`
-	TheaterID   uint     `json:"theater_id"`
+	Movie       string   `json:"movie"`
+	Theater     string   `json:"theater"`
 	SessionID   uint     `json:"session_id"`
 	Seat        [][2]int `json:"seat"`
 	Num         int      `json:"num"`
@@ -18,7 +18,7 @@ type Order struct {
 	SurplusTime float64  `json:"surplus_time"`
 }
 
-func BuildOrder(order *model.Order) *Order {
+func BuildOrder(order *model.Order, movie, theater string) *Order {
 	seat := make([][2]int, 0)
 	seats := util.ParseSeat(order.Seat)
 	for i, j := 0, 1; j < len(seats); i, j = i+2, j+2 {
@@ -27,8 +27,8 @@ func BuildOrder(order *model.Order) *Order {
 	return &Order{
 		ID:        order.ID,
 		UserID:    order.UserID,
-		MovieID:   order.MovieID,
-		TheaterID: order.TheaterID,
+		Movie:     movie,
+		Theater:   theater,
 		SessionID: order.SessionID,
 		Seat:      seat,
 		Num:       order.Num,
@@ -37,7 +37,7 @@ func BuildOrder(order *model.Order) *Order {
 	}
 }
 
-func BuildOrderWithTime(order *model.Order, surplusTime float64) *Order {
+func BuildOrderWithTime(order *model.Order, surplusTime float64, movie, theater string) *Order {
 	seat := make([][2]int, 0)
 	seats := util.ParseSeat(order.Seat)
 	for i, j := 0, 1; j < len(seats); i, j = i+2, j+2 {
@@ -46,8 +46,8 @@ func BuildOrderWithTime(order *model.Order, surplusTime float64) *Order {
 	return &Order{
 		ID:          order.ID,
 		UserID:      order.UserID,
-		MovieID:     order.MovieID,
-		TheaterID:   order.TheaterID,
+		Movie:       movie,
+		Theater:     theater,
 		SessionID:   order.SessionID,
 		Seat:        seat,
 		Num:         order.Num,
@@ -57,9 +57,9 @@ func BuildOrderWithTime(order *model.Order, surplusTime float64) *Order {
 	}
 }
 
-func BuildOrders(items []*model.Order) (products []Order) {
+func BuildOrders(items []*model.Order, movies, theaters []string) (products []Order) {
 	for i := 0; i < len(items); i++ {
-		product := BuildOrder(items[i])
+		product := BuildOrder(items[i], movies[i], theaters[i])
 		products = append(products, *product)
 	}
 	return products

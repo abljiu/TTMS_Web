@@ -9,7 +9,6 @@ import (
 	"TTMS_Web/serializer"
 	"context"
 	"encoding/json"
-	"fmt"
 	"time"
 )
 
@@ -130,10 +129,28 @@ func (service *OrderService) Submit(ctx context.Context, userID uint) serializer
 		}
 	}
 	go startCountdown(order.ID)
+	movieDao := dao.NewMovieDao(ctx)
+	theaterDao := dao.NewTheaterDao(ctx)
+	movie, err := movieDao.GetMovieByMovieID(order.MovieID)
+	if err != nil {
+		code = e.ErrorMovieId
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+	theater, err := theaterDao.GetTheaterByID(order.TheaterID)
+	if err != nil {
+		code = e.ErrorTheaterID
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
 	return serializer.Response{
 		Status: code,
 		Msg:    e.GetMsg(code),
-		Data:   serializer.BuildOrder(order),
+		Data:   serializer.BuildOrder(order, movie.ChineseName, theater.Name),
 	}
 }
 
@@ -157,6 +174,8 @@ func startCountdown(orderID uint) {
 func (service *OrderService) Confirm(ctx context.Context) serializer.Response {
 	code := e.Success
 	rdb := cache.GetRedisClient()
+	movieDao := dao.NewMovieDao(ctx)
+	theaterDao := dao.NewTheaterDao(ctx)
 	order, err := cache.GetOrderInfo(ctx, rdb, service.OrderID)
 	if err != nil {
 		code = e.ErrorOrderID
@@ -181,10 +200,26 @@ func (service *OrderService) Confirm(ctx context.Context) serializer.Response {
 			Msg:    e.GetMsg(code),
 		}
 	}
+	movie, err := movieDao.GetMovieByMovieID(order.MovieID)
+	if err != nil {
+		code = e.ErrorMovieId
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+	theater, err := theaterDao.GetTheaterByID(order.TheaterID)
+	if err != nil {
+		code = e.ErrorTheaterID
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
 	return serializer.Response{
 		Status: code,
 		Msg:    e.GetMsg(code),
-		Data:   serializer.BuildOrderWithTime(order, endTime.Sub(time.Now()).Seconds()),
+		Data:   serializer.BuildOrderWithTime(order, endTime.Sub(time.Now()).Seconds(), movie.ChineseName, theater.Name),
 	}
 }
 
@@ -260,11 +295,35 @@ func (service *OrderService) Get(ctx context.Context, userID uint) serializer.Re
 			Msg:    e.GetMsg(code),
 		}
 	}
-	fmt.Println(orders)
+	movieDao := dao.NewMovieDao(ctx)
+	theaterDao := dao.NewTheaterDao(ctx)
+	var movies []string
+	var theaters []string
+	for _, order := range orders {
+		movie, err := movieDao.GetMovieByMovieID(order.MovieID)
+		if err != nil {
+			code = e.ErrorMovieId
+			return serializer.Response{
+				Status: code,
+				Msg:    e.GetMsg(code),
+			}
+		}
+		theater, err := theaterDao.GetTheaterByID(order.TheaterID)
+		if err != nil {
+			code = e.ErrorTheaterID
+			return serializer.Response{
+				Status: code,
+				Msg:    e.GetMsg(code),
+			}
+		}
+		movies = append(movies, movie.ChineseName)
+		theaters = append(theaters, theater.Name)
+	}
+
 	return serializer.Response{
 		Status: code,
 		Msg:    e.GetMsg(code),
-		Data:   serializer.BuildOrders(orders),
+		Data:   serializer.BuildOrders(orders, movies, theaters),
 	}
 }
 
