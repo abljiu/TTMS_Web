@@ -3,22 +3,21 @@ package serializer
 import (
 	"TTMS_Web/model"
 	"TTMS_Web/pkg/util"
-	"time"
 )
 
 type Order struct {
-	ID          uint      `json:"id"`
-	UserID      uint      `json:"user_id"`
-	Movie       string    `json:"movie"`
-	Theater     string    `json:"theater"`
-	SessionID   uint      `json:"session_id"`
-	Seat        [][2]int  `json:"seat"`
-	Num         int       `json:"num"`
-	Type        uint      `json:"type"`
-	Money       float64   `json:"money"`
-	SurplusTime float64   `json:"surplus_time"`
-	ShowTime    time.Time `json:"show_time"`
-	Hall        string    `json:"hall"`
+	ID          uint     `json:"id"`
+	UserID      uint     `json:"user_id"`
+	Movie       string   `json:"movie"`
+	Theater     string   `json:"theater"`
+	SessionID   uint     `json:"session_id"`
+	Seat        [][2]int `json:"seat"`
+	Num         int      `json:"num"`
+	Type        uint     `json:"type"`
+	Money       float64  `json:"money"`
+	SurplusTime float64  `json:"surplus_time"`
+	ShowTime    string   `json:"show_time"`
+	Hall        string   `json:"hall"`
 }
 
 func BuildOrder(order *model.Order, movie, theater, hall string) *Order {
@@ -37,7 +36,7 @@ func BuildOrder(order *model.Order, movie, theater, hall string) *Order {
 		Num:       order.Num,
 		Type:      order.Type,
 		Money:     order.Money,
-		ShowTime:  order.Session.ShowTime,
+		ShowTime:  order.Session.ShowTime.Format("2006-01-02 15:04"),
 		Hall:      hall,
 	}
 }
@@ -59,7 +58,7 @@ func BuildOrderWithTime(order *model.Order, surplusTime float64, movie, theater,
 		Type:        order.Type,
 		Money:       order.Money,
 		SurplusTime: surplusTime,
-		ShowTime:    order.Session.ShowTime,
+		ShowTime:    order.Session.ShowTime.Format("2006-01-02 15:04"),
 		Hall:        hall,
 	}
 }
