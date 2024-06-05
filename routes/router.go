@@ -52,7 +52,7 @@ func NewRouter() *gin.Engine {
 			//提交订单
 			authed.POST("submit-order", api.SubmitOrder)
 			//确认订单
-			authed.GET("confirm-order", api.ConfirmOrder)
+			authed.POST("confirm-order", api.ConfirmOrder)
 			//支付订单
 			authed.POST("pay-order", api.PayOrder)
 			//退票
