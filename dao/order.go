@@ -61,8 +61,8 @@ func (dao *OrderDao) DeleteOrderByID(uid uint) error {
 	return err
 }
 
-func (dao *OrderDao) ListUserOrders(userId uint, page model.BasePage) (orders []*model.Order, err error) {
-	err = dao.DB.Model(&model.Order{}).Preload("Movie").Preload("Theater").Preload("Session").Where("user_id = ?", userId).Offset((page.PageNum - 1) * page.PageSize).Limit(page.PageSize).Find(&orders).Error
+func (dao *OrderDao) ListUserOrders(userId uint) (orders []*model.Order, err error) {
+	err = dao.DB.Model(&model.Order{}).Preload("Movie").Preload("Theater").Preload("Session").Where("user_id = ?", userId).Find(&orders).Error
 
 	return
 }

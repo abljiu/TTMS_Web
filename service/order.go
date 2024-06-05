@@ -161,7 +161,7 @@ func (service *OrderService) Submit(ctx context.Context, userID uint) serializer
 	return serializer.Response{
 		Status: code,
 		Msg:    e.GetMsg(code),
-		Data:   serializer.BuildOrder(order, movie.ChineseName, theater.Name, hall.Name),
+		Data:   serializer.BuildOrder(order, movie.ChineseName, theater.Name, hall.Name, movie.ImgPath),
 	}
 }
 
@@ -306,9 +306,6 @@ func (service *OrderService) Get(ctx context.Context, userID uint) serializer.Re
 	code := e.Success
 	orderDao := dao.NewOrderDao(ctx)
 	userDao := dao.NewUserDao(ctx)
-	if service.PageSize == 0 {
-		service.PageSize = 15
-	}
 	//判断用户是否存在
 	_, err := userDao.GetUserByID(userID)
 	if err != nil {
@@ -318,7 +315,7 @@ func (service *OrderService) Get(ctx context.Context, userID uint) serializer.Re
 			Msg:    e.GetMsg(code),
 		}
 	}
-	orders, err := orderDao.ListUserOrders(userID, service.BasePage)
+	orders, err := orderDao.ListUserOrders(userID)
 	if err != nil {
 		code = e.ErrorExistUserNotFound
 		return serializer.Response{
@@ -332,6 +329,7 @@ func (service *OrderService) Get(ctx context.Context, userID uint) serializer.Re
 	var movies []string
 	var theaters []string
 	var halls []string
+	var moviesImg []string
 	for _, order := range orders {
 		movie, err := movieDao.GetMovieByMovieID(order.MovieID)
 		if err != nil {
@@ -360,12 +358,13 @@ func (service *OrderService) Get(ctx context.Context, userID uint) serializer.Re
 		movies = append(movies, movie.ChineseName)
 		theaters = append(theaters, theater.Name)
 		halls = append(halls, hall.Name)
+		moviesImg = append(moviesImg, movie.ImgPath)
 	}
 
 	return serializer.Response{
 		Status: code,
 		Msg:    e.GetMsg(code),
-		Data:   serializer.BuildOrders(orders, movies, theaters, halls),
+		Data:   serializer.BuildOrders(orders, movies, theaters, halls, moviesImg),
 	}
 }
 

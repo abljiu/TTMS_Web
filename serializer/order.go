@@ -1,6 +1,7 @@
 package serializer
 
 import (
+	"TTMS_Web/conf"
 	"TTMS_Web/model"
 	"TTMS_Web/pkg/util"
 )
@@ -18,9 +19,10 @@ type Order struct {
 	SurplusTime float64  `json:"surplus_time"`
 	ShowTime    string   `json:"show_time"`
 	Hall        string   `json:"hall"`
+	MovieImg    string   `json:"movie_img"`
 }
 
-func BuildOrder(order *model.Order, movie, theater, hall string) *Order {
+func BuildOrder(order *model.Order, movie, theater, hall, movieImg string) *Order {
 	seat := make([][2]int, 0)
 	seats := util.ParseSeat(order.Seat)
 	for i, j := 0, 1; j < len(seats); i, j = i+2, j+2 {
@@ -38,6 +40,7 @@ func BuildOrder(order *model.Order, movie, theater, hall string) *Order {
 		Money:     order.Money,
 		ShowTime:  order.Session.ShowTime.Format("2006-01-02 15:04"),
 		Hall:      hall,
+		MovieImg:  conf.Config_.Path.Host + conf.Config_.Service.HttpPort + conf.Config_.Path.MoviePath + movieImg,
 	}
 }
 
@@ -63,9 +66,9 @@ func BuildOrderWithTime(order *model.Order, surplusTime float64, movie, theater,
 	}
 }
 
-func BuildOrders(items []*model.Order, movies, theaters, halls []string) (products []Order) {
+func BuildOrders(items []*model.Order, movies, theaters, halls, moviesImg []string) (products []Order) {
 	for i := 0; i < len(items); i++ {
-		product := BuildOrder(items[i], movies[i], theaters[i], halls[i])
+		product := BuildOrder(items[i], movies[i], theaters[i], halls[i], moviesImg[i])
 		products = append(products, *product)
 	}
 	return products
