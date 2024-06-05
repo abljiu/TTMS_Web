@@ -84,7 +84,7 @@ func (service *OrderService) Submit(ctx context.Context, userID uint) serializer
 		Seat:      service.Seat,
 		Num:       service.Num,
 		Type:      0,
-		Money:     session.Price,
+		Money:     session.Price * float64(service.Num),
 	}
 	orderDao := dao.NewOrderDaoByDB(txDB)
 	if order, err = orderDao.AddOrder(order); err != nil {
@@ -171,13 +171,17 @@ func startCountdown(orderID uint) {
 	rdb := cache.GetRedisClient()
 	time.Sleep(14 * time.Minute)
 	orderDao := dao.NewOrderDao(ctx)
+	sesssionDao := dao.NewSessionDao(ctx)
 	order, _ := orderDao.GetOrderByOrderID(orderID)
 	//未支付订单
 	if order.Type == 0 {
 		session, _ := cache.GetSessionInfo(ctx, rdb, order.SessionID)
-		_ = cache.AlterStock(ctx, rdb, order.SessionID, session.SurplusTicket-order.Num)
+		_ = cache.AlterStock(ctx, rdb, order.SessionID, session.SurplusTicket+order.Num)
 		_ = cache.DelSessionInfo(ctx, rdb, order.SessionID)
 		_ = orderDao.DeleteOrderByID(orderID)
+		session.SurplusTicket += order.Num
+		util.ReturnSessionSeat(session, order.Seat, order.Num)
+		_ = sesssionDao.UpdateSessionByID(session.ID, session)
 	}
 }
 
@@ -267,7 +271,14 @@ func (service *OrderService) Pay(ctx context.Context, userID uint) serializer.Re
 			Msg:    e.GetMsg(code),
 		}
 	}
-
+	order, err = orderDao.GetOrderByOrderID(service.OrderID)
+	if err != nil {
+		code = e.ErrorOrderID
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
 	if user.Money-order.Money < 0 {
 		code = e.ErrorUserMoney
 		return serializer.Response{
@@ -360,11 +371,9 @@ func (service *OrderService) Get(ctx context.Context, userID uint) serializer.Re
 
 // Return 退票逻辑
 func (service *OrderService) Return(ctx context.Context, userID uint) serializer.Response {
-	session := &model.Session{}
 	code := e.Success
 	rdb := cache.GetRedisClient()
 	orderDao := dao.NewOrderDao(ctx)
-
 	order, err := orderDao.GetOrderByOrderID(service.OrderID)
 	if err != nil {
 		code = e.ErrorOrderID
@@ -380,7 +389,16 @@ func (service *OrderService) Return(ctx context.Context, userID uint) serializer
 			Msg:    e.GetMsg(code),
 		}
 	}
-	err = cache.AlterStock(ctx, rdb, service.SessionID, session.SurplusTicket-service.Num)
+	sessionDao := dao.NewSessionDao(ctx)
+	session, err := sessionDao.GetSessionByID(service.SessionID)
+	if err != nil {
+		code = e.ErrorSessionId
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+	err = cache.AlterStock(ctx, rdb, service.SessionID, session.SurplusTicket+service.Num)
 	if err != nil {
 		code = e.Error
 		return serializer.Response{

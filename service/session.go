@@ -193,6 +193,62 @@ func (service *SessionServer) Delete(ctx context.Context) serializer.Response {
 			Msg:    e.GetMsg(code),
 		}
 	}
+	orderDao := dao.NewOrderDao(ctx)
+	orders, err := orderDao.ListOrdersBySessionID(service.SessionID)
+	for _, order := range orders {
+		if order.Type == 1 {
+			rdb := cache.GetRedisClient()
+			err = cache.DelStock(ctx, rdb, service.SessionID)
+			if err != nil {
+				code = e.Error
+				return serializer.Response{
+					Status: code,
+					Msg:    e.GetMsg(code),
+				}
+			}
+			err = cache.DelSessionInfo(ctx, rdb, service.SessionID)
+			if err != nil {
+				code = e.Error
+				return serializer.Response{
+					Status: code,
+					Msg:    e.GetMsg(code),
+				}
+			}
+			err = orderDao.DeleteOrderByID(order.ID)
+			if err != nil {
+				code = e.ErrorOrderID
+				return serializer.Response{
+					Status: code,
+					Msg:    e.GetMsg(code),
+				}
+			}
+			userDao := dao.NewUserDao(ctx)
+			user, err := userDao.GetUserByID(order.UserID)
+			if err != nil {
+				code = e.ErrorExistUserNotFound
+				return serializer.Response{
+					Status: code,
+					Msg:    e.GetMsg(code),
+				}
+			}
+			user.Money += order.Money
+			err = userDao.UpdateUserByID(order.UserID, user)
+			if err != nil {
+				code = e.Error
+				return serializer.Response{
+					Status: code,
+					Msg:    e.GetMsg(code),
+				}
+			}
+		}
+	}
+	if err != nil {
+		code = e.ErrorSessionId
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
 
 	err = sessionDao.DeleteSessionByID(service.SessionID)
 	if err != nil {

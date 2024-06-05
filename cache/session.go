@@ -21,6 +21,14 @@ func AlterStock(ctx context.Context, rdb *redis.Client, sessionID uint, num int)
 	return rdb.Set(ctx, key, num, 0).Err()
 }
 
+// DelStock 更改场次库存
+func DelStock(ctx context.Context, rdb *redis.Client, sessionID uint) error {
+	Mutex.Lock()
+	defer Mutex.Unlock()
+	key := fmt.Sprintf("ticket_stock:%d", sessionID)
+	return rdb.Del(ctx, key).Err()
+}
+
 // AlterStockPipe 更改场次库存
 func AlterStockPipe(ctx context.Context, pipe redis.Pipeliner, sessionID uint, num int) {
 	Mutex.Lock()

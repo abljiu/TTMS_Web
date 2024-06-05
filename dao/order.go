@@ -66,3 +66,9 @@ func (dao *OrderDao) ListUserOrders(userId uint, page model.BasePage) (orders []
 
 	return
 }
+
+func (dao *OrderDao) ListOrdersBySessionID(sessionId uint) (orders []*model.Order, err error) {
+	err = dao.DB.Model(&model.Order{}).Where("session_id = ?", sessionId).Find(&orders).Error
+
+	return
+}
