@@ -27,7 +27,7 @@ func (dao *OrderDao) AddOrder(order *model.Order) (*model.Order, error) {
 }
 
 func (dao *OrderDao) GetOrderByOrderID(id uint) (order *model.Order, err error) {
-	err = dao.DB.Preload("Movie").Preload("Theater").Preload("Session").Preload("Session").Model(&model.Order{}).Where("id=?", id).First(&order).Error
+	err = dao.DB.Preload("Movie").Preload("Theater").Preload("Session").Model(&model.Order{}).Where("id=?", id).First(&order).Error
 	return
 }
 
@@ -62,7 +62,7 @@ func (dao *OrderDao) DeleteOrderByID(uid uint) error {
 }
 
 func (dao *OrderDao) ListUserOrders(userId uint, page model.BasePage) (orders []*model.Order, err error) {
-	err = dao.DB.Model(&model.Order{}).Where("user_id = ?", userId).Offset((page.PageNum - 1) * page.PageSize).Limit(page.PageSize).Find(&orders).Error
+	err = dao.DB.Model(&model.Order{}).Preload("Movie").Preload("Theater").Preload("Session").Where("user_id = ?", userId).Offset((page.PageNum - 1) * page.PageSize).Limit(page.PageSize).Find(&orders).Error
 
 	return
 }

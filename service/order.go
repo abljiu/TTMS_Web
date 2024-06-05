@@ -131,6 +131,7 @@ func (service *OrderService) Submit(ctx context.Context, userID uint) serializer
 	go startCountdown(order.ID)
 	movieDao := dao.NewMovieDao(ctx)
 	theaterDao := dao.NewTheaterDao(ctx)
+	hallDao := dao.NewHallDao(ctx)
 	movie, err := movieDao.GetMovieByMovieID(order.MovieID)
 	if err != nil {
 		code = e.ErrorMovieId
@@ -147,10 +148,20 @@ func (service *OrderService) Submit(ctx context.Context, userID uint) serializer
 			Msg:    e.GetMsg(code),
 		}
 	}
+	hall, err := hallDao.GetHallByHallID(session.HallID)
+	if err != nil {
+		code = e.ErrorHallId
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+	order.Session = *session
+
 	return serializer.Response{
 		Status: code,
 		Msg:    e.GetMsg(code),
-		Data:   serializer.BuildOrder(order, movie.ChineseName, theater.Name),
+		Data:   serializer.BuildOrder(order, movie.ChineseName, theater.Name, hall.Name),
 	}
 }
 
@@ -176,6 +187,7 @@ func (service *OrderService) Confirm(ctx context.Context) serializer.Response {
 	rdb := cache.GetRedisClient()
 	movieDao := dao.NewMovieDao(ctx)
 	theaterDao := dao.NewTheaterDao(ctx)
+	hallDao := dao.NewHallDao(ctx)
 	order, err := cache.GetOrderInfo(ctx, rdb, service.OrderID)
 	if err != nil {
 		code = e.ErrorOrderID
@@ -216,10 +228,18 @@ func (service *OrderService) Confirm(ctx context.Context) serializer.Response {
 			Msg:    e.GetMsg(code),
 		}
 	}
+	hall, err := hallDao.GetHallByHallID(order.Session.HallID)
+	if err != nil {
+		code = e.ErrorHallId
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
 	return serializer.Response{
 		Status: code,
 		Msg:    e.GetMsg(code),
-		Data:   serializer.BuildOrderWithTime(order, endTime.Sub(time.Now()).Seconds(), movie.ChineseName, theater.Name),
+		Data:   serializer.BuildOrderWithTime(order, endTime.Sub(time.Now()).Seconds(), movie.ChineseName, theater.Name, hall.Name),
 	}
 }
 
@@ -297,8 +317,10 @@ func (service *OrderService) Get(ctx context.Context, userID uint) serializer.Re
 	}
 	movieDao := dao.NewMovieDao(ctx)
 	theaterDao := dao.NewTheaterDao(ctx)
+	hallDao := dao.NewHallDao(ctx)
 	var movies []string
 	var theaters []string
+	var halls []string
 	for _, order := range orders {
 		movie, err := movieDao.GetMovieByMovieID(order.MovieID)
 		if err != nil {
@@ -316,14 +338,23 @@ func (service *OrderService) Get(ctx context.Context, userID uint) serializer.Re
 				Msg:    e.GetMsg(code),
 			}
 		}
+		hall, err := hallDao.GetHallByHallID(order.Session.HallID)
+		if err != nil {
+			code = e.ErrorTheaterID
+			return serializer.Response{
+				Status: code,
+				Msg:    e.GetMsg(code),
+			}
+		}
 		movies = append(movies, movie.ChineseName)
 		theaters = append(theaters, theater.Name)
+		halls = append(halls, hall.Name)
 	}
 
 	return serializer.Response{
 		Status: code,
 		Msg:    e.GetMsg(code),
-		Data:   serializer.BuildOrders(orders, movies, theaters),
+		Data:   serializer.BuildOrders(orders, movies, theaters, halls),
 	}
 }
 
