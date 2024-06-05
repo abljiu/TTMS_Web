@@ -36,10 +36,10 @@ func (dao *OrderDao) UpdateOrderByID(id uint, order *model.Order) error {
 	return err
 }
 
-func (dao *OrderDao) GetOrderIDBySeat(seat string) (id uint, err error) {
-	err = dao.DB.Model(&model.Order{}).Where("seat like ?").Error
-	return
-}
+//func (dao *OrderDao) GetOrderIDBySeat(seat string) (id uint, err error) {
+//	err = dao.DB.Model(&model.Order{}).Where("seat like ?"sea).Error
+//	return
+//}
 
 func (dao *OrderDao) CheckOrderTypeByID(id uint) (status uint, err error) {
 	order := &model.Order{}
