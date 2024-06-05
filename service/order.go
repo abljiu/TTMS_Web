@@ -381,7 +381,7 @@ func (service *OrderService) Return(ctx context.Context, userID uint) serializer
 			Msg:    e.GetMsg(code),
 		}
 	}
-	if order.Type == 0 {
+	if order.Type != 1 {
 		code = e.ErrorOrderType
 		return serializer.Response{
 			Status: code,
@@ -392,6 +392,16 @@ func (service *OrderService) Return(ctx context.Context, userID uint) serializer
 	session, err := sessionDao.GetSessionByID(order.SessionID)
 	if err != nil {
 		code = e.ErrorSessionId
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+	session.SurplusTicket += order.Num
+	util.ReturnSessionSeat(session, order.Seat, order.Num)
+	err = sessionDao.UpdateSessionByID(session.ID, session)
+	if err != nil {
+		code = e.Error
 		return serializer.Response{
 			Status: code,
 			Msg:    e.GetMsg(code),
@@ -413,7 +423,8 @@ func (service *OrderService) Return(ctx context.Context, userID uint) serializer
 			Msg:    e.GetMsg(code),
 		}
 	}
-	err = orderDao.DeleteOrderByID(order.ID)
+	order.Type = 3
+	err = orderDao.UpdateOrderByID(order.ID, order)
 	if err != nil {
 		code = e.ErrorOrderID
 		return serializer.Response{
