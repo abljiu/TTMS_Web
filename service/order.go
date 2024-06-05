@@ -10,6 +10,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"sync"
 	"time"
 )
 
@@ -18,7 +19,7 @@ type OrderService struct {
 	MovieID   uint    `json:"movie_id" form:"movie_id"`
 	SessionID uint    `json:"session_id" form:"session_id"`
 	ThreatID  uint    `json:"threat_id" form:"threat_id"`
-	Seat      string  `json:"seat" form:"seat"`
+	Seat      string  `json:"seat" form:"seat" `
 	Num       int     `json:"num" form:"num"`
 	Type      uint    `json:"type" form:"type"`
 	Money     float64 `json:"money" form:"money"`
@@ -130,17 +131,21 @@ func (service *OrderService) Submit(ctx context.Context, userID uint) serializer
 			Msg:    e.GetMsg(e.Error),
 		}
 	}
-	go startCountdown(order.ID, ctx)
-	session = &model.Session{}
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go startCountdown(order.ID, ctx, &wg)
+	wg.Wait()
 	return serializer.Response{
 		Status: code,
 		Msg:    e.GetMsg(code),
 		Data:   serializer.BuildOrder(order),
 	}
+
 }
 
 // 开始倒计时
-func startCountdown(orderID uint, ctx context.Context) {
+func startCountdown(orderID uint, ctx context.Context, wg *sync.WaitGroup) {
+	defer wg.Done()
 	rdb := cache.GetRedisClient()
 	time.Sleep(14 * time.Minute)
 	orderDao := dao.NewOrderDao(ctx)
