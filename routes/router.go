@@ -24,7 +24,7 @@ func NewRouter() *gin.Engine {
 		//轮播图
 		v1.GET("carousels", api.ListCarousel)
 		//获取电影详细信息
-		v1.GET("get-movie", api.GetMovie)
+		v1.POST("get-movie", api.GetMovie)
 		//根据类型查询热映电影
 		v1.GET("hot-movies", api.ListHotMovie)
 		//根据类型查询未上映电影
