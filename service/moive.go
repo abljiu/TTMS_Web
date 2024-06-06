@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"gorm.io/gorm"
 	"mime/multipart"
+	"strings"
 	"sync"
 	"time"
 )
@@ -28,8 +29,8 @@ type MovieService struct {
 	Introduction string        `json:"introduction" form:"introduction"`
 	OnSale       bool          `json:"on_sale" form:"on_sale"`
 	Score        float64       `json:"score" form:"score"`
-	Directors    []string      `json:"directors" form:"directors"`
-	Actors       []string      `json:"actors" form:"actors"`
+	Directors    string        `json:"directors" form:"directors"`
+	Actors       string        `json:"actors" form:"actors"`
 	Theaters     []string      `json:"theaters" form:"theaters"`
 	TheaterId    uint          `json:"theater_id" form:"theater_id"`
 	model.BasePage
@@ -62,12 +63,15 @@ func (service *MovieService) Create(ctx context.Context, movieImg, directorImg, 
 		}
 	}
 
+	directorSlice := strings.Split(service.Directors, ",")
+	actorSlice := strings.Split(service.Actors, ",")
+
 	//整理导演演员信息
-	for _, director := range service.Directors {
+	for _, director := range directorSlice {
 		directors = append(directors, model.Director{Name: director, ImageURL: conf.Config_.Path.Host + conf.Config_.Service.HttpPort + conf.Config_.Path.DirectorPath + director + ".jpg"})
 	}
 
-	for _, actor := range service.Actors {
+	for _, actor := range actorSlice {
 		actors = append(actors, model.Actor{Name: actor, ImageURL: conf.Config_.Path.Host + conf.Config_.Service.HttpPort + conf.Config_.Path.ActorPath + actor + ".jpg"})
 	}
 
@@ -85,6 +89,7 @@ func (service *MovieService) Create(ctx context.Context, movieImg, directorImg, 
 		Directors:    directors,
 		Actors:       actors,
 	}
+
 	MovieDao := dao.NewMovieDao(ctx)
 	err = MovieDao.CreateMovie(movie)
 	if err != nil {
@@ -107,7 +112,7 @@ func (service *MovieService) Create(ctx context.Context, movieImg, directorImg, 
 	}
 
 	//上传导演图片
-	_, err = UploadDirectorToLocalStatic(directorImg, service.Directors)
+	_, err = UploadDirectorToLocalStatic(directorImg, directorSlice)
 	if err != nil {
 		code = e.ErrorProductImgUpload
 		return serializer.Response{
@@ -117,7 +122,7 @@ func (service *MovieService) Create(ctx context.Context, movieImg, directorImg, 
 	}
 
 	//上传演员图片
-	_, err = UploadActorToLocalStatic(actorImg, service.Actors)
+	_, err = UploadActorToLocalStatic(actorImg, actorSlice)
 	if err != nil {
 		code = e.ErrorProductImgUpload
 		return serializer.Response{
