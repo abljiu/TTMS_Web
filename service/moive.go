@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"gorm.io/gorm"
 	"mime/multipart"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -21,7 +22,7 @@ type MovieService struct {
 	MovieId      uint          `json:"movie_id" form:"movie_id"`
 	ChineseName  string        `json:"chinese_name" form:"chinese_name"`
 	EnglishName  string        `json:"english_name" form:"english_name"`
-	CategoryId   []uint        `json:"category_id" form:"category_id"`
+	CategoryId   string        `json:"category_id" form:"category_id"`
 	Area         string        `json:"area" form:"area"`
 	Duration     time.Duration `json:"duration" form:"duration"`
 	ShowTime     time.Time     `json:"show_time" form:"show_time" time_format:"2006-01-02"`
@@ -71,16 +72,10 @@ func (service *MovieService) Create(ctx context.Context, movieImg, directorImg, 
 		actors = append(actors, model.Actor{Name: actor, ImageURL: conf.Config_.Path.Host + conf.Config_.Service.HttpPort + conf.Config_.Path.ActorPath + actor + ".jpg"})
 	}
 
-	strSlice := make([]string, len(service.CategoryId))
-	// 将每个uint转换为字符串并存储在strSlice中
-	for i, num := range service.CategoryId {
-		strSlice[i] = fmt.Sprintf("%d", num)
-	}
-	categoryStr := strings.Join(strSlice, ",")
 	movie := &model.Movie{
 		ChineseName:  service.ChineseName,
 		EnglishName:  service.EnglishName,
-		CategoryId:   categoryStr,
+		CategoryId:   service.CategoryId,
 		Area:         service.Area,
 		Duration:     service.Duration,
 		ShowTime:     service.ShowTime,
@@ -147,9 +142,16 @@ func (service *MovieService) ListAll(ctx context.Context) serializer.Response {
 	if service.PageSize == 0 {
 		service.PageSize = 15
 	}
+	var intId []uint
+	Id := strings.Split(service.CategoryId, ",")
+	for i := 0; i < len(Id); i++ {
+		num, _ := strconv.ParseUint(Id[i], 10, 32)
+		intId = append(intId, uint(num))
+	}
+
 	categoryId := uint(0)
 	if len(service.CategoryId) != 0 {
-		categoryId = service.CategoryId[0]
+		categoryId = intId[0]
 	}
 	productDao := dao.NewMovieDao(ctx)
 	total, err := productDao.CountMovieByCondition(categoryId)
@@ -182,9 +184,16 @@ func (service *MovieService) ListHot(ctx context.Context) serializer.Response {
 	if service.PageSize == 0 {
 		service.PageSize = 15
 	}
+	var intId []uint
+	Id := strings.Split(service.CategoryId, ",")
+	for i := 0; i < len(Id); i++ {
+		num, _ := strconv.ParseUint(Id[i], 10, 32)
+		intId = append(intId, uint(num))
+	}
+
 	categoryId := uint(0)
 	if len(service.CategoryId) != 0 {
-		categoryId = service.CategoryId[0]
+		categoryId = intId[0]
 	}
 	productDao := dao.NewMovieDao(ctx)
 	total, err := productDao.CountHotMovieByCondition(categoryId)
@@ -244,9 +253,16 @@ func (service *MovieService) ListUnreleased(ctx context.Context) serializer.Resp
 	if service.PageSize == 0 {
 		service.PageSize = 15
 	}
+	var intId []uint
+	Id := strings.Split(service.CategoryId, ",")
+	for i := 0; i < len(Id); i++ {
+		num, _ := strconv.ParseUint(Id[i], 10, 32)
+		intId = append(intId, uint(num))
+	}
+
 	categoryId := uint(0)
 	if len(service.CategoryId) != 0 {
-		categoryId = service.CategoryId[0]
+		categoryId = intId[0]
 	}
 	productDao := dao.NewMovieDao(ctx)
 	total, err := productDao.CountUnreleasedMovieByCondition(categoryId)
