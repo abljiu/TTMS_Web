@@ -15,7 +15,7 @@ type Session struct {
 	Hall          Hall      `gorm:"ForeignKey:HallID"`
 	ShowTime      time.Time `gorm:"not null"`
 	EndTime       time.Time `gorm:"not null"`
-	SurplusTicket int       `gorm:"not null"`
+	SurplusTicket int       `gorm:"not null type:varchar(1024)"`
 	SeatStatus    string    `gorm:"not null"`
 	Price         float64   `gorm:"not null"`
 	SeatRow       int       `gorm:"not null"`
