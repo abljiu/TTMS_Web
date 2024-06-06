@@ -26,11 +26,11 @@ func NewRouter() *gin.Engine {
 		//获取电影详细信息
 		v1.POST("get-movie", api.GetMovie)
 		//根据类型查询热映电影
-		v1.GET("hot-movies", api.ListHotMovie)
+		v1.POST("hot-movies", api.ListHotMovie)
 		//根据类型查询未上映电影
-		v1.GET("unreleased-movies", api.ListUnreleasedMovie)
+		v1.POST("unreleased-movies", api.ListUnreleasedMovie)
 		//根据类型查询全部电影
-		v1.GET("all-movies", api.ListMovie)
+		v1.POST("all-movies", api.ListMovie)
 		//查询电影票房
 		v1.GET("sales", api.ListMovieSales)
 		//获取首页热映电影

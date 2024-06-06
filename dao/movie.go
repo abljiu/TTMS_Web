@@ -90,7 +90,7 @@ func (dao *MovieDao) ListUnreleasedMovieByCondition(categoryId uint, page model.
 }
 
 func (dao *MovieDao) ListMovieBySales(page model.BasePage) (movies []*model.Movie, err error) {
-	err = dao.DB.Order("sales desc").Offset((page.PageNum - 1) * page.PageSize).Limit(page.PageSize).Find(&movies).Error
+	err = dao.DB.Order("sales desc").Limit(8).Find(&movies).Error
 	return
 }
 

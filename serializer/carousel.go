@@ -1,20 +1,21 @@
 package serializer
 
-import "TTMS_Web/model"
+import (
+	"TTMS_Web/conf"
+	"TTMS_Web/model"
+)
 
 type Carousel struct {
-	Id        uint   `json:"id"`
 	ImgPath   string `json:"img_path"`
-	ProductId uint   `json:"product_id"`
-	CreateAt  int64  `json:"create_at"`
+	MovieName string `json:"movie_name"`
+	Duration  string `json:"duration"`
 }
 
 func BuildCarousel(item *model.Carousel) Carousel {
 	return Carousel{
-		Id:        item.ID,
-		ImgPath:   item.ImgPath,
-		ProductId: item.ProductID,
-		CreateAt:  item.CreatedAt.Unix(),
+		ImgPath:   conf.Config_.Path.Host + conf.Config_.Service.HttpPort + conf.Config_.Path.MoviePath + item.Movie.ImgPath,
+		MovieName: item.Movie.ChineseName,
+		Duration:  item.Movie.Duration.String(),
 	}
 }
 

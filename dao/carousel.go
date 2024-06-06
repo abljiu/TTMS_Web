@@ -19,6 +19,11 @@ func NewCarouselByDB(db *gorm.DB) *CarouselDao {
 }
 
 func (dao *CarouselDao) ListCarousel() (carousel []model.Carousel, err error) {
-	err = dao.DB.Model(&model.Carousel{}).Find(&carousel).Error
+	err = dao.DB.Model(&model.Carousel{}).Find(&carousel).Limit(6).Error
+	return
+}
+
+func (dao *CarouselDao) CreateCarousel(item *model.Carousel) (err error) {
+	err = dao.DB.Model(&model.Carousel{}).Create(&item).Error
 	return
 }
