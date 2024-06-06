@@ -23,18 +23,20 @@ func NewRouter() *gin.Engine {
 
 		//轮播图
 		v1.GET("carousels", api.ListCarousel)
-
-		//查询电影票房
-		v1.GET("sales", api.ListMovieSales)
+		//获取电影详细信息
+		v1.POST("get-movie", api.GetMovie)
 		//根据类型查询热映电影
 		v1.GET("hot-movies", api.ListHotMovie)
 		//根据类型查询未上映电影
 		v1.GET("unreleased-movies", api.ListUnreleasedMovie)
 		//根据类型查询全部电影
 		v1.GET("all-movies", api.ListMovie)
-		//根据sessionId返回场次信息
+		//查询电影票房
+		v1.GET("sales", api.ListMovieSales)
+		//获取首页热映电影
+		v1.GET("index_hot_movies", api.ListIndexHotMovies)
+		//根据sessionID获取某场次详细信息
 		v1.GET("session", api.GetSession)
-
 		//获取剧院列表
 		v1.GET("theaters", api.ListTheater)
 		//用户发布评论，评分
@@ -77,18 +79,22 @@ func NewRouter() *gin.Engine {
 			authed.POST("avatar", api.UploadAvatar)
 			authed.POST("user/sending-email", api.SendEmail)
 			authed.POST("user/valid-email", api.ValidEmail)
+			authed.GET("show-user", api.ShowData)
+			authed.POST("add-money", api.AddUserMoney)
 
+			//提交订单
 			authed.POST("submit-order", api.SubmitOrder)
-			authed.GET("confirm-order", api.ConfirmOrder)
+			//确认订单
+			authed.POST("confirm-order", api.ConfirmOrder)
+			//支付订单
 			authed.POST("pay-order", api.PayOrder)
+			//退票
 			authed.DELETE("return-order", api.ReturnOrder)
+			//用户查看个人订单
 			authed.GET("orders", api.GetOrders)
 
-			//显示金额
-			//authed.POST("money", api.ShowMoney)
-
 			//搜索电影
-			//authed.POST("movies", api.SearchMovie)
+			authed.POST("movies", api.SearchMovie)
 			//用户发布评论，评分
 			authed.POST("publishComment", api.PublishComment)
 			//用户点赞某个评论	：为每条评论添加字段，判断是否为该用户点赞
@@ -112,16 +118,26 @@ func NewRouter() *gin.Engine {
 			admin := v1.Group("/admin") //api/v1/admin
 			admin.Use(middleware.Admin())
 			{
+				//添加管理员
+				admin.PUT("add-admin", api.AddAdmin)
+				//添加售票员
+				admin.PUT("add-conductor", api.AddConductor)
+
 				//添加电影
 				admin.POST("add-movie", api.CreateMovie)
+				//删除电影
+				admin.DELETE("del-movie", api.DeleteMovie)
 				//增加场次
 				admin.POST("add-session", api.AddSession)
 				//修改场次
 				admin.PUT("alter-session", api.AlterSession)
 				//删除场次
 				admin.DELETE("delete-session", api.DeleteSession)
-				//添加剧院
-				//admin.POST("add-theater", api.AddTheater)
+				//获取某影厅场次列表
+				admin.GET("sessions", api.ListSession)
+				//根据sessionID获取某场次详细信息
+				admin.GET("session", api.GetSession)
+
 				//获取影院热映电影列表
 				admin.GET("movie/getHot", api.ListHotMovieByTheater)
 
@@ -156,7 +172,6 @@ func NewRouter() *gin.Engine {
 				//管理员删除不合法内容的评论
 				admin.DELETE("deleteCommentsByContent", api.DeleteCommentsByContent)
 
-				admin.POST("movie", api.CreateMovie)
 			}
 		}
 

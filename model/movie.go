@@ -20,4 +20,5 @@ type Movie struct {
 	Sales        int64      `json:"sales"`
 	Directors    []Director `gorm:"many2many:movie_directors;"`
 	Actors       []Actor    `gorm:"many2many:movie_actors;"`
+	Theaters     []Theater  `gorm:"many2many:movie_theaters;"`
 }

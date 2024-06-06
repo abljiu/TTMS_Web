@@ -8,7 +8,9 @@ import (
 	"TTMS_Web/pkg/util"
 	"TTMS_Web/serializer"
 	"context"
+	"errors"
 	"fmt"
+	"gorm.io/gorm"
 	"mime/multipart"
 	"strings"
 	"sync"
@@ -28,6 +30,7 @@ type MovieService struct {
 	Score        float64       `json:"score" form:"score"`
 	Directors    []string      `json:"directors" form:"directors"`
 	Actors       []string      `json:"actors" form:"actors"`
+	Theaters     []string      `json:"theaters" form:"theaters"`
 	TheaterId    uint          `json:"theater_id" form:"theater_id"`
 	model.BasePage
 }
@@ -67,8 +70,8 @@ func (service *MovieService) Create(ctx context.Context, movieImg, directorImg, 
 	for _, actor := range service.Actors {
 		actors = append(actors, model.Actor{Name: actor, ImageURL: conf.Config_.Path.Host + conf.Config_.Service.HttpPort + conf.Config_.Path.ActorPath + actor + ".jpg"})
 	}
-	strSlice := make([]string, len(service.CategoryId))
 
+	strSlice := make([]string, len(service.CategoryId))
 	// 将每个uint转换为字符串并存储在strSlice中
 	for i, num := range service.CategoryId {
 		strSlice[i] = fmt.Sprintf("%d", num)
@@ -208,12 +211,12 @@ func (service *MovieService) ListHot(ctx context.Context) serializer.Response {
 
 // ListHotByTheater 获取影院热映电影列表
 func (service *MovieService) ListHotByTheater(ctx context.Context) serializer.Response {
-	var movies []*model.Movie
 	var err error
+	var movies []*model.Movie
 	code := e.Success
 
 	movieDao := dao.NewMovieDao(ctx)
-	total, err := movieDao.CountHotMovieByTheater(service.MovieId, service.TheaterId)
+	total, err := movieDao.CountHotMovieByTheater(service.TheaterId)
 	if err != nil {
 		code = e.Error
 		util.LogrusObj.Infoln("CountHotMovieByTheater", err)
@@ -226,11 +229,10 @@ func (service *MovieService) ListHotByTheater(ctx context.Context) serializer.Re
 	wg := new(sync.WaitGroup)
 	wg.Add(1)
 	go func() {
-		movies, _ = movieDao.ListHotMovieByTheater(service.MovieId, service.TheaterId)
+		movies, _ = movieDao.ListHotMovieByTheater(service.TheaterId)
 		wg.Done()
 	}()
 	wg.Wait()
-
 	return serializer.BuildListResponse(serializer.BuildMovies(movies), uint(total))
 }
 
@@ -296,9 +298,27 @@ func (service *MovieService) Search(ctx context.Context) serializer.Response {
 		service.PageSize = 15
 	}
 
+	var movies []*model.Movie
+
 	productDao := dao.NewMovieDao(ctx)
-	movies, err := productDao.SearchMovie(service.Introduction, service.BasePage)
-	if err != nil {
+	//精确查找
+	movie, err := productDao.SearchMovieExactly(service.Introduction)
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		util.LogrusObj.Infoln("SearchProduct", err)
+		code = e.Error
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+	movies = append(movies, movie)
+	//模糊
+	name := `%`
+	for _, ch := range service.Introduction {
+		name += string(ch) + "%"
+	}
+	movies, err = productDao.SearchMovie(name, service.BasePage)
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		util.LogrusObj.Infoln("SearchProduct", err)
 		code = e.Error
 		return serializer.Response{
@@ -308,4 +328,94 @@ func (service *MovieService) Search(ctx context.Context) serializer.Response {
 	}
 
 	return serializer.BuildListResponse(serializer.BuildMovies(movies), uint(len(movies)))
+}
+
+// ListIndexHotMovies 获取首页热映电影
+func (service *MovieService) ListIndexHotMovies(ctx context.Context) serializer.Response {
+	var movies []*model.Movie
+	var err error
+	code := e.Success
+
+	service.PageSize = 8
+
+	now := time.Now()
+	// 获取 30 天前的日期
+	preDate := now.AddDate(0, 0, -30)
+
+	productDao := dao.NewMovieDao(ctx)
+	total, err := productDao.CountIndexHotMovie(now, preDate)
+	if err != nil {
+		code = e.Error
+		util.LogrusObj.Infoln("CountIndexHotMovie", err)
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+
+	wg := new(sync.WaitGroup)
+	wg.Add(1)
+	go func() {
+		productDao = dao.NewMovieDaoByDB(productDao.DB)
+		movies, _ = productDao.ListIndexHotMovie(now, preDate, service.PageSize)
+		wg.Done()
+	}()
+	wg.Wait()
+
+	return serializer.BuildListResponse(serializer.BuildMovies(movies), uint(total))
+}
+
+// Delete 删除电影
+func (service *MovieService) Delete(ctx context.Context) serializer.Response {
+	code := e.Success
+
+	movieDao := dao.NewMovieDao(ctx)
+	movie, err := movieDao.GetMovieByMovieID(service.MovieId)
+	if err != nil {
+		code = e.ErrorMovieId
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+	if movie.OnSale {
+		code = e.ErrorMovieStatus
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+	_, err = movieDao.DeleteMovie(service.MovieId)
+	if err != nil {
+		code = e.ErrorMovieId
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+
+	return serializer.Response{
+		Status: code,
+		Msg:    e.GetMsg(code),
+	}
+}
+
+// Get 获取电影详细信息
+func (service *MovieService) Get(ctx context.Context) serializer.Response {
+	code := e.Success
+	movieDao := dao.NewMovieDao(ctx)
+	movie, err := movieDao.GetMovieByMovieID(service.MovieId)
+	if err != nil {
+		code = e.ErrorMovieId
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+	fmt.Println(movie)
+	return serializer.Response{
+		Status: code,
+		Msg:    e.GetMsg(code),
+		Data:   serializer.BuildMovie(movie),
+	}
 }

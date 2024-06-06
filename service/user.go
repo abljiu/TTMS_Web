@@ -16,12 +16,13 @@ import (
 )
 
 type UserService struct {
-	NickName      string `json:"nick_name" form:"nick_name"`
-	UserID        string `json:"user_id" form:"user_id"`
-	Password      string `json:"password" form:"password"`
-	Email         string `json:"email" form:"email"`
-	OperationType uint   `json:"operation_type" form:"operation_type"` //1 绑定邮箱 2 解绑邮箱 3 改密码
-	Status        string `json:"status" form:"status"`
+	NickName      string  `json:"nick_name" form:"nick_name"`
+	UserID        string  `json:"user_id" form:"user_id"`
+	Password      string  `json:"password" form:"password"`
+	Email         string  `json:"email" form:"email"`
+	OperationType uint    `json:"operation_type" form:"operation_type"` //1 绑定邮箱 2 解绑邮箱 3 改密码
+	Status        string  `json:"status" form:"status"`
+	Money         float64 `json:"money" form:"money"`
 }
 
 // Register 注册逻辑
@@ -250,11 +251,12 @@ func (service *UserService) Valid(ctx context.Context, token string) serializer.
 			Msg:    e.GetMsg(code),
 		}
 	}
+
 	user := &model.User{
 		NickName: nickName,
 		Status:   model.Normal,
 		Avatar:   "avatar.JPG",
-		Money:    0,
+		Money:    1000,
 	}
 
 	if operationType == 1 {
@@ -318,8 +320,87 @@ func (service *UserService) Valid(ctx context.Context, token string) serializer.
 	}
 }
 
-// Show 展示用户金额
+// AddAdmin 添加管理员
+func (service *UserService) AddAdmin(ctx context.Context) serializer.Response {
+	code := e.Success
+	userDao := dao.NewUserDao(ctx)
+	user, _, err := userDao.ExitOrNorByUserID(service.UserID)
+	if err != nil {
+		code = e.Error
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+
+	user.Status = model.Administrator
+	err = userDao.UpdateUserByID(user.ID, user)
+	if err != nil {
+		code = e.Error
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+
+	return serializer.Response{
+		Status: code,
+		Data:   serializer.BuildUser(user),
+		Msg:    e.GetMsg(code),
+	}
+}
+
+// AddConductor 添加管理员
+func (service *UserService) AddConductor(ctx context.Context) serializer.Response {
+	code := e.Success
+	userDao := dao.NewUserDao(ctx)
+	user, _, err := userDao.ExitOrNorByUserID(service.UserID)
+	if err != nil {
+		code = e.Error
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+
+	user.Status = model.Conductor
+	err = userDao.UpdateUserByID(user.ID, user)
+	if err != nil {
+		code = e.Error
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+
+	return serializer.Response{
+		Status: code,
+		Data:   serializer.BuildUser(user),
+		Msg:    e.GetMsg(code),
+	}
+}
+
+// Show 展示用户信息
 func (service *UserService) Show(ctx context.Context, uid uint) serializer.Response {
+	code := e.Success
+	userDao := dao.NewUserDao(ctx)
+	user, err := userDao.GetUserByID(uid)
+	if err != nil {
+		code = e.ErrorExistUserNotFound
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+	return serializer.Response{
+		Status: code,
+		Data:   serializer.BuildUser(user),
+		Msg:    e.GetMsg(code),
+	}
+}
+
+// AddMoney 充钱
+func (service *UserService) AddMoney(ctx context.Context, uid uint) serializer.Response {
 	code := e.Success
 	userDao := dao.NewUserDao(ctx)
 	user, err := userDao.GetUserByID(uid)
@@ -330,6 +411,17 @@ func (service *UserService) Show(ctx context.Context, uid uint) serializer.Respo
 			Msg:    e.GetMsg(code),
 		}
 	}
+
+	user.Money += service.Money
+	err = userDao.UpdateUserByID(user.ID, user)
+	if err != nil {
+		code = e.Error
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+
 	return serializer.Response{
 		Status: code,
 		Data:   serializer.BuildUser(user),

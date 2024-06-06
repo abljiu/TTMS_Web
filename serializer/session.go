@@ -1,50 +1,59 @@
 package serializer
 
 import (
+	"TTMS_Web/dao"
 	"TTMS_Web/model"
-	"fmt"
-	"strconv"
-	"strings"
+	"context"
 	"time"
 )
 
 type Session struct {
-	ID          uint          `json:"id"`
-	MovieName   string        `json:"movie_name"`
-	TheaterName string        `json:"theater_name"`
-	HallName    string        `json:"hall_name"`
-	Address     string        `json:"address"`
-	Duration    time.Duration `json:"duration"`
-	ShowTime    time.Time     `json:"show_time"`
-	EndTime     time.Time     `json:"end_time"`
-	CategoryID  []uint        `json:"category_id"`
-	SeatStatus  string        `json:"seat_status"`
-	Price       float64       `json:"price"`
-	SeatRow     int           `json:"seat_row"`
-	SeatColumn  int           `json:"seat_column"`
+	ID            uint
+	Movie         Movie
+	TheaterID     uint
+	Theater       model.Theater
+	Hall          *model.Hall
+	ShowTime      time.Time
+	EndTime       time.Time
+	SurplusTicket int
+	SeatStatus    string
+	Price         float64
+	SeatRow       uint
 }
 
-func BuildSession(session *model.Session) *Session {
-	CategoryID := make([]uint, len(session.Movie.CategoryId))
-	fmt.Println(session.Movie)
-	strSlice := strings.Split(session.Movie.CategoryId, ",")
-	for i, str := range strSlice {
-		num, _ := strconv.ParseUint(str, 10, 64)
-		CategoryID[i] = uint(num)
+func BuildSession(item *model.Session, movie *model.Movie, hall *model.Hall) Session {
+	return Session{
+		ID:            item.ID,
+		Movie:         BuildMovie(movie),
+		Hall:          hall,
+		ShowTime:      item.ShowTime,
+		EndTime:       item.ShowTime.Add(movie.Duration),
+		SurplusTicket: item.SurplusTicket,
+		SeatStatus:    item.SeatStatus,
+		Price:         item.Price,
+		SeatRow:       uint(hall.SeatRow),
+		Theater:       item.Theater,
+		TheaterID:     item.TheaterID,
 	}
-	return &Session{
-		ID:          session.ID,
-		MovieName:   session.Movie.ChineseName,
-		TheaterName: session.Theater.Name,
-		HallName:    session.Hall.Name,
-		Address:     session.Theater.Address,
-		Duration:    session.Movie.Duration,
-		ShowTime:    session.ShowTime,
-		EndTime:     session.EndTime,
-		CategoryID:  CategoryID,
-		SeatStatus:  session.SeatStatus,
-		Price:       session.Price,
-		SeatRow:     session.SeatRow,
-		SeatColumn:  session.Hall.SeatColumn,
+}
+
+func BuildSessions(items []*model.Session, theaterID uint, ctx context.Context) (products []Session) {
+	for i := 0; i < len(items); i++ {
+		movieDao := dao.NewMovieDao(ctx)
+		hallDao := dao.NewHallDao(ctx)
+		//根据id获取电影
+		movie, err := movieDao.GetMovieByMovieID(items[i].MovieID)
+		if err != nil {
+			return nil
+		}
+		// 根据id获取影厅
+		hall, err := hallDao.GetHallByHallID(items[i].HallID)
+		if err != nil {
+			return nil
+		}
+		product := BuildSession(items[i], movie, hall)
+		product.TheaterID = theaterID
+		products = append(products, product)
 	}
+	return products
 }

@@ -88,3 +88,49 @@ func ShowMoney(c *gin.Context) {
 		util.LogrusObj.Infoln("ShowMoney", err)
 	}
 }
+
+func AddAdmin(c *gin.Context) {
+	var addAmin service.UserService
+	if err := c.ShouldBind(&addAmin); err == nil {
+		res := addAmin.AddAdmin(c.Request.Context())
+		c.JSON(http.StatusOK, res)
+	} else {
+		c.JSON(http.StatusBadRequest, ErrorResponse(err))
+		util.LogrusObj.Infoln("UserUpdate", err)
+	}
+}
+
+func AddConductor(c *gin.Context) {
+	var addConductor service.UserService
+	if err := c.ShouldBind(&addConductor); err == nil {
+		res := addConductor.AddConductor(c.Request.Context())
+		c.JSON(http.StatusOK, res)
+	} else {
+		c.JSON(http.StatusBadRequest, ErrorResponse(err))
+		util.LogrusObj.Infoln("UserUpdate", err)
+	}
+}
+
+func AddUserMoney(c *gin.Context) {
+	var addUserMoney service.UserService
+	claims, _ := util.ParseToken(c.GetHeader("Authorization"))
+	if err := c.ShouldBind(&addUserMoney); err == nil {
+		res := addUserMoney.AddMoney(c.Request.Context(), claims.UserID)
+		c.JSON(http.StatusOK, res)
+	} else {
+		c.JSON(http.StatusBadRequest, ErrorResponse(err))
+		util.LogrusObj.Infoln("UserUpdate", err)
+	}
+}
+
+func ShowData(c *gin.Context) {
+	var showData service.UserService
+	claims, _ := util.ParseToken(c.GetHeader("Authorization"))
+	if err := c.ShouldBind(&showData); err == nil {
+		res := showData.Show(c.Request.Context(), claims.UserID)
+		c.JSON(http.StatusOK, res)
+	} else {
+		c.JSON(http.StatusBadRequest, ErrorResponse(err))
+		util.LogrusObj.Infoln("UserUpdate", err)
+	}
+}
