@@ -12,8 +12,6 @@ import (
 	"fmt"
 	"gorm.io/gorm"
 	"mime/multipart"
-	"strconv"
-	"strings"
 	"sync"
 	"time"
 )
@@ -22,7 +20,8 @@ type MovieService struct {
 	MovieId      uint          `json:"movie_id" form:"movie_id"`
 	ChineseName  string        `json:"chinese_name" form:"chinese_name"`
 	EnglishName  string        `json:"english_name" form:"english_name"`
-	CategoryId   string        `json:"category_id" form:"category_id"`
+	CategoryId   []uint        `json:"category_id" form:"category_id"`
+	CategoryIds  string        `json:"category_ids" form:"category_ids"`
 	Area         string        `json:"area" form:"area"`
 	Duration     time.Duration `json:"duration" form:"duration"`
 	ShowTime     time.Time     `json:"show_time" form:"show_time" time_format:"2006-01-02"`
@@ -75,7 +74,7 @@ func (service *MovieService) Create(ctx context.Context, movieImg, directorImg, 
 	movie := &model.Movie{
 		ChineseName:  service.ChineseName,
 		EnglishName:  service.EnglishName,
-		CategoryId:   service.CategoryId,
+		CategoryId:   service.CategoryIds,
 		Area:         service.Area,
 		Duration:     service.Duration,
 		ShowTime:     service.ShowTime,
@@ -142,16 +141,9 @@ func (service *MovieService) ListAll(ctx context.Context) serializer.Response {
 	if service.PageSize == 0 {
 		service.PageSize = 15
 	}
-	var intId []uint
-	Id := strings.Split(service.CategoryId, ",")
-	for i := 0; i < len(Id); i++ {
-		num, _ := strconv.ParseUint(Id[i], 10, 32)
-		intId = append(intId, uint(num))
-	}
-
 	categoryId := uint(0)
 	if len(service.CategoryId) != 0 {
-		categoryId = intId[0]
+		categoryId = service.CategoryId[0]
 	}
 	productDao := dao.NewMovieDao(ctx)
 	total, err := productDao.CountMovieByCondition(categoryId)
@@ -184,16 +176,9 @@ func (service *MovieService) ListHot(ctx context.Context) serializer.Response {
 	if service.PageSize == 0 {
 		service.PageSize = 15
 	}
-	var intId []uint
-	Id := strings.Split(service.CategoryId, ",")
-	for i := 0; i < len(Id); i++ {
-		num, _ := strconv.ParseUint(Id[i], 10, 32)
-		intId = append(intId, uint(num))
-	}
-
 	categoryId := uint(0)
 	if len(service.CategoryId) != 0 {
-		categoryId = intId[0]
+		categoryId = service.CategoryId[0]
 	}
 	productDao := dao.NewMovieDao(ctx)
 	total, err := productDao.CountHotMovieByCondition(categoryId)
@@ -253,16 +238,9 @@ func (service *MovieService) ListUnreleased(ctx context.Context) serializer.Resp
 	if service.PageSize == 0 {
 		service.PageSize = 15
 	}
-	var intId []uint
-	Id := strings.Split(service.CategoryId, ",")
-	for i := 0; i < len(Id); i++ {
-		num, _ := strconv.ParseUint(Id[i], 10, 32)
-		intId = append(intId, uint(num))
-	}
-
 	categoryId := uint(0)
 	if len(service.CategoryId) != 0 {
-		categoryId = intId[0]
+		categoryId = service.CategoryId[0]
 	}
 	productDao := dao.NewMovieDao(ctx)
 	total, err := productDao.CountUnreleasedMovieByCondition(categoryId)
