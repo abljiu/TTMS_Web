@@ -260,7 +260,6 @@ func (service *UserService) Valid(ctx context.Context, token string) serializer.
 	}
 
 	if operationType == 1 {
-		user.Email = email
 		//如果是首次绑定 说明是注册
 		if userId == 0 {
 			//密码加密
@@ -279,10 +278,16 @@ func (service *UserService) Valid(ctx context.Context, token string) serializer.
 			}
 			return serializer.Response{
 				Status: code,
-				Msg:    e.GetMsg(code),
+				Msg:    "注册成功！",
 				Data:   serializer.BuildUser(user),
 			}
 		}
+		if len(email) == 0 {
+			code = e.ErrorAuthToken
+		} else {
+			user.Email = email
+		}
+
 	} else if operationType == 2 {
 		user.Email = ""
 	} else if operationType == 3 {
@@ -307,7 +312,6 @@ func (service *UserService) Valid(ctx context.Context, token string) serializer.
 	}
 	err = userDao.UpdateUserByID(userId, user)
 	if err != nil {
-		code = e.Error
 		return serializer.Response{
 			Status: code,
 			Msg:    e.GetMsg(code),

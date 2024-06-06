@@ -49,7 +49,7 @@ type EmailClaims struct {
 	UserID        uint   `json:"user_id"`
 	Email         string `json:"email"`
 	Password      string `json:"password"`
-	OperationType uint   `json:"operation_type"`
+	OperationType uint   `json:"operation_type"` //1 绑定邮箱 2 解绑邮箱 3
 	jwt.StandardClaims
 }
 
