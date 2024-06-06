@@ -121,9 +121,9 @@ func (dao *SessionDao) ListSession(theaterID uint, curTime string, page model.Ba
 	return
 }
 
-func (dao *SessionDao) IsTimeOverlap(sessionId uint, StartTime, EndTime time.Time) bool {
+func (dao *SessionDao) IsTimeOverlap(hallId uint, StartTime, EndTime time.Time) bool {
 	var count int64
 	dao.Model(&model.Session{}).
-		Where("(session_id = ?  and ((? BETWEEN show_time AND end_time) OR (? BETWEEN show_time AND end_time)) OR (show_time BETWEEN ? AND ? OR end_time BETWEEN ? AND ?))", sessionId, StartTime, EndTime, StartTime, EndTime, StartTime, EndTime).Count(&count)
+		Where("(hall_id = ?  and ((? BETWEEN show_time AND end_time) OR (? BETWEEN show_time AND end_time)) OR (show_time BETWEEN ? AND ? OR end_time BETWEEN ? AND ?))", hallId, StartTime, EndTime, StartTime, EndTime, StartTime, EndTime).Count(&count)
 	return count > 0
 }
