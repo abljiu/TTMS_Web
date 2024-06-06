@@ -11,7 +11,7 @@ type Hall struct {
 	Theater    Theater `gorm:"ForeignKey:TheaterID"`
 	SeatRow    int
 	SeatColumn int
-	Seat       string `gorm:"varchar(1025)"`
+	Seat       string `gorm:"type:varchar(1024)"`
 	SeatNum    int
 }
 
