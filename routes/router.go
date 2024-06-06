@@ -23,6 +23,7 @@ func NewRouter() *gin.Engine {
 
 		//轮播图
 		v1.GET("carousels", api.ListCarousel)
+
 		//获取电影详细信息
 		v1.POST("get-movie", api.GetMovie)
 		//根据类型查询热映电影
@@ -106,7 +107,8 @@ func NewRouter() *gin.Engine {
 				admin.GET("sessions", api.ListSession)
 				//根据sessionID获取某场次详细信息
 				admin.GET("session", api.GetSession)
-
+				//添加轮播图
+				admin.POST("add-carousel", api.AddCarousel)
 				//获取影院热映电影列表
 				admin.GET("movie/getHot", api.ListHotMovieByTheater)
 

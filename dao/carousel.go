@@ -19,7 +19,7 @@ func NewCarouselByDB(db *gorm.DB) *CarouselDao {
 }
 
 func (dao *CarouselDao) ListCarousel() (carousel []model.Carousel, err error) {
-	err = dao.DB.Model(&model.Carousel{}).Find(&carousel).Limit(6).Error
+	err = dao.DB.Model(&model.Carousel{}).Preload("Movie").Find(&carousel).Limit(6).Error
 	return
 }
 

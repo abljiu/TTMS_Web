@@ -6,10 +6,11 @@ import (
 	"TTMS_Web/pkg/e"
 	"TTMS_Web/serializer"
 	"context"
+	"fmt"
 )
 
 type CarouselService struct {
-	MovieID uint `form:"movie_id" json:"movie_id" binding:"required"`
+	MovieID uint `form:"movie_id" json:"movie_id" `
 }
 
 func (service *CarouselService) List(ctx context.Context) serializer.Response {
@@ -23,6 +24,7 @@ func (service *CarouselService) List(ctx context.Context) serializer.Response {
 			Msg:    e.GetMsg(code),
 		}
 	}
+	fmt.Println("asdasdasd", carousels)
 	return serializer.BuildListResponse(serializer.BuildCarousels(carousels), uint(len(carousels)))
 }
 

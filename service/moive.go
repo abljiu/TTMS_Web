@@ -275,9 +275,6 @@ func (service *MovieService) ListUnreleased(ctx context.Context) serializer.Resp
 func (service *MovieService) ListSales(ctx context.Context) serializer.Response {
 	var movies []*model.Movie
 	code := e.Success
-	if service.PageSize == 0 {
-		service.PageSize = 15
-	}
 	productDao := dao.NewMovieDao(ctx)
 	movies, err := productDao.ListMovieBySales(service.BasePage)
 	if err != nil {
