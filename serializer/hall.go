@@ -23,6 +23,7 @@ func BuildHall(item *model.Hall) Hall {
 	for i := range seat {
 		seat[i] = make([]int, item.SeatColumn)
 	}
+	//fmt.Println(item.ID, item.SeatRow, item.SeatColumn, seatArr, len(seatArr))
 	k := 0
 	for i := 0; i < item.SeatRow; i++ {
 		for j := 0; j < item.SeatColumn; j++ {
