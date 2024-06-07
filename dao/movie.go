@@ -155,15 +155,14 @@ func (dao *MovieDao) CountIndexHotMovie(today, preDate time.Time) (int64, error)
 
 	// 注意：这里调用 Err() 方法（如果 GORM 版本支持）或者直接访问 Error 字段
 	err := dao.DB.Model(&model.Movie{}).
-		Where("on_sale = ? AND show_time BETWEEN ? AND ?", 1, preDate, today).
+		Where("show_time BETWEEN ? AND ?", preDate, today).
 		Count(&total).Error
-
 	return total, err
 }
 
 func (dao *MovieDao) ListIndexHotMovie(today, preDate time.Time, size int) (movies []*model.Movie, err error) {
 	err = dao.DB.Model(&model.Movie{}).
-		Where("on_sale = ? AND show_time BETWEEN ? AND ?", 1, preDate, today).
-		Order("sales desc").Limit(size).Find(&movies).Error
+		Where("show_time BETWEEN ? AND ?", preDate, today).
+		Order("sales desc").Find(&movies).Limit(size).Error
 	return
 }

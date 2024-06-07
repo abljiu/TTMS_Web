@@ -87,15 +87,13 @@ func NewRouter() *gin.Engine {
 				admin.PUT("alter-session", api.AlterSession)
 				//删除场次
 				admin.DELETE("delete-session", api.DeleteSession)
+				//获取影院热映电影列表
+				admin.GET("movie/getHot", api.ListHotMovieByTheater)
+
 				//获取某影厅场次列表
 				admin.GET("sessions", api.ListSession)
 				//根据sessionID获取某场次详细信息
 				admin.GET("session", api.GetSession)
-
-				//添加剧院
-				//admin.POST("add-theater", api.AddTheater)
-				//获取影院热映电影列表
-				admin.GET("movie/getHot", api.ListHotMovieByTheater)
 
 				//某剧院的影厅列表
 				admin.GET("halls", api.ListHall)
@@ -107,6 +105,7 @@ func NewRouter() *gin.Engine {
 				admin.PUT("hall/update", api.UpdateHall)
 				//影厅详细信息
 				admin.GET("hall", api.GetHall)
+
 				//添加剧院
 				admin.POST("createTheater", api.CreateTheater)
 				//修改剧院
