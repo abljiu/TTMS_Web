@@ -24,6 +24,11 @@ func (dao *MovieDao) CreateMovie(product *model.Movie) (err error) {
 	return dao.DB.Model(&model.Movie{}).Create(&product).Error
 }
 
+func (dao *MovieDao) DeleteMovie(id uint) (product *model.Movie, err error) {
+	dao.DB.Model(&model.Movie{}).Where("id = ?", id).Delete(&product)
+	return product, nil
+}
+
 func (dao *MovieDao) CountMovieByCondition(categoryId uint) (total int64, err error) {
 	if categoryId == 0 {
 		// 查询所有电影
@@ -85,7 +90,7 @@ func (dao *MovieDao) ListUnreleasedMovieByCondition(categoryId uint, page model.
 }
 
 func (dao *MovieDao) ListMovieBySales(page model.BasePage) (movies []*model.Movie, err error) {
-	err = dao.DB.Order("sales desc").Offset((page.PageNum - 1) * page.PageSize).Limit(page.PageSize).Find(&movies).Error
+	err = dao.DB.Order("sales desc").Limit(8).Find(&movies).Error
 	return
 }
 
@@ -104,7 +109,7 @@ func (dao *MovieDao) SearchMovie(info string, page model.BasePage) (products []*
 }
 
 func (dao *MovieDao) GetMovieByMovieID(id uint) (movie *model.Movie, err error) {
-	err = dao.DB.Model(&model.Movie{}).Where("id=?", id).First(&movie).Error
+	err = dao.DB.Model(&model.Movie{}).Preload("Directors").Preload("Actors").Where("id=?", id).First(&movie).Error
 	return
 }
 
@@ -115,23 +120,28 @@ func (dao *MovieDao) AddMovieSales(id uint, price uint) (err error) {
 
 func (dao *MovieDao) UpdateMovie(id uint, movie *model.Movie) (err error) {
 	err = dao.DB.Model(&model.Movie{}).Where("id=?", id).Updates(movie).Error
-	return
-}
-
-func (dao *MovieDao) AddMovieTheater(movieTheater *model.MovieTheater) (err error) {
-	err = dao.DB.Model(&model.MovieTheater{}).Create(movieTheater).Error
+	if err == nil {
+		err = dao.DB.Model(movie).Association("Theaters").Append(movie.Theaters)
+	} else {
+		return
+	}
 	return
 }
 
 func (dao *MovieDao) CountHotMovieByTheater(theaterId uint) (total int64, err error) {
-	err = dao.DB.Model(&model.MovieTheater{}).Preload("Movie").Preload("Theater").
-		Where("theater_id = ?", theaterId).Count(&total).Error
+	err = dao.DB.Model(&model.Movie{}).
+		Joins("JOIN movie_theaters ON movie.id = movie_theaters.movie_id").
+		Where("movie_theaters.theater_id = ?", theaterId).
+		Count(&total).Error
 	return
 }
 
-func (dao *MovieDao) ListHotMovieByTheater(theaterId uint) (movies []*model.MovieTheater, err error) {
-	err = dao.DB.Model(&model.MovieTheater{}).Preload("Movie").Preload("Theater").
-		Where("theater_id = ?", theaterId).Find(&movies).Error
+func (dao *MovieDao) ListHotMovieByTheater(theaterId uint) (movies []*model.Movie, err error) {
+	err = dao.DB.Model(&model.Movie{}).
+		Joins("JOIN movie_theaters ON movie.id = movie_theaters.movie_id").
+		Where("movie_theaters.theater_id = ?", theaterId).
+		Where("theater_id = ?", theaterId).
+		Find(&movies).Error
 	return
 }
 

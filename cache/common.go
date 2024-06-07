@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/go-redis/redis/v8"
 	"strconv"
+	"sync"
 )
 
 var rdb *redis.Client
@@ -32,3 +33,5 @@ func Redis() {
 func GetRedisClient() *redis.Client {
 	return rdb
 }
+
+var Mutex sync.RWMutex

@@ -4,6 +4,6 @@ import "gorm.io/gorm"
 
 type Carousel struct {
 	gorm.Model
-	ImgPath   string
-	ProductID uint `gorm:"not null"`
+	MovieID uint  `gorm:"movie_id"`
+	Movie   Movie `gorm:"ForeignKey:MovieID"`
 }

@@ -13,7 +13,7 @@ type User struct {
 	NickName       string
 	Status         string
 	Avatar         string
-	Money          uint
+	Money          float64
 }
 
 const (

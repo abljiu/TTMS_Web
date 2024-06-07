@@ -27,7 +27,7 @@ func (dao *OrderDao) AddOrder(order *model.Order) (*model.Order, error) {
 }
 
 func (dao *OrderDao) GetOrderByOrderID(id uint) (order *model.Order, err error) {
-	err = dao.DB.Preload("Movie").Preload("Theater").Preload("Session").Preload("Session").Model(&model.Order{}).Where("id=?", id).First(&order).Error
+	err = dao.DB.Preload("Movie").Preload("Theater").Preload("Session").Model(&model.Order{}).Where("id=?", id).First(&order).Error
 	return
 }
 
@@ -36,10 +36,10 @@ func (dao *OrderDao) UpdateOrderByID(id uint, order *model.Order) error {
 	return err
 }
 
-func (dao *OrderDao) GetOrderIDBySeat(seat string) (id uint, err error) {
-	err = dao.DB.Model(&model.Order{}).Where("seat like ?").Error
-	return
-}
+//func (dao *OrderDao) GetOrderIDBySeat(seat string) (id uint, err error) {
+//	err = dao.DB.Model(&model.Order{}).Where("seat like ?"sea).Error
+//	return
+//}
 
 func (dao *OrderDao) CheckOrderTypeByID(id uint) (status uint, err error) {
 	order := &model.Order{}
@@ -61,8 +61,14 @@ func (dao *OrderDao) DeleteOrderByID(uid uint) error {
 	return err
 }
 
-func (dao *OrderDao) ListUserOrders(userId uint, page model.BasePage) (orders []*model.Order, err error) {
-	err = dao.DB.Model(&model.Order{}).Where("user_id = ?", userId).Offset((page.PageNum - 1) * page.PageSize).Limit(page.PageSize).Find(&orders).Error
+func (dao *OrderDao) ListUserOrders(userId uint) (orders []*model.Order, err error) {
+	err = dao.DB.Model(&model.Order{}).Preload("Movie").Preload("Theater").Preload("Session").Where("user_id = ?", userId).Find(&orders).Error
+
+	return
+}
+
+func (dao *OrderDao) ListOrdersBySessionID(sessionId uint) (orders []*model.Order, err error) {
+	err = dao.DB.Model(&model.Order{}).Where("session_id = ?", sessionId).Find(&orders).Error
 
 	return
 }

@@ -14,12 +14,14 @@ const (
 	ErrorAuthTokenTimeout  = 30006
 	ErrorUploadFail        = 30007
 	ErrorSendEmail         = 30008
+	ErrorUserMoney         = 3009
 
 	//movie 模块
 	ErrorStatus           = 40001
 	ErrorProductImgUpload = 40002
 	ErrorMovieIndex       = 40003
 	ErrorMovieId          = 40004
+	ErrorMovieStatus      = 40005
 
 	//hall模块
 	ErrorHallId           = 50001

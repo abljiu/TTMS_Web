@@ -7,4 +7,5 @@ type Theater struct {
 	Name    string
 	Address string
 	HallNum int
+	Movies  []Movie `gorm:"many2many:movie_theaters;"`
 }
