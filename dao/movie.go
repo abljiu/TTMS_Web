@@ -54,7 +54,7 @@ func (dao *MovieDao) CountUnreleasedMovieByCondition(categoryId uint) (total int
 		// 查询所有电影
 		err = dao.DB.Model(&model.Movie{}).Count(&total).Error
 	} else {
-		err = dao.DB.Model(&model.Movie{}).Where("category_id LIKE ? and  on_sale = 0", "%"+strconv.Itoa(int(categoryId))+"%").Count(&total).Error
+		err = dao.DB.Model(&model.Movie{}).Where("category_id LIKE ? and  on_sale = 0 ", "%"+strconv.Itoa(int(categoryId))+"%").Count(&total).Error
 	}
 	return
 }
