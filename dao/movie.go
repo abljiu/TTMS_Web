@@ -145,21 +145,6 @@ func (dao *MovieDao) ListHotMovieByTheater(theaterId uint) (movies []*model.Movi
 	return
 }
 
-//
-//func (dao *MovieDao) CountIndexHotMovie(today, preDate string) (total int64, err error) {
-//	err = dao.DB.Model(&model.Movie{}).
-//		Where("on_sale = ? AND show_time BETWEEN ? AND ?", 1, preDate, today).
-//		Count(&total).Error
-//	return
-//}
-//
-//func (dao *MovieDao) ListIndexHotMovie(today, preDate string, page int) (movies []*model.Movie, err error) {
-//	err = dao.DB.Model(&model.Movie{}).
-//		Where("on_sale = ? AND show_time BETWEEN ? AND ?", 1, preDate, today).
-//		Order("sales desc").Limit(page).Find(movies).Error
-//	return
-//}
-
 func (dao *MovieDao) CountIndexHotMovie(today, preDate time.Time) (int64, error) {
 	var total int64
 
