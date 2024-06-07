@@ -335,7 +335,7 @@ func (service *MovieService) ListIndexHotMovies(ctx context.Context) serializer.
 	service.PageSize = 8
 
 	now := time.Now()
-	// 获取 30 天前的日期
+	// 获取30天前的日期
 	preDate := now.AddDate(0, 0, -30)
 
 	productDao := dao.NewMovieDao(ctx)
