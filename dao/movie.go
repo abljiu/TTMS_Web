@@ -174,7 +174,7 @@ func (dao *MovieDao) CountIndexHotMovie(today, preDate time.Time) (int64, error)
 
 func (dao *MovieDao) ListIndexHotMovie(today, preDate time.Time, size int) (movies []*model.Movie, err error) {
 	err = dao.DB.Model(&model.Movie{}).
-		Where("on_sale=1").
+		Where("on_sale= 1").
 		Order("sales desc").Find(&movies).Limit(size).Error
 	return
 }
