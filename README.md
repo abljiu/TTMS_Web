@@ -2,7 +2,7 @@
 
 # 项目结构
 ```
-gin-mall
+TTMS_Web
 ├── api             # 用于定义接口函数，也就是controller的作用、
 ├── cache           # Redis缓存
 ├── conf            # 配置文件
